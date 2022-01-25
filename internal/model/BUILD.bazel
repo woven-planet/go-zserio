@@ -1,0 +1,18 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "model",
+    srcs = [
+        "model.go",
+        "package.go",
+        "transform.go",
+    ],
+    importpath = "github.com/woven-planet/go-zserio/internal/model",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/ast",
+        "//internal/parser",
+        "//internal/visitor",
+        "@antlr4_runtimes//:go",
+    ],
+)

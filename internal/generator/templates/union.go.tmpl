@@ -1,0 +1,78 @@
+{{ template "preamble.go.tmpl" dict "rootPackage" .rootPackage "pkg" .pkg }}
+{{ $scope := .pkg }}
+{{ $union := .union }}
+
+type {{ $union.Name }}UnionChoiceType uint64
+
+const (
+    // {{ $union.Name }}ChoiceUndefined is the value for the union if no value is set. 
+    {{ $union.Name }}ChoiceUndefined {{ $union.Name }}UnionChoiceType = iota
+{{- range $item := $union.Fields }}
+    // {{ $union.Name }}Choice{{ $item.Name }} is the union value if the union 
+    // is {{ $item.Name }}.
+    {{ $union.Name }}Choice{{ $item.Name }}
+{{- end }}
+)
+
+{{ $union.Comment }}
+type {{ $union.Name }} struct {
+UnionChoice {{ $union.Name }}UnionChoiceType
+{{- range $param := $union.TypeParameters }}
+  {{ .Name }} {{ goType $scope .Type }}
+{{- end }}
+{{- range $field := $union.Fields }}
+  {{ .Name }}  {{ goType $scope .Type }}
+{{- end }}
+}
+
+// MarshalZserio implements the zserio.Marshaler interface.
+func (v *{{ $union.Name}}) MarshalZserio(w *bitio.Writer) error {
+  var err error
+
+  err = WriteVarsize(w, uint64(v.UnionChoice))
+  if err != nil {
+    return err
+  }
+{{- range $field := $union.Fields }}
+  if v.UnionChoice == {{ $union.Name }}Choice{{ $field.Name }} {
+{{template "encode.go.tmpl" dict "pkg" $scope "field" $field }}
+  }
+{{- end}}
+    return nil
+}
+
+// UnmarshalZserio implements the zserio.Unmarshaler interface.
+func (v *{{ $union.Name}}) UnmarshalZserio(r *bitio.Reader) error {
+    var err error
+    unionChoice, err = ztype.ReadVarsize(r)
+    if err != nil {
+       return err
+    }
+    v.UnionChoice = {{ $union.Name }}UnionChoiceType(unionChoice)
+
+{{- range $field := $union.Fields }}
+   if v.UnionChoice == {{ $union.Name }}Choice{{ $field.Name }} {
+{{template "decode.go.tmpl" dict "pkg" $scope "field" $field }}
+   }
+{{- end}}
+    return nil
+}
+
+{{- $name := $union.Name }}
+{{- range $function := $union.Functions }}
+func (v *{{ $name }}) {{ .Name }}() {{ .ReturnType.Name }} {
+   return {{ goExpression .Result }}
+}
+{{- end}}
+
+// ZserioBitSize implements the zserio.Marshaler interface.
+func (v *{{ $union.Name}}) ZserioBitSize(bitPosition int) (int, error) {
+  endBitPosition := bitPosition
+  endBitPosition += ztype.UnsignedBitSize(v.UnionChoice, 5)
+{{- range $field := $union.Fields }}
+  if v.UnionChoice == {{ $union.Name }}Choice{{ $field.Name }} {
+    {{- template "bitsizeof.go.tmpl" dict "pkg" $scope "field" $field }}
+  }
+{{- end }}
+  return endBitPosition - bitPosition, nil
+}

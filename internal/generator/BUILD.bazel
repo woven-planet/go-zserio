@@ -1,0 +1,25 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "generator",
+    srcs = [
+        "expression.go",
+        "funcs.go",
+        "gen.go",
+        "templates.go",
+        "types.go",
+        "strip_imports.go",
+        "syscall_unix.go",
+        "syscall_windows.go"
+    ],
+    importpath = "github.com/woven-planet/go-zserio/internal/generator",
+    visibility = ["//:__subpackages__"],
+    embedsrcs = glob(["templates/*.go.tmpl"]),
+    deps = [
+        "//internal/ast",
+        "//internal/model",
+        "//internal/parser",
+        "@com_github_iancoleman_strcase//:go_default_library",
+        "@com_github_masterminds_sprig_v3//:go_default_library",
+    ],
+)

@@ -1,0 +1,27 @@
+{{ $scope := .pkg }}
+{{ $field := .field }}
+{{ $native := goNativeType $scope $field.Type }} 
+{{if $field.IsOptional}}
+    endBitPosition += 1
+    if v.{{ $field.Name }} != nil {
+{{- if $native.Type.IsBuiltin}}
+        endBitPosition += {{- template "builtin_bitsizeof.go.tmpl" dict "pkg" $scope "field" $field "native" $native }}
+{{- else}}
+        delta, err := v.{{ $field.Name }}.ZserioBitSize(endBitPosition)
+        if err != nil {
+            return 0, err
+        }
+        endBitPosition += delta
+{{- end}}
+    }
+{{- else}}
+{{- if $native.Type.IsBuiltin}}
+    endBitPosition += {{- template "builtin_bitsizeof.go.tmpl" dict "pkg" $scope "field" $field "native" $native }}
+{{- else}}
+    delta, err := v.{{ $field.Name }}.ZserioBitSize(endBitPosition)
+    if err != nil {
+        return 0, err
+    }
+    endBitPosition += delta
+{{- end}}
+{{- end}}

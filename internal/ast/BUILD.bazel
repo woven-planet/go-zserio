@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "ast",
+    srcs = [
+        "bitmask.go",
+        "choice.go",
+        "enum.go",
+        "expression.go",
+        "field.go",
+        "model.go",
+        "package.go",
+        "scope.go",
+        "struct.go",
+        "union.go",
+        "type_reference.go",
+    ],
+    importpath = "github.com/woven-planet/go-zserio/internal/ast",
+    visibility = ["//:__subpackages__"],
+    deps = ["//internal/parser"],
+)

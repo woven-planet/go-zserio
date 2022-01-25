@@ -1,0 +1,4 @@
+/bazel-*
+*~
+*.sw[op]
+.DS_Store

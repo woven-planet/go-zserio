@@ -1,0 +1,16 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "cmd",
+    srcs = [
+        "d.go",
+        "root.go",
+    ],
+    importpath = "github.com/woven-planet/go-zserio/zserio/cmd",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//internal/generator",
+        "//internal/model",
+        "@com_github_spf13_cobra//:go_default_library",
+    ],
+)

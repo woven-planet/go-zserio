@@ -1,0 +1,24 @@
+load("@rules_antlr//antlr:antlr4.bzl", "antlr")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+antlr(
+    name = "generated",
+    language = "Go",
+    srcs = ["ZserioLexer.g4", "ZserioParser.g4"],
+    listener = False,
+    visitor = True,
+)
+
+
+go_library(
+    name = "parser",
+    srcs = [
+        ":generated",
+        "constants.go",
+    ],
+    importpath = "github.com/woven-planet/go-zserio/internal/parser",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "@antlr4_runtimes//:go",
+    ],
+)
