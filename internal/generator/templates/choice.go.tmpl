@@ -1,0 +1,53 @@
+{{ template "preamble.go.tmpl" dict "rootPackage" .rootPackage "pkg" .pkg }}
+{{ $scope := .pkg }} 
+{{ $choice := .choice }}
+
+{{ $choice.Comment }}
+type {{ $choice.Name }} struct {
+{{- range $param := $choice.TypeParameters }}
+  {{ .Name }} {{ goType $scope .Type }}
+{{- end }}
+{{- range $case := $choice.Cases }}
+{{- if .Field }}
+  {{ .Field.Name }} {{ goType $scope .Field.Type }}
+  {{- end }}
+{{- end }}
+}
+
+// MarshalZserio implements the zserio.Marshaler interface.
+func (v *{{ $choice.Name}}) MarshalZserio(w *bitio.Writer) error {
+{{- $expr := $choice.Expression }}
+{{- range $case := $choice.Cases }}
+  {{- if .Field }}
+  if v.{{ $expr.ResultSymbol.Name }} == {{ (index .Conditions 0).Condition.ResultIntValue }} { 
+    {{- template "encode.go.tmpl" dict "pkg" $scope "field" .Field }}
+  }
+  {{- end }}
+{{- end }}
+}
+
+// UnmarshalZserio implements the zserio.Unmarshaler interface.
+func (v *{{ $choice.Name}}) UnmarshalZserio(r *bitio.Reader) error {
+{{- $expr := $choice.Expression }}
+{{- range $case := $choice.Cases }}
+  {{- if .Field }}
+  if v.{{ $expr.ResultSymbol.Name }} == {{ (index .Conditions 0).Condition.ResultIntValue }} { 
+    {{- template "decode.go.tmpl" dict "pkg" $scope "field" .Field }}
+  }
+  {{- end }}
+{{- end }}
+}
+
+// ZserioBitSize implements the zserio.Marshaler interface.
+func (v *{{ $choice.Name}}) ZserioBitSize(bitPosition int) (int, error) {
+  endBitPosition := bitPosition
+{{- $expr := $choice.Expression }}
+{{- range $case := $choice.Cases }}
+  {{- if .Field }}
+  if v.{{ $expr.ResultSymbol.Name }} == {{ (index .Conditions 0).Condition.ResultIntValue }} { 
+    {{- template "bitsizeof.go.tmpl" dict "pkg" $scope "field" .Field }}
+  }
+  {{- end }}
+{{- end }}
+  return endBitPosition - bitPosition, nil
+}

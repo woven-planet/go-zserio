@@ -1,0 +1,33 @@
+{{- $scope := .pkg }}
+{{- $field := .field }}
+{{- $native := .native }}
+{{- if gt $native.Type.Bits 0 }}
+    {{- $field.Type.Bits }}
+{{- else if $native.Type.LengthExpression }}
+    {{- goExpression $native.Type.LengthExpression }}
+{{- else }}
+    {{- if eq $native.Type.Name "uint8" }} 8
+    {{- else if eq $native.Type.Name "uint16" }} 16
+    {{- else if eq $native.Type.Name "uint32" }} 32
+    {{- else if eq $native.Type.Name "uint64" }} 64
+    {{- else if eq $native.Type.Name "int8" }} 8
+    {{- else if eq $native.Type.Name "int16" }} 16
+    {{- else if eq $native.Type.Name "int32" }} 32
+    {{- else if eq $native.Type.Name "int64" }} 64
+    {{- else if eq $native.Type.Name "bool" }} 1
+    {{- else if eq $native.Type.Name "float16" }} 16
+    {{- else if eq $native.Type.Name "float32" }} 32
+    {{- else if eq $native.Type.Name "float64" }} 64
+    {{- else if eq $native.Type.Name "extern" }} int(v.{{- $field.Name }}.BitSize)
+    {{- else if eq $native.Type.Name "varuint" }} ztype.UnsignedBitSize(v.{{ $field.Name }}, 9)
+    {{- else if eq $native.Type.Name "varuint16" }} ztype.UnsignedBitSize(v.{{ $field.Name }}, 2)
+    {{- else if eq $native.Type.Name "varuint32" }} ztype.UnsignedBitSize(v.{{ $field.Name }}, 4)
+    {{- else if eq $native.Type.Name "varuint64" }} ztype.UnsignedBitSize(v.{{ $field.Name }}, 8)
+    {{- else if eq $native.Type.Name "varsize" }} ztype.UnsignedBitSize(v.{{ $field.Name }}, 5)
+    {{- else if eq $native.Type.Name "varint" }} ztype.SignedBitSize(v.{{ $field.Name }}, 9)
+    {{- else if eq $native.Type.Name "varint16" }} ztype.SignedBitSize(v.{{ $field.Name }}, 2)
+    {{- else if eq $native.Type.Name "varint32" }} ztype.SignedBitSize(v.{{ $field.Name }}, 4)
+    {{- else if eq $native.Type.Name "varint64" }} ztype.SignedBitSize(v.{{ $field.Name }}, 8)
+    {{- else if eq $native.Type.Name "string" }} ztype.BitSizeOfString(v.{{ $field.Name }})
+    {{- end}}
+{{- end }}

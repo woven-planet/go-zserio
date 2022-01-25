@@ -1,0 +1,44 @@
+{{ $scope := .pkg }}
+{{ $field := .field }}
+{{ $native := goNativeType $scope $field.Type }} 
+{{if $field.IsOptional}}
+    if present, err := ztype.ReadBool(r); err != nil {
+        return err
+    } else if present {
+        var value {{ goType $scope $field.Type }}
+{{- if $native.Type.IsBuiltin}}
+    {{- if gt $native.Type.Bits 0 }}
+        if value, err = ztype.Read{{if eq $native.Type.Name "int"}}Signed{{end}}Bits(r, {{ $native.Type.Bits }}); err != nil {
+    {{- else }}
+        if value, err = ztype.Read{{ title $native.Type.Name }}(r); err != nil {
+    {{- end }}
+            return err
+        }
+{{- else}}
+        if err = value.UnmarshalZserio(r); err != nil {
+            return err
+        }
+{{- end}}
+        v.{{ $field.Name }} = &value
+    } else {
+        v.{{ $field.Name }} = nil
+    }
+{{- else}}
+{{- if $native.Type.IsBuiltin}}
+    {{- if gt $field.Type.Bits 0 }}
+        if value, err := ztype.Read{{if eq $native.Type.Name "int"}}Signed{{end}}Bits(r, {{ $native.Type.Bits }}); err != nil {
+            return err
+        } else {
+            v.{{ $field.Name }} = {{ goType $scope $native.Type }}(value)
+        }
+    {{- else }}
+        if v.{{ $field.Name }}, err = ztype.Read{{ title $native.Type.Name }}(r); err != nil {
+            return err
+        }
+    {{- end }}
+{{- else}}
+    if err = v.{{ $field.Name }}.UnmarshalZserio(r); err != nil {
+        return err
+    }
+{{- end}}
+{{- end}}

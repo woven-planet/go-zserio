@@ -1,0 +1,13 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "visitor",
+    srcs = ["visitor.go"],
+    importpath = "github.com/woven-planet/go-zserio/internal/visitor",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/ast",
+        "//internal/parser",
+        "@antlr4_runtimes//:go",
+    ],
+)

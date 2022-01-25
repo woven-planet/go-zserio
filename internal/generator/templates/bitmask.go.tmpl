@@ -1,0 +1,51 @@
+{{ template "preamble.go.tmpl" dict "rootPackage" .rootPackage "pkg" .pkg }}
+{{ $scope := .pkg }} 
+{{ $bitmask := .bitmask }}
+
+{{ $bitmask.Comment }}
+type {{ $bitmask.Name }} {{ goType $scope $bitmask.Type }}
+const (
+{{- range $value := $bitmask.Values }}
+    {{ $bitmask.Name }}{{ $value.Name }} {{ $bitmask.Name }} = {{ if eq $value.ResultType "int" }}{{ .ResultIntValue }}
+    {{- else if eq $value.ResultType "string" }}{{ .ResultStringValue }}
+    {{- else }}UNSUPPORTED
+    {{- end }}
+{{- end }}
+)
+
+// MarshalZserio implements the zserio.Marshaler interface.
+func (v *{{ $bitmask.Name}}) MarshalZserio(w *bitio.CountWriter, packed bool) error {
+    {{- if not $bitmask.Type.IsBuiltin }}
+      panic("only builtin types supported")
+    {{- else if eq $bitmask.Type.Bits 0 }}
+      return ztype.Write{{ title $bitmask.Type.Name }}(w, v)
+    {{- else if eq $bitmask.Type.Name "bit" }}
+      return ztype.WriteUnsignedBits(w, uint64(*v), {{ $bitmask.Type.Bits }})
+    {{- else if eq $bitmask.Type.Name "int" }}
+      return ztype.WriteSignedBits(w, int64(*v), {{ $bitmask.Type.Bits }})
+    {{- else }}
+      panic("unsupported type")
+    {{- end }}
+}
+
+// UnmarshalZserio implements the zserio.Unmarshaler interface.
+func (v *{{ $.bitmask.Name }}) UnmarshalZserio(r *bitio.CountReader) error {
+    {{- if not $bitmask.Type.IsBuiltin }}
+      panic("only builtin types supported")
+    {{- else if eq $bitmask.Type.Bits 0 }}
+      var err error
+      *v, err = ztype.Read{{ title $bitmask.Type.Name }}(r)
+      return err
+    {{- else }}
+      {{- if eq $bitmask.Type.Name "int" }}
+        if value, err := ztype.ReadSignedBits(r, {{ $bitmask.Type.Bits }}); err != nil {
+      {{- else }}
+        if value, err := ztype.ReadUnsignedBits(r, {{ $bitmask.Type.Bits }}); err != nil {
+      {{- end }}
+          return err
+        } else {
+          *v = {{ $bitmask.Name }}(value)
+        }
+        return nil
+    {{- end }}
+}
