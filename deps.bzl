@@ -394,8 +394,8 @@ def go_dependencies():
     go_repository(
         name = "com_github_icza_bitio",
         importpath = "github.com/icza/bitio",
-        sum = "h1:squ/m1SHyFeCA6+6Gyol1AxV9nmPPlJFT8c2vKdj3U8=",
-        version = "v1.0.0",
+        sum = "h1:ysX4vtldjdi3Ygai5m1cWy4oLkhWTAi+SyO6HC8L9T0=",
+        version = "v1.1.0",
     )
     go_repository(
         name = "com_github_icza_mighty",
