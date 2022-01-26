@@ -8,14 +8,28 @@ import (
 	"github.com/woven-planet/go-zserio/internal/parser"
 )
 
-func IdentifierToGoString(expression *ast.Expression) string {
-	if field, ok := expression.ResultSymbol.Symbol.(*ast.Field); ok {
-		return "v." + field.Name
+func IdentifierToGoString(scope ast.Scope, expression *ast.Expression) string {
+	dummyType := &ast.TypeReference{
+		Name:    expression.ResultSymbol.Name,
+		Package: expression.ResultSymbol.Package,
 	}
-	if parameter, ok := expression.ResultSymbol.Symbol.(*ast.Parameter); ok {
-		return "v." + parameter.Name
+	name, err := GoType(scope, dummyType)
+	if err != nil {
+		return "UNKNOWN_TYPE"
 	}
-	return "UNSUPPORTED"
+
+	switch n := expression.ResultSymbol.Symbol.(type) {
+	case *ast.Field:
+		return "v." + n.Name
+	case *ast.Parameter:
+		return "v." + n.Name
+	case *ast.Enum:
+		return name
+	case *ast.BitmaskType:
+		return name
+	default:
+		return "UNSUPPORTED_TYPE"
+	}
 }
 
 func parenthesizedExpressionToGoString(scope ast.Scope, expression *ast.Expression) string {
@@ -32,7 +46,10 @@ func dotOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
 
 	// Enums don't exist in Go, so the dot expression must be translated to the
 	// constant, which is Enum name, followed by the Enum value.
+	// The same is valid for bitmasks.
 	if expression.Operand1.ResultType == ast.ExpressionTypeEnum {
+		return leftText + rightText
+	} else if expression.Operand1.ResultType == ast.ExpressionTypeBitmask {
 		return leftText + rightText
 	}
 	return fmt.Sprintf("%s.%s", leftText, rightText)
@@ -121,7 +138,7 @@ func ExpressionToGoString(scope ast.Scope, expression *ast.Expression) string {
 		case ast.ExpressionTypeString:
 			return fmt.Sprintf("%q", expression.ResultStringValue)
 		default:
-			return "UNSUPPORTED"
+			return "UNSUPPORTED_TYPE"
 		}
 	}
 	switch expression.Type {
@@ -174,7 +191,7 @@ func ExpressionToGoString(scope ast.Scope, expression *ast.Expression) string {
 	case parser.ZserioParserNE:
 		return twoOperatorToGoString(scope, expression)
 	case parser.ZserioParserID:
-		return IdentifierToGoString(expression)
+		return IdentifierToGoString(scope, expression)
 	case parser.ZserioParserQUESTIONMARK:
 		return ternaryExpressionToGoString(scope, expression)
 	default:
