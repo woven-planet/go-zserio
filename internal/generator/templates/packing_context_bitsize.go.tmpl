@@ -1,0 +1,64 @@
+{{ $scope := .pkg }}
+{{ $field := .field }}
+{{ $index := .index }}
+{{ $native := goNativeType $scope $field.Type }}
+{{- $field_name := printf "v.%s" $field.Name }}
+{{- if $field.IsOptional}}
+    {{- $field_name = printf "(*v.%s)" $field.Name }}
+{{- end }}
+{{- if and $native.RequiresCast (not $field.Array) }}
+    {{- if $native.IsMarshaler }}
+        {{- $field_name = printf "(*%s)(&v.%s)" (goType $scope $native.Type) $field.Name }}
+        {{- if $field.IsOptional}}
+            {{- $field_name = printf "(*%s)(v.%s)" (goType $scope $native.Type) $field.Name }}
+        {{- end }}
+    {{- else }}
+        {{- $field_name = printf "%s(%s)" (goType $scope $native.Type) $field_name }}
+    {{- end }}
+{{- end }}
+
+{{- if not (eq $field.Alignment 0) }}
+    endBitPosition += ztype.CountAlignBits(endBitPosition, {{ $field.Alignment }})
+{{- end }}
+
+{{- if $field.IsOptional}}
+    endBitPosition += 1
+    if v.{{ $field.Name }} != nil {
+{{- end }}
+
+{{- if $field.Array }}
+    {{- if $field.Array }}
+        if delta, err := {{ $field_name }}.ZserioBitSizePacked(endBitPosition); err != nil {
+    {{- else }}
+        if delta, err := ztype.BitSizeOfString({{ $field_name }}); err != nil {
+    {{- end }}
+        return 0, err
+    } else {
+    endBitPosition += delta
+    }
+{{- else if or $field.IsOptional (eq $native.Type.Name "bool") (eq $native.Type.Name "string") (eq $native.Type.Name "extern") }}
+    {{/* These fields use the standard packing */}}
+    {{- template "builtin_bitsizeof.go.tmpl" dict "pkg" $scope "name" $field_name "native" $native "isarray" $field.Array }}
+
+{{- else }}
+    {{- if $native.IsMarshaler }}
+        if delta, err := {{ $field_name }}.ZserioBitSizePacked(childrenNodes[{{ $index }}], endBitPosition); err != nil {
+            return 0, err
+        } else {
+            endBitPosition += delta
+        } 
+    {{- else }}
+    if field{{ $field.Name }}Context, ok := childrenNodes[{{ $index }}].Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}]); !ok {
+        return 0, errors.New("invalid packing context")
+    } else {
+        if delta, err := field{{ $field.Name }}Context.BitSizeOf(&{{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "native" $native }}, endBitPosition, {{ goType $scope $native.Type }}({{ $field_name }})); err != nil {
+            return 0, err
+        } else {
+            endBitPosition += delta
+        }
+    }
+    {{- end }}
+{{- end }}
+{{- if $field.IsOptional}}
+    }
+{{- end }}

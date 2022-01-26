@@ -1,0 +1,31 @@
+{{ $scope := .pkg }}
+{{ $field := .field }}
+{{ $index := .index }}
+{{ $native := goNativeType $scope $field.Type }}
+{{- $field_name := printf "v.%s" $field.Name }}
+{{- if $field.IsOptional}}
+    {{- $field_name = printf "(*v.%s)" $field.Name }}
+{{- end }}
+{{- if and $native.RequiresCast (not $field.Array) }}
+    {{- if $native.IsMarshaler }}
+        {{- $field_name = printf "(*%s)(&v.%s)" (goType $scope $native.Type) $field.Name }}
+        {{- if $field.IsOptional}}
+            {{- $field_name = printf "(*%s)(v.%s)" (goType $scope $native.Type) $field.Name }}
+        {{- end }}
+    {{- else }}
+        {{- $field_name = printf "%s(%s)" (goType $scope $native.Type) $field_name }}
+    {{- end }}
+{{- end }}
+field{{ $field.Name }}Node := &zserio.PackingContextNode{}
+contextNode.AddChild(field{{ $field.Name }}Node)
+{{- if and (not $field.Array) (not $field.IsOptional) (not (eq $native.Type.Name "bool")) (not (eq $native.Type.Name "string")) (not (eq $native.Type.Name "extern")) }}
+    {{- if $native.IsMarshaler }}
+        var field{{ $field.Name }}Ptr *{{ goType $scope $native.Type }}
+        if err := field{{ $field.Name }}Ptr.ZserioCreatePackingContext(field{{ $field.Name }}Node); err != nil {
+            return err
+        }
+    {{- else }}
+        // The field is not a marshalable type, therefore create use a delta context.
+        field{{ $field.Name }}Node.Context = &ztype.DeltaContext[{{ goType $scope $native.Type }}]{}
+    {{- end }}
+{{- end }}
