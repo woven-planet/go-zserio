@@ -40,7 +40,6 @@ func (u *Union) Evaluate(p *Package) error {
 			return err
 		}
 	}
-
 	for _, function := range u.Functions {
 		if err := function.Result.Evaluate(p); err != nil {
 			return err

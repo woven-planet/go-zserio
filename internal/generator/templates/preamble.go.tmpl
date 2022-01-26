@@ -6,7 +6,7 @@ package {{ goPackageName .pkg.Name }}
 import (
 	"errors"
     "github.com/icza/bitio"
-    "github.com/woven-planet/go-zserio"
+    zserio "github.com/woven-planet/go-zserio/interface"
     "github.com/woven-planet/go-zserio/ztype"
 {{- range $import := goGetAllImports .pkg }}
     {{ goPackageAlias $import }} "{{ $root }}/{{ $import | replace "." "/" }}"
