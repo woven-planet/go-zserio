@@ -8,45 +8,109 @@ type {{ $struct.Name }} struct {
   {{ .Name }} {{ goType $scope .Type }}
 {{- end }}
 {{- range $field := $struct.Fields }}
-  {{ .Name }}  {{ if .IsOptional }}*{{end}}
-  {{- if .Array -}}
-    ztype.Array[{{ goType $scope $field.Type }}, {{ goArrayTraits $scope $field.Type -}}]
-  {{- else -}}
-    {{ goType $scope .Type -}}
-  {{- end }}
+  {{- template "field_declaration.go.tmpl" dict "pkg" $scope "field" $field }}
 {{- end }}
 }
 
+func (v *{{ $struct.Name}}) LoadDefaultValues() error {
+{{- range $field := $struct.Fields }}
+{{template "default_values.go.tmpl" dict "pkg" $scope "field" $field }}
+{{- end}}
+  return nil
+}
+
 // MarshalZserio implements the zserio.Marshaler interface.
-func (v *{{ $struct.Name}}) MarshalZserio(w *bitio.Writer) error {
+func (v *{{ $struct.Name}}) MarshalZserio(w *bitio.CountWriter) error {
+{{- if $struct.Fields }}
     var err error
 {{- range $field := $struct.Fields }}
 {{template "encode.go.tmpl" dict "pkg" $scope "field" $field }}
-{{- end}}
+{{- end }}
+    _ = err // to avoid "declared but not used" warning
+{{- end }}
     return nil
 }
 
 // UnmarshalZserio implements the zserio.Unmarshaler interface.
-func (v *{{ $struct.Name}}) UnmarshalZserio(r *bitio.Reader) error {
+func (v *{{ $struct.Name}}) UnmarshalZserio(r *bitio.CountReader) error {
+{{- if $struct.Fields }}
     var err error
 {{- range $field := $struct.Fields }}
 {{template "decode.go.tmpl" dict "pkg" $scope "field" $field }}
 {{- end}}
+    _ = err // to avoid "declared but not used" warning
+{{- end }}
     return nil
 }
 
-{{- $name := $struct.Name }}
-{{- range $function := $struct.Functions }}
-func (v *{{ $name }}) {{ .Name }}() {{ .ReturnType.Name }} {
-   return {{ goExpression .Result }}
-}
-{{- end}}
+{{template "functions.go.tmpl" dict "name" $struct.Name "scope" $scope "functions" $struct.Functions }}
 
 // ZserioBitSize implements the zserio.Marshaler interface.
 func (v *{{ $struct.Name}}) ZserioBitSize(bitPosition int) (int, error) {
   endBitPosition := bitPosition
+{{- range $index, $field := $struct.Fields }}
+    {{- template "bitsizeof.go.tmpl" dict "pkg" $scope "field" $field "index" $index }}
+{{- end }}
+  return endBitPosition - bitPosition, nil
+}
+
+
+func (v *{{ $struct.Name}}) ZserioCreatePackingContext(contextNode *zserio.PackingContextNode) error {
 {{- range $field := $struct.Fields }}
-    {{- template "bitsizeof.go.tmpl" dict "pkg" $scope "field" $field }}
+  {{- template "packing_context_create.go.tmpl" dict "pkg" $scope "field" $field }}
+{{- end}}
+  return nil
+}
+
+func (v *{{ $struct.Name}}) ZserioInitPackingContext(contextNode *zserio.PackingContextNode) error {
+    childrenNodes := contextNode.GetChildren()
+    _ = childrenNodes // to avoid "declared but not used" warning
+{{- range $index, $field := $struct.Fields }}
+  {{- template "packing_context_init.go.tmpl" dict "pkg" $scope "field" $field "index" $index }}
+{{- end}}
+  return nil
+}
+
+
+func (v *{{ $struct.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingContextNode, r *bitio.CountReader) error {
+{{- if $struct.Fields }}
+    var err error
+    childrenNodes := contextNode.GetChildren()
+    _ = childrenNodes // to avoid "declared but not used" warning
+{{- range $index, $field := $struct.Fields }}
+{{template "packing_context_decode.go.tmpl" dict "pkg" $scope "field" $field "index" $index }}
+{{- end}}
+    _ = err // to avoid "declared but not used" warning
+{{- end }}
+    return nil
+}
+
+
+func (v *{{ $struct.Name}}) MarshalZserioPacked(contextNode *zserio.PackingContextNode, w *bitio.CountWriter) error {
+{{- if $struct.Fields }}
+    var err error
+    childrenNodes := contextNode.GetChildren()
+    _ = childrenNodes // to avoid "declared but not used" warning
+{{- range $index, $field := $struct.Fields }}
+{{template "packing_context_encode.go.tmpl" dict "pkg" $scope "field" $field "index" $index }}
+{{- end }}
+    _ = err // to avoid "declared but not used" warning
+{{- end }}
+    return nil
+}
+
+func (v *{{ $struct.Name}}) ZserioInitializeOffsetsPacked(contextNode *zserio.PackingContextNode, bitPosition int) int {
+  return 0
+}
+
+func (v *{{ $struct.Name}}) ZserioBitSizePacked(contextNode *zserio.PackingContextNode, bitPosition int) (int, error) {
+  endBitPosition := bitPosition
+{{- if $struct.Fields }}
+  childrenNodes := contextNode.GetChildren()
+  _ = childrenNodes // to avoid "declared but not used" warning
+{{- range $index, $field := $struct.Fields }}
+  {{- template "packing_context_bitsize.go.tmpl" dict "pkg" $scope "field" $field "index" $index }}
+{{- end}}
 {{- end }}
   return endBitPosition - bitPosition, nil
 }

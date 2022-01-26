@@ -21,15 +21,20 @@ UnionChoice {{ $union.Name }}UnionChoiceType
   {{ .Name }} {{ goType $scope .Type }}
 {{- end }}
 {{- range $field := $union.Fields }}
-  {{ .Name }}  {{ goType $scope .Type }}
+  {{- template "field_declaration.go.tmpl" dict "pkg" $scope "field" $field }}
 {{- end }}
 }
 
-// MarshalZserio implements the zserio.Marshaler interface.
-func (v *{{ $union.Name}}) MarshalZserio(w *bitio.Writer) error {
-  var err error
+func (v *{{ $union.Name}}) LoadDefaultValues() error {
+{{- range $field := $union.Fields }}
+  {{template "default_values.go.tmpl" dict "pkg" $scope "field" $field }}
+{{- end}}
+  return nil
+}
 
-  err = WriteVarsize(w, uint64(v.UnionChoice))
+// MarshalZserio implements the zserio.Marshaler interface.
+func (v *{{ $union.Name}}) MarshalZserio(w *bitio.CountWriter) error {
+  err := ztype.WriteVarsize(w, uint64(v.UnionChoice))
   if err != nil {
     return err
   }
@@ -42,9 +47,8 @@ func (v *{{ $union.Name}}) MarshalZserio(w *bitio.Writer) error {
 }
 
 // UnmarshalZserio implements the zserio.Unmarshaler interface.
-func (v *{{ $union.Name}}) UnmarshalZserio(r *bitio.Reader) error {
-    var err error
-    unionChoice, err = ztype.ReadVarsize(r)
+func (v *{{ $union.Name}}) UnmarshalZserio(r *bitio.CountReader) error {
+    unionChoice, err := ztype.ReadVarsize(r)
     if err != nil {
        return err
     }
@@ -58,21 +62,54 @@ func (v *{{ $union.Name}}) UnmarshalZserio(r *bitio.Reader) error {
     return nil
 }
 
-{{- $name := $union.Name }}
-{{- range $function := $union.Functions }}
-func (v *{{ $name }}) {{ .Name }}() {{ .ReturnType.Name }} {
-   return {{ goExpression .Result }}
-}
-{{- end}}
+{{template "functions.go.tmpl" dict "name" $union.Name "scope" $scope "functions" $union.Functions }}
 
 // ZserioBitSize implements the zserio.Marshaler interface.
 func (v *{{ $union.Name}}) ZserioBitSize(bitPosition int) (int, error) {
   endBitPosition := bitPosition
-  endBitPosition += ztype.UnsignedBitSize(v.UnionChoice, 5)
+  if delta, err := ztype.UnsignedBitSize(uint64(v.UnionChoice), 5); err != nil {
+    return 0, err
+  } else {
+    endBitPosition += delta
+  }
 {{- range $field := $union.Fields }}
   if v.UnionChoice == {{ $union.Name }}Choice{{ $field.Name }} {
     {{- template "bitsizeof.go.tmpl" dict "pkg" $scope "field" $field }}
   }
 {{- end }}
   return endBitPosition - bitPosition, nil
+}
+
+
+func (v *{{ $union.Name}}) ZserioCreatePackingContext(contextNode *zserio.PackingContextNode) error {
+{{- range $field := $union.Fields }}
+  {{- template "packing_context_create.go.tmpl" dict "pkg" $scope "field" $field }}
+{{- end}}
+  return nil
+}
+
+func (v *{{ $union.Name}}) ZserioInitPackingContext(contextNode *zserio.PackingContextNode) error {
+    childrenNodes := contextNode.GetChildren()
+    _ = childrenNodes // to avoid "declared but not used" warning
+{{- range $index, $field := $union.Fields }}
+  {{- template "packing_context_init.go.tmpl" dict "pkg" $scope "field" $field "index" $index }}
+{{- end}}
+  return nil
+}
+
+func (v *{{ $union.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingContextNode, r *bitio.CountReader) error {
+  return nil
+}
+
+
+func (v *{{ $union.Name}}) MarshalZserioPacked(contextNode *zserio.PackingContextNode, r *bitio.CountWriter) error {
+  return nil
+}
+
+func (v *{{ $union.Name}}) ZserioInitializeOffsetsPacked(contextNode *zserio.PackingContextNode, bitPosition int) int {
+  return 0
+}
+
+func (v *{{ $union.Name}}) ZserioBitSizePacked(contextNode *zserio.PackingContextNode, bitPosition int) (int, error) {
+  return 0, nil
 }

@@ -1,0 +1,24 @@
+{{ $scope := .pkg }}
+{{ $field := .field }}
+{{ $native := goNativeType $scope $field.Type }} 
+{{- $bit_size := $field.Type.Bits }}
+{{- $field_name := printf "v.%s" $field.Name }}
+{{- if and $native.RequiresCast (not $field.Array) }}
+    {{- if $native.IsMarshaler }}
+        {{- $field_name = printf "(*%s)(&v.%s)" (goType $scope $native.Type) $field.Name }}
+    {{- else }}
+        {{- $field_name = printf "%s(%s)" (goType $scope $native.Type) $field_name }}
+    {{- end }}
+{{- end }}
+
+{{- if and (not $field.IsOptional) (not $field.Array) }}
+    {{- if $native.IsMarshaler }}
+        if err := {{- $field_name }}.LoadDefaultValues(); err != nil {
+            return err
+        }
+    {{- else if not $field.Array }}
+        {{- if $field.Initializer }}
+        {{- $field_name }} = {{ goExpression $scope $field.Initializer }}
+        {{- end }}
+    {{- end }}
+{{- end }}

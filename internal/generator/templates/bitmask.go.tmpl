@@ -1,6 +1,10 @@
 {{ template "preamble.go.tmpl" dict "rootPackage" .rootPackage "pkg" .pkg }}
 {{ $scope := .pkg }} 
 {{ $bitmask := .bitmask }}
+{{ $native := goNativeType $scope $bitmask.Type }}
+{{ $go_type := goType $scope $bitmask.Type }}
+{{ $obj_with_cast := printf "%s(*v)" $go_type }} 
+
 
 {{ $bitmask.Comment }}
 type {{ $bitmask.Name }} {{ goType $scope $bitmask.Type }}
@@ -13,15 +17,19 @@ const (
 {{- end }}
 )
 
+func (v *{{ $bitmask.Name}}) LoadDefaultValues() error {
+  return nil
+}
+
 // MarshalZserio implements the zserio.Marshaler interface.
-func (v *{{ $bitmask.Name}}) MarshalZserio(w *bitio.CountWriter, packed bool) error {
-    {{- if not $bitmask.Type.IsBuiltin }}
+func (v *{{ $bitmask.Name}}) MarshalZserio(w *bitio.CountWriter) error {
+    {{- if not $native.Type.IsBuiltin }}
       panic("only builtin types supported")
-    {{- else if eq $bitmask.Type.Bits 0 }}
-      return ztype.Write{{ title $bitmask.Type.Name }}(w, v)
-    {{- else if eq $bitmask.Type.Name "bit" }}
+    {{- else if eq $native.Type.Bits 0 }}
+      return ztype.Write{{ title $native.Type.Name }}(w, {{ goType $scope $native.Type }}(*v))
+    {{- else if eq $native.Type.Name "bit" }}
       return ztype.WriteUnsignedBits(w, uint64(*v), {{ $bitmask.Type.Bits }})
-    {{- else if eq $bitmask.Type.Name "int" }}
+    {{- else if eq $native.Type.Name "int" }}
       return ztype.WriteSignedBits(w, int64(*v), {{ $bitmask.Type.Bits }})
     {{- else }}
       panic("unsupported type")
@@ -29,18 +37,16 @@ func (v *{{ $bitmask.Name}}) MarshalZserio(w *bitio.CountWriter, packed bool) er
 }
 
 // UnmarshalZserio implements the zserio.Unmarshaler interface.
-func (v *{{ $.bitmask.Name }}) UnmarshalZserio(r *bitio.CountReader) error {
-    {{- if not $bitmask.Type.IsBuiltin }}
+func (v *{{ $bitmask.Name }}) UnmarshalZserio(r *bitio.CountReader) error {
+    {{- if not $native.Type.IsBuiltin }}
       panic("only builtin types supported")
-    {{- else if eq $bitmask.Type.Bits 0 }}
-      var err error
-      *v, err = ztype.Read{{ title $bitmask.Type.Name }}(r)
-      return err
     {{- else }}
-      {{- if eq $bitmask.Type.Name "int" }}
-        if value, err := ztype.ReadSignedBits(r, {{ $bitmask.Type.Bits }}); err != nil {
+      {{- if eq $native.Type.Bits 0 }}
+        if value, err := ztype.Read{{ title $native.Type.Name }}(r); err != nil {
+      {{- else if eq $native.Type.Name "int" }}
+        if value, err := ztype.ReadSignedBits(r, {{ $native.Type.Bits }}); err != nil {
       {{- else }}
-        if value, err := ztype.ReadUnsignedBits(r, {{ $bitmask.Type.Bits }}); err != nil {
+        if value, err := ztype.ReadUnsignedBits(r, {{ $native.Type.Bits }}); err != nil {
       {{- end }}
           return err
         } else {
@@ -48,4 +54,55 @@ func (v *{{ $.bitmask.Name }}) UnmarshalZserio(r *bitio.CountReader) error {
         }
         return nil
     {{- end }}
+}
+
+// ZserioBitSize implements the zserio.Marshaler interface.
+func (v *{{ $bitmask.Name}}) ZserioBitSize(bitPosition int) (int, error) {
+  endBitPosition := bitPosition
+{{- if not $native.Type.IsBuiltin }}
+      panic("only builtin types supported")
+{{- else }}
+  {{ template "builtin_bitsizeof.go.tmpl" dict "pkg" $scope "name" $obj_with_cast "native" $native }}
+{{- end }}
+  return endBitPosition - bitPosition, nil
+}
+
+func (v *{{ $bitmask.Name}}) ZserioCreatePackingContext(contextNode *zserio.PackingContextNode) error {
+  contextNode.Context = &ztype.DeltaContext[{{ goType $scope $native.Type}}]{}
+  return nil
+}
+
+
+func (v *{{ $bitmask.Name}}) ZserioInitPackingContext(contextNode *zserio.PackingContextNode) error {
+  return nil
+}
+
+
+func (v *{{ $bitmask.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingContextNode, r *bitio.CountReader) error {
+  context, ok := contextNode.Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}])
+  if !ok {
+    return errors.New("unsupported packing context type")
+  }
+  if tempValue, err := context.Read(&{{- template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "native" $native }}, r); err != nil {
+    return err
+  } else {
+    (*v) = {{ $bitmask.Name }}(tempValue)
+    return nil
+  }
+}
+
+func (v *{{ $bitmask.Name}}) MarshalZserioPacked(contextNode *zserio.PackingContextNode, w *bitio.CountWriter) error {
+  context, ok := contextNode.Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}])
+  if !ok {
+    return errors.New("unsupported packing context type")
+  }
+  return context.Write(&{{- template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "native" $native }}, w, {{ goType $scope $native.Type }}(*v))
+}
+
+func (v *{{ $bitmask.Name}}) ZserioInitializeOffsetsPacked(contextNode *zserio.PackingContextNode, bitPosition int) int {
+  return 0
+}
+
+func (v *{{ $bitmask.Name}}) ZserioBitSizePacked(contextNode *zserio.PackingContextNode, bitPosition int) (int, error) {
+  return 0, nil
 }

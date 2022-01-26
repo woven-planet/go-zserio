@@ -32,6 +32,11 @@ func GoGetAllImports(pkg *ast.Package) []string {
 	}
 	return imports
 }
+
+func GetTypeParameter(pkg *ast.Package, typ *ast.TypeReference) ([]*ast.Parameter, error) {
+	return pkg.GetTypeParameter(typ)
+}
+
 func GoPackageAlias(pkg string) string {
 	return ast.GoPackageAlias(pkg)
 }
@@ -42,4 +47,8 @@ func GoExpression(scope ast.Scope, expression *ast.Expression) string {
 
 func GoNativeType(pkg *ast.Package, typ *ast.TypeReference) (*ast.NativeZserioTypeReference, error) {
 	return pkg.GetZserioNativeType(typ)
+}
+
+func Add(op1, op2 int) int {
+	return op1 + op2
 }

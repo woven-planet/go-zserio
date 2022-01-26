@@ -1,0 +1,100 @@
+{{ $scope := .pkg }}
+{{ $field := .field }}
+{{ $index := .index }}
+{{ $native := goNativeType $scope $field.Type }}
+{{- $bit_size := $native.Type.Bits }}
+{{- if $native.Type.LengthExpression }}
+    {{- $bit_size = printf "uint8(%s)" (goExpression $scope $native.Type.LengthExpression) }}
+{{- end }}
+{{- $field_name := printf "v.%s" $field.Name }}
+{{- if $field.IsOptional}}
+    {{- $field_name = printf "(*v.%s)" $field.Name }}
+{{- end }}
+{{- if and $native.RequiresCast (not $field.Array) }}
+    {{- if $native.IsMarshaler }}
+        {{- $field_name = printf "(*%s)(&v.%s)" (goType $scope $native.Type) $field.Name }}
+        {{- if $field.IsOptional}}
+            {{- $field_name = printf "(*%s)(v.%s)" (goType $scope $native.Type) $field.Name }}
+        {{- end }}
+    {{- else }}
+        {{- $field_name = printf "%s(%s)" (goType $scope $native.Type) $field_name }}
+    {{- end }}
+{{- end }}
+
+{{- if $field.IsOptional}}
+    // this field is optional, and therefore uses the standard packing approach
+    {{- template "decode.go.tmpl" dict "pkg" $scope "field" $field }}
+{{- else }}
+    {{- if $field.OptionalClause }}
+        if {{ goExpression $scope $field.OptionalClause }} {
+    {{- end }}
+    {{- if not (eq $field.Alignment 0) }}
+        ztype.AlignReader(r, {{ $field.Alignment }})
+    {{- end }}
+
+    {{- $assign_str_lvalue := printf "v.%s" $field.Name }}
+    {{- $assign_str_rvalue := $field_name }}
+
+    {{- template "decode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field }}
+
+    {{- if $field.Array }}
+        {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $assign_str_lvalue "array" $field.Array }}
+        {{- if not $field.Array.IsPacked }}
+            // This array is implicitly packed, because its parent object is packed
+            {{ $assign_str_rvalue }}.IsPacked = true
+        {{- end }}
+        if err = {{ $assign_str_rvalue }}.UnmarshalZserio(r); err != nil {
+            return err
+        }
+
+    {{- else if eq $native.Type.Name "bool" }}
+        {{- if $native.RequiresCast }}
+            if tempValue, err := ztype.ReadBool(r); err != nil {
+                return err
+            } else {
+                {{ $assign_str_lvalue }} = ({{ goType $scope $field.Type }})(tempValue)
+            }
+        {{- else }}
+            if {{ $assign_str_lvalue }}, err = ztype.ReadBool(r); err != nil {
+                return err
+            }
+        {{- end }}
+
+    {{- else if eq $native.Type.Name "extern" }}
+        if tempValue, err := ztype.ReadExtern(r); err == nil {
+            {{ $assign_str_lvalue }} = ({{ goType $scope $field.Type }})(tempValue)
+        } else {
+            return err
+        }
+
+    {{- else if eq $native.Type.Name "string" }}
+        if tempValue, err := ztype.ReadString(r); err == nil {
+            {{ $assign_str_lvalue }} = ({{ goType $scope $field.Type }})(tempValue)
+        } else {
+            return err
+        }
+
+    {{- else if $native.IsMarshaler }}
+        if err = {{ $assign_str_rvalue }}.UnmarshalZserioPacked(childrenNodes[{{ $index }}], r); err != nil {
+            return err
+        }
+
+
+    {{- else}}
+        if field{{ $field.Name }}Context, ok := childrenNodes[{{ $index }}].Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}]); !ok {
+            return errors.New("unknown context type")
+        } else {
+            if tempValue, err := field{{ $field.Name }}Context.Read(&{{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "native" $native }}, r); err == nil {
+                {{ $assign_str_lvalue }} = ({{ goType $scope $field.Type }})(tempValue)
+            } else {
+                return err
+            }
+        }
+    {{- end}}
+
+
+    {{- if $field.OptionalClause }}
+    }
+    {{- end }}
+
+{{- end }}{{/* if $field.IsOptional */}}

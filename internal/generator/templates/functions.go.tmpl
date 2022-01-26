@@ -1,0 +1,9 @@
+{{- $name := .name }}
+{{- $scope := .scope }}
+{{- $functions := .functions }}
+{{- range $function := $functions }}
+func (v *{{ $name }}) {{ .Name }}() {{ goType $scope .ReturnType }} {
+   retVal := {{ goExpression $scope .Result }}
+   return {{ goType $scope .ReturnType }}(retVal)
+}
+{{- end}}

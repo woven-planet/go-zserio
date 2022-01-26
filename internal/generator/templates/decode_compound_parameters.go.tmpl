@@ -1,0 +1,15 @@
+{{ $scope := .pkg }}
+{{ $field := .field }}
+{{ $native := goNativeType $scope $field.Type }}
+
+{{- if $field.Type.TypeArguments }}
+    {{- $lvalue := printf "v.%s" $field.Name }}
+    {{- if $field.Array }}
+        {{- $lvalue = printf "%s.ArrayTraits.DefaultObject" $lvalue }}
+    {{- end }}
+    {{- $type_parameter := getTypeParameter $scope $field.Type }}
+    {{- range $i, $argument := $field.Type.TypeArguments }}
+        {{- $current_type_parameter := index $type_parameter $i }}
+        {{ $lvalue }}.{{ $current_type_parameter.Name}} = {{ goType $scope $current_type_parameter.Type }}({{ goExpression $scope $argument }})
+    {{- end}}
+{{- end }}

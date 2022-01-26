@@ -1,0 +1,3 @@
+{{- $name := .name }}
+{{- $native := .native }}
+{{- if $native.RequiresCast}}{{$native.Type.Name}}({{end}}{{ $name }}{{if $native.RequiresCast}}){{end}}
