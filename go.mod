@@ -1,13 +1,13 @@
 module github.com/woven-planet/go-zserio
 
-go 1.17
+go 1.18
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.2
 	github.com/antlr/antlr4/runtime/Go/antlr v0.0.0-20211101200231-0802afb9c160
 	github.com/google/go-cmp v0.5.6
 	github.com/iancoleman/strcase v0.2.0
-	github.com/icza/bitio v1.0.0
+	github.com/icza/bitio v1.1.0
 	github.com/spf13/cobra v1.2.1
 	github.com/x448/float16 v0.8.4
 )

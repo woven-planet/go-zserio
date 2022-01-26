@@ -2,7 +2,7 @@ package ztype
 
 import "github.com/icza/bitio"
 
-func ReadVaruint16(r *bitio.Reader) (uint16, error) {
+func ReadVaruint16(r *bitio.CountReader) (uint16, error) {
 	b, err := r.ReadByte()
 	if err != nil {
 		return 0, err
@@ -17,7 +17,7 @@ func ReadVaruint16(r *bitio.Reader) (uint16, error) {
 	return v, nil
 }
 
-func ReadVaruint32(r *bitio.Reader) (uint32, error) {
+func ReadVaruint32(r *bitio.CountReader) (uint32, error) {
 	b, err := r.ReadByte()
 	if err != nil {
 		return 0, err
@@ -45,7 +45,7 @@ func ReadVaruint32(r *bitio.Reader) (uint32, error) {
 	return v, nil
 }
 
-func ReadVaruint64(r *bitio.Reader) (uint64, error) {
+func ReadVaruint64(r *bitio.CountReader) (uint64, error) {
 	b, err := r.ReadByte()
 	if err != nil {
 		return 0, err
@@ -78,7 +78,7 @@ func ReadVaruint64(r *bitio.Reader) (uint64, error) {
 	return v, nil
 }
 
-func ReadVaruint(r *bitio.Reader) (uint64, error) {
+func ReadVaruint(r *bitio.CountReader) (uint64, error) {
 	b, err := r.ReadByte()
 	if err != nil {
 		return 0, err
@@ -111,7 +111,7 @@ func ReadVaruint(r *bitio.Reader) (uint64, error) {
 	return v, nil
 }
 
-func ReadVarsize(r *bitio.Reader) (uint64, error) {
+func ReadVarsize(r *bitio.CountReader) (uint64, error) {
 	b, err := r.ReadByte()
 	if err != nil {
 		return 0, err

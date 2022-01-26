@@ -56,7 +56,7 @@ func TestWriteVarint16(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			var buf bytes.Buffer
-			w := bitio.NewWriter(&buf)
+			w := bitio.NewCountWriter(&buf)
 			var err error
 			for _, n := range test.input {
 				err = ztype.WriteVarint16(w, n)
@@ -121,7 +121,7 @@ func TestWriteVarint32(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			var buf bytes.Buffer
-			w := bitio.NewWriter(&buf)
+			w := bitio.NewCountWriter(&buf)
 			var err error
 			for _, n := range test.input {
 				err = ztype.WriteVarint32(w, n)
@@ -186,7 +186,7 @@ func TestWriteVarint64(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			var buf bytes.Buffer
-			w := bitio.NewWriter(&buf)
+			w := bitio.NewCountWriter(&buf)
 			var err error
 			for _, n := range test.input {
 				err = ztype.WriteVarint64(w, n)
@@ -250,7 +250,7 @@ func TestWriteVarint(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			var buf bytes.Buffer
-			w := bitio.NewWriter(&buf)
+			w := bitio.NewCountWriter(&buf)
 			var err error
 			for _, n := range test.input {
 				err = ztype.WriteVarint(w, n)

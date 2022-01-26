@@ -8,30 +8,30 @@ import (
 
 var ErrOutOfBounds = errors.New("value too large or too small for type")
 
-func WriteVaruint16(w *bitio.Writer, v uint16) error {
+func WriteVaruint16(w *bitio.CountWriter, v uint16) error {
 	return writeVarUint(w, uint64(v), 2)
 }
 
-func WriteVaruint32(w *bitio.Writer, v uint32) error {
+func WriteVaruint32(w *bitio.CountWriter, v uint32) error {
 	return writeVarUint(w, uint64(v), 4)
 }
 
-func WriteVaruint64(w *bitio.Writer, v uint64) error {
+func WriteVaruint64(w *bitio.CountWriter, v uint64) error {
 	return writeVarUint(w, uint64(v), 8)
 }
 
-func WriteVaruint(w *bitio.Writer, v uint64) error {
+func WriteVaruint(w *bitio.CountWriter, v uint64) error {
 	return writeVarUint(w, uint64(v), 9)
 }
 
-func WriteVarsize(w *bitio.Writer, v uint64) error {
+func WriteVarsize(w *bitio.CountWriter, v uint64) error {
 	if v > VARSIZE_MAX {
 		return ErrOutOfBounds
 	}
 	return writeVarUint(w, uint64(v), 5)
 }
 
-func writeVarUint(w *bitio.Writer, v uint64, maxBytes int) error {
+func writeVarUint(w *bitio.CountWriter, v uint64, maxBytes int) error {
 	neededBytes, err := UnsignedBitSize(v, maxBytes)
 	if err != nil {
 		return err

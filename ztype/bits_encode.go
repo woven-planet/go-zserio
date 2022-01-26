@@ -9,7 +9,7 @@ import (
 var ErrValueOutOfBitRange = errors.New("value is out of range for the given number of bits")
 
 // WriteUnsignedBits writes an unsigned number with a given number of bits
-func WriteUnsignedBits(w *bitio.Writer, value uint64, bits uint8) error {
+func WriteUnsignedBits(w *bitio.CountWriter, value uint64, bits uint8) error {
 	if value > ((1 << bits) - 1) {
 		return ErrValueOutOfBitRange
 	}
@@ -17,7 +17,7 @@ func WriteUnsignedBits(w *bitio.Writer, value uint64, bits uint8) error {
 }
 
 // WriteSignedBits writes an signed number with a given number of bits
-func WriteSignedBits(w *bitio.Writer, value int64, bits uint8) error {
+func WriteSignedBits(w *bitio.CountWriter, value int64, bits uint8) error {
 	if bits > 64 {
 		panic("can not read more than 64 bits")
 	}

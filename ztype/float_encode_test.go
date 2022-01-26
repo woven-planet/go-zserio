@@ -31,9 +31,9 @@ func TestWriteFloat16(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			var buf bytes.Buffer
-			w := bitio.NewWriter(&buf)
+			w := bitio.NewCountWriter(&buf)
 			if err := ztype.WriteFloat16(w, test.input); err != nil {
-				t.Fatalf("error writing float32: %v", err)
+				t.Fatalf("error writing float16: %v", err)
 			}
 			w.Close()
 			if diff := cmp.Diff(test.want, buf.Bytes()); diff != "" {
@@ -64,7 +64,7 @@ func TestWriteFloat32(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			var buf bytes.Buffer
-			w := bitio.NewWriter(&buf)
+			w := bitio.NewCountWriter(&buf)
 			if err := ztype.WriteFloat32(w, test.input); err != nil {
 				t.Fatalf("error writing float32: %v", err)
 			}
@@ -97,9 +97,9 @@ func TestWriteFloat64(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			var buf bytes.Buffer
-			w := bitio.NewWriter(&buf)
+			w := bitio.NewCountWriter(&buf)
 			if err := ztype.WriteFloat64(w, test.input); err != nil {
-				t.Fatalf("error writing float32: %v", err)
+				t.Fatalf("error writing float64: %v", err)
 			}
 			w.Close()
 			if diff := cmp.Diff(test.want, buf.Bytes()); diff != "" {

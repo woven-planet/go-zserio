@@ -26,7 +26,7 @@ func TestReadVaruint16(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := bitio.NewReader(bytes.NewBuffer(test.input))
+			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
 			v, err := ztype.ReadVaruint16(r)
 			if err != nil {
 				t.Fatalf("unexpected error: %s", err)
@@ -54,7 +54,7 @@ func TestReadVaruint32(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := bitio.NewReader(bytes.NewBuffer(test.input))
+			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
 			v, err := ztype.ReadVaruint32(r)
 			if err != nil {
 				t.Fatalf("unexpected error: %s", err)
@@ -82,7 +82,7 @@ func TestReadVaruint64(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := bitio.NewReader(bytes.NewBuffer(test.input))
+			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
 			v, err := ztype.ReadVaruint64(r)
 			if err != nil {
 				t.Fatalf("unexpected error: %s", err)
@@ -110,7 +110,7 @@ func TestReadVaruint(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := bitio.NewReader(bytes.NewBuffer(test.input))
+			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
 			v, err := ztype.ReadVaruint(r)
 			if err != nil {
 				t.Fatalf("unexpected error: %s", err)
@@ -143,7 +143,7 @@ func TestReadVarsize(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := bitio.NewReader(bytes.NewBuffer(test.input))
+			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
 			v, err := ztype.ReadVarsize(r)
 			if diff := cmp.Diff(test.err, err, cmpopts.EquateErrors()); diff != "" {
 				t.Fatalf("incorrect error: %s", diff)
