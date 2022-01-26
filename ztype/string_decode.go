@@ -2,7 +2,7 @@ package ztype
 
 import "github.com/icza/bitio"
 
-func ReadString(r *bitio.Reader) (string, error) {
+func ReadString(r *bitio.CountReader) (string, error) {
 	size, err := ReadVarsize(r)
 	if err != nil {
 		return "", err

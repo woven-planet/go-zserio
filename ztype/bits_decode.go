@@ -3,12 +3,12 @@ package ztype
 import "github.com/icza/bitio"
 
 // ReadUnsignedBits reads an unsigned number with a given number of bits
-func ReadUnsignedBits(r *bitio.Reader, bits uint8) (uint64, error) {
+func ReadUnsignedBits(r *bitio.CountReader, bits uint8) (uint64, error) {
 	return r.ReadBits(bits)
 }
 
 // ReadSignedBits reads an signed number with a given number of bits
-func ReadSignedBits(r *bitio.Reader, bits uint8) (int64, error) {
+func ReadSignedBits(r *bitio.CountReader, bits uint8) (int64, error) {
 	if bits > 64 {
 		panic("can not read more than 64 bits")
 	}

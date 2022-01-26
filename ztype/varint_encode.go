@@ -2,26 +2,26 @@ package ztype
 
 import "github.com/icza/bitio"
 
-func WriteVarint16(w *bitio.Writer, v int16) error {
+func WriteVarint16(w *bitio.CountWriter, v int16) error {
 	return writeVarInt(w, int64(v), 2)
 }
 
-func WriteVarint32(w *bitio.Writer, v int32) error {
+func WriteVarint32(w *bitio.CountWriter, v int32) error {
 	return writeVarInt(w, int64(v), 4)
 }
 
-func WriteVarint64(w *bitio.Writer, v int64) error {
+func WriteVarint64(w *bitio.CountWriter, v int64) error {
 	return writeVarInt(w, int64(v), 8)
 }
 
-func WriteVarint(w *bitio.Writer, v int64) error {
+func WriteVarint(w *bitio.CountWriter, v int64) error {
 	if v == INT64_MIN {
 		return w.WriteByte(0x80)
 	}
 	return writeVarInt(w, int64(v), 9)
 }
 
-func writeVarInt(w *bitio.Writer, v int64, maxBytes int) error {
+func writeVarInt(w *bitio.CountWriter, v int64, maxBytes int) error {
 	var absValue uint64
 	if v < 0 {
 		absValue = uint64(-v)
@@ -61,7 +61,7 @@ func writeVarInt(w *bitio.Writer, v int64, maxBytes int) error {
 	return w.TryError
 }
 
-// SignedBitSize returns the size in bits of the zserio encoding of an unsigned
+// SignedBitSize returns the size in bits of the zserio encoding of a signed
 // value. Unlike the Python zserio version this version is generic and does
 // not need a per-type table, but still gets identical performance.
 //

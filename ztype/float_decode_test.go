@@ -30,7 +30,7 @@ func TestReadFloat16(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := bitio.NewReader(bytes.NewBuffer(test.input))
+			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
 			got, err := ztype.ReadFloat16(r)
 			if err != nil {
 				t.Fatalf("error reading float: %v", err)
@@ -67,7 +67,7 @@ func TestReadFloat32(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := bitio.NewReader(bytes.NewBuffer(test.input))
+			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
 			got, err := ztype.ReadFloat32(r)
 			if err != nil {
 				t.Fatalf("error reading float: %v", err)
@@ -104,7 +104,7 @@ func TestReadFloat64(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := bitio.NewReader(bytes.NewBuffer(test.input))
+			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
 			got, err := ztype.ReadFloat64(r)
 			if err != nil {
 				t.Fatalf("error reading float: %v", err)

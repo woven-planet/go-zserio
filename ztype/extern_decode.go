@@ -7,7 +7,7 @@ import (
 )
 
 // ReadExtern reads an zserio extern type (variable size bitbuffer) from a reader.
-func ReadExtern(r *bitio.Reader) (*ExternType, error) {
+func ReadExtern(r *bitio.CountReader) (*ExternType, error) {
 	var err error
 	e := &ExternType{}
 	e.BitSize, err = ReadVarsize(r)

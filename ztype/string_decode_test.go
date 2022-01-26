@@ -29,7 +29,7 @@ func TestReadString(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := bitio.NewReader(bytes.NewBuffer(test.input))
+			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
 			got, err := ztype.ReadString(r)
 			if err != nil {
 				t.Fatalf("error reading string: %v", err)
