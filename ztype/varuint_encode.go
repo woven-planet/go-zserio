@@ -58,6 +58,14 @@ func writeVarUint(w *bitio.CountWriter, v uint64, maxBytes int) error {
 	return w.TryError
 }
 
+// TryUnsignedBitSize is a simplified version of UnsignedBitSize(), that is
+// needed for use within expressions. Within an expression, there is no possibility
+// for error checking or branching.
+func TryUnsignedBitSize(v uint64) int {
+	value, _ := UnsignedBitSize(v, 64)
+	return value
+}
+
 // UnsignedBitSize returns the size in bits of the zserio encoding of an unsigned
 // value. Unlike the Python zserio version this version is generic and does
 // not need a per-type table, but still gets identical performance.
