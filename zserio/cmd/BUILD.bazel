@@ -4,6 +4,7 @@ go_library(
     name = "cmd",
     srcs = [
         "d.go",
+	"generate.go",
         "root.go",
     ],
     importpath = "github.com/woven-planet/go-zserio/zserio/cmd",
