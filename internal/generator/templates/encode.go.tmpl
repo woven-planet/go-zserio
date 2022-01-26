@@ -1,49 +1,64 @@
 {{ $scope := .pkg }}
 {{ $field := .field }}
 {{ $native := goNativeType $scope $field.Type }} 
-{{if $field.IsOptional}}
+{{- $bit_size := $native.Type.Bits }}
+{{- if $native.Type.LengthExpression }}
+    {{- $bit_size = printf "uint8(%s)" (goExpression $scope $native.Type.LengthExpression) }}
+{{- end }}
+{{- $field_name := printf "v.%s" $field.Name }}
+{{- if $field.IsOptional}}
+    {{- $field_name = printf "(*v.%s)" $field.Name }}
+{{- end }}
+{{- if and $native.RequiresCast (not $field.Array) }}
+    {{- if $native.IsMarshaler }}
+        {{- $field_name = printf "(*%s)(&v.%s)" (goType $scope $native.Type) $field.Name }}
+        {{- if $field.IsOptional}}
+            {{- $field_name = printf "(*%s)(v.%s)" (goType $scope $native.Type) $field.Name }}
+        {{- end }}
+    {{- else }}
+        {{- $field_name = printf "%s(%s)" (goType $scope $native.Type) $field_name }}
+    {{- end }}
+{{- end }}
+
+
+{{- if $field.OptionalClause }}
+    if {{ goExpression $scope $field.OptionalClause }} {
+{{- end }}
+{{- if not (eq $field.Alignment 0) }}
+    if err := ztype.AlignWriter(w, {{ $field.Alignment }}); err != nil {
+        return err
+    }
+{{- end }}
+{{- if $field.IsOptional}}
     if err = ztype.WriteBool(w, v.{{ $field.Name }} != nil); err != nil {
         return err
     }
     if v.{{ $field.Name }} != nil {
-{{- if $native.Type.IsBuiltin}}
-    {{- if gt $native.Type.Bits 0 }}
+{{- end }}
+{{- template "encode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field }}
+{{- if $field.Array }}
+    {{- template "encode_array_init.go.tmpl" dict "pkg" $scope "field_name" $field_name "array" $field.Array }}
+{{- end }}
+{{- if and (not $native.IsMarshaler) (not $field.Array) }}
+    {{- if or (gt $native.Type.Bits 0) $native.Type.LengthExpression}}
         {{- if eq $native.Type.Name "int" }}
-            if err = ztype.WriteSignedBits(w, int64(*v.{{ $field.Name }}), {{ $field.Type.Bits }}); err != nil {
+            if err = ztype.WriteSignedBits(w, int64({{ $field_name }}), {{ $bit_size }}); err != nil {
         {{- else }}
-            if err = ztype.WriteBits(w, uint64(*v.{{ $field.Name }}), {{ $field.Type.Bits }}); err != nil {
+            if err = ztype.WriteUnsignedBits(w, uint64({{ $field_name }}), {{ $bit_size }}); err != nil {
         {{- end }}
-    {{- else if eq $native.Type.Name "string" }}
-        if err = ztype.WriteString(w, v.{{ $field.Name }}); err != nil {
-    {{- else }}
-        if err = ztype.Write{{ title $field.Type.Name }}(w, *v.{{ $field.Name }}); err != nil {
-    {{- end }}
-            return err
-        }
-{{- else}}
-        if err = v.{{ $field.Name }}.MarshalZserio(w); err != nil {
-            return err
-        }
-{{- end}}
-    }
-{{- else}}
-{{- if $native.Type.IsBuiltin}}
-    {{- if gt $native.Type.Bits 0 }}
-        {{- if eq $native.Type.Name "int" }}
-            if err = ztype.WriteSignedBits(w, int64(v.{{ $field.Name }}), {{ $native.Type.Bits }}); err != nil {
-        {{- else }}
-            if err = ztype.WriteBits(w, uint64(v.{{ $field.Name }}), {{ $native.Type.Bits }}); err != nil {
-        {{- end }}
-    {{- else if eq $native.Type.Name "string" }}
-        if err = ztype.WriteString(w, v.{{ $field.Name }}); err != nil {
-    {{- else }}
-        if err = ztype.Write{{ title $native.Type.Name }}(w, v.{{ $field.Name }}); err != nil {
+   {{- else }}
+        if err = ztype.Write{{ title $native.Type.Name }}(w, {{ $field_name }}); err != nil {
     {{- end }}
         return err
     }
 {{- else}}
-    if err = v.{{ $field.Name }}.MarshalZserio(w); err != nil {
+    if err = {{ $field_name }}.MarshalZserio(w); err != nil {
         return err
     }
 {{- end}}
-{{- end}}
+{{- if $field.IsOptional}}
+    }
+{{- end }}
+{{- if $field.OptionalClause }}
+    }
+{{- end }}

@@ -1,44 +1,76 @@
 {{ $scope := .pkg }}
 {{ $field := .field }}
-{{ $native := goNativeType $scope $field.Type }} 
-{{if $field.IsOptional}}
+{{ $native := goNativeType $scope $field.Type }}
+{{- $bit_size := $native.Type.Bits }}
+{{- if $native.Type.LengthExpression }}
+    {{- $bit_size = printf "uint8(%s)" (goExpression $scope $native.Type.LengthExpression) }}
+{{- end }}
+{{- $field_name := printf "v.%s" $field.Name }}
+{{- if $field.IsOptional}}
+    {{- $field_name = printf "(*v.%s)" $field.Name }}
+{{- end }}
+{{- if and $native.RequiresCast (not $field.Array) }}
+    {{- if $native.IsMarshaler }}
+        {{- $field_name = printf "(*%s)(&v.%s)" (goType $scope $native.Type) $field.Name }}
+        {{- if $field.IsOptional}}
+            {{- $field_name = printf "(*%s)(v.%s)" (goType $scope $native.Type) $field.Name }}
+        {{- end }}
+    {{- else }}
+        {{- $field_name = printf "%s(%s)" (goType $scope $native.Type) $field_name }}
+    {{- end }}
+{{- end }}
+
+
+{{- if $field.OptionalClause }}
+    if {{ goExpression $scope $field.OptionalClause }} {
+{{- end }}
+{{- if not (eq $field.Alignment 0) }}
+    ztype.AlignReader(r, {{ $field.Alignment }})
+{{- end }}
+
+{{- $assign_str_lvalue := printf "v.%s" $field.Name }}
+{{- $assign_str_rvalue := $field_name }}
+{{- if $field.IsOptional}}
     if present, err := ztype.ReadBool(r); err != nil {
         return err
     } else if present {
-        var value {{ goType $scope $field.Type }}
-{{- if $native.Type.IsBuiltin}}
-    {{- if gt $native.Type.Bits 0 }}
-        if value, err = ztype.Read{{if eq $native.Type.Name "int"}}Signed{{end}}Bits(r, {{ $native.Type.Bits }}); err != nil {
+
+    {{- if $field.Array }}
+        var value ztype.Array[{{if $native.IsMarshaler }}*{{ end }}{{ goType $scope $field.Type -}}, {{ template "array_traits_type.go.tmpl" dict "pkg" $scope "type" $field.Type }}]
     {{- else }}
-        if value, err = ztype.Read{{ title $native.Type.Name }}(r); err != nil {
+        var value {{ goType $scope $field.Type }}
     {{- end }}
-            return err
-        }
+    {{ $assign_str_lvalue = "value" }}
+    {{ $assign_str_rvalue = "value" }}
+{{- end }}
+
+{{- if and (not $native.IsMarshaler) (not $field.Array) }}
+    {{- if or (gt $native.Type.Bits 0) $native.Type.LengthExpression }}
+    if tempValue, err := ztype.Read{{if eq $native.Type.Name "int"}}Signed{{else}}Unsigned{{end}}Bits(r, {{ $bit_size }}); err == nil {
+    {{- else }}
+    if tempValue, err := ztype.Read{{ title $native.Type.Name }}(r); err == nil {
+    {{- end }}
+        {{ $assign_str_lvalue }} = ({{ goType $scope $field.Type }})(tempValue)
+    } else {
+        return err
+    }
 {{- else}}
-        if err = value.UnmarshalZserio(r); err != nil {
-            return err
-        }
+    {{- template "decode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field }}
+    {{- if $field.Array }}
+        {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $assign_str_lvalue "array" $field.Array }}
+    {{- end }}
+    if err = {{ $assign_str_rvalue }}.UnmarshalZserio(r); err != nil {
+        return err
+    }
 {{- end}}
+
+{{- if $field.IsOptional}}
         v.{{ $field.Name }} = &value
     } else {
         v.{{ $field.Name }} = nil
     }
-{{- else}}
-{{- if $native.Type.IsBuiltin}}
-    {{- if gt $field.Type.Bits 0 }}
-        if value, err := ztype.Read{{if eq $native.Type.Name "int"}}Signed{{end}}Bits(r, {{ $native.Type.Bits }}); err != nil {
-            return err
-        } else {
-            v.{{ $field.Name }} = {{ goType $scope $native.Type }}(value)
-        }
-    {{- else }}
-        if v.{{ $field.Name }}, err = ztype.Read{{ title $native.Type.Name }}(r); err != nil {
-            return err
-        }
-    {{- end }}
-{{- else}}
-    if err = v.{{ $field.Name }}.UnmarshalZserio(r); err != nil {
-        return err
-    }
-{{- end}}
-{{- end}}
+{{- end }}
+
+{{- if $field.OptionalClause }}
+}
+{{- end }}

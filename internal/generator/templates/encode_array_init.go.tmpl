@@ -1,0 +1,13 @@
+{{ $scope := .pkg }}
+{{ $field_name := .field_name }}
+{{ $array := .array }}
+{{- if $array.IsPacked }}
+    {{ $field_name }}.IsPacked = true
+{{- end }}
+{{- if $array.Length }}
+    if {{ $field_name }}.Size() != int({{ goExpression $scope $array.Length }}) {
+        return errors.New("array size does not match!")
+    }
+{{- else }}
+    {{ $field_name }}.IsAuto = true
+{{- end }}
