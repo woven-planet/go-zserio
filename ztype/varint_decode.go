@@ -2,7 +2,7 @@ package ztype
 
 import "github.com/icza/bitio"
 
-func ReadVarint16(r *bitio.Reader) (int16, error) {
+func ReadVarint16(r *bitio.CountReader) (int16, error) {
 	b, err := r.ReadByte()
 	if err != nil {
 		return 0, err
@@ -21,7 +21,7 @@ func ReadVarint16(r *bitio.Reader) (int16, error) {
 	return v, nil
 }
 
-func ReadVarint32(r *bitio.Reader) (int32, error) {
+func ReadVarint32(r *bitio.CountReader) (int32, error) {
 	b, err := r.ReadByte()
 	if err != nil {
 		return 0, err
@@ -53,7 +53,7 @@ func ReadVarint32(r *bitio.Reader) (int32, error) {
 	return v, nil
 }
 
-func ReadVarint64(r *bitio.Reader) (int64, error) {
+func ReadVarint64(r *bitio.CountReader) (int64, error) {
 	b, err := r.ReadByte()
 	if err != nil {
 		return 0, err
@@ -90,7 +90,7 @@ func ReadVarint64(r *bitio.Reader) (int64, error) {
 	return v, nil
 }
 
-func ReadVarint(r *bitio.Reader) (int64, error) {
+func ReadVarint(r *bitio.CountReader) (int64, error) {
 	b, err := r.ReadByte()
 	if err != nil {
 		return 0, err

@@ -30,7 +30,7 @@ func TestWriteBool(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			var buf bytes.Buffer
-			w := bitio.NewWriter(&buf)
+			w := bitio.NewCountWriter(&buf)
 			var err error
 			for _, n := range test.input {
 				err = ztype.WriteBool(w, n)

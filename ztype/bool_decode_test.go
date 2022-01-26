@@ -29,7 +29,7 @@ func TestReadBool(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := bitio.NewReader(bytes.NewBuffer(test.input))
+			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
 			got := make([]bool, 0, len(test.input))
 			for range test.want {
 				b, err := ztype.ReadBool(r)

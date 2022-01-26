@@ -3,7 +3,7 @@ package ztype
 import "github.com/icza/bitio"
 
 // WriteExtern writes an zserio extern type (variable size bitbuffer) from a reader.
-func WriteExtern(w *bitio.Writer, e *ExternType) error {
+func WriteExtern(w *bitio.CountWriter, e *ExternType) error {
 	if err := WriteVarsize(w, e.BitSize); err != nil {
 		return err
 	}

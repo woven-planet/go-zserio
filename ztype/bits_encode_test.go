@@ -40,7 +40,7 @@ func TestWriteSignedBits(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Run(name, func(t *testing.T) {
 				var buf bytes.Buffer
-				w := bitio.NewWriter(&buf)
+				w := bitio.NewCountWriter(&buf)
 				var err error
 				for ix := range test.input {
 					err = ztype.WriteSignedBits(w, test.input[ix], test.bits[ix])
