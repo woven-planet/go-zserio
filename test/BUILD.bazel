@@ -1,0 +1,33 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_test")
+
+filegroup(
+    name = "specs",
+    srcs = glob(["features/*.feature"]),
+)
+
+genrule(
+    name = "testdata",
+    outs = ["testdata.bin"],
+    cmd = "$(location //test/python:write_test_data) $@",
+    message = "Generating zserio payload binary using official Python bindings",
+    tools = ["//test/python:write_test_data"],
+)
+
+# gazelle:resolve go github.com/woven-planet/go-zserio/test/go/reference_modules/testobject1/testobject //test/go:testobject
+
+go_test(
+    name = "test_test",
+    srcs = ["integration_test.go"],
+    data = [
+        ":specs",
+        ":testdata",
+    ],
+    env = {
+        "TESTDATA_BIN": "$(rootpath :testdata)",
+    },
+    deps = [
+        "//test/go:testobject",
+        "@com_github_cucumber_godog//:godog",
+        "@com_github_icza_bitio//:bitio",
+    ],
+)

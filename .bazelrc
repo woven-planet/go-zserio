@@ -1,0 +1,13 @@
+test --test_output=errors
+
+# Fix the excessive rebuilding when using anything that depends on protobuf
+# rules
+# See https://github.com/bazelbuild/buildtools/issues/744
+# Also https://github.com/bazelbuild/bazel/issues/7026
+#
+# TODO @aignas 2021-10-08: Remove these options when the bazel issue is solved.
+build --incompatible_strict_action_env
+
+# A user specific configuration that have local settings to save the user
+# from typing a lot in their terminal. See ../docs/bazel.md for more info.
+try-import %workspace%/user.bazelrc
