@@ -16,7 +16,6 @@ jobs:
         with:
           path: "~/.cache/bazel"
           key: bazel
-      - run: bazel test //...
 
       - name: Install Dependencies
         run: python -m pip install "zserio==2.4.2"
@@ -26,9 +25,14 @@ jobs:
         
       - name: Generate the Go zserio code using go-zserio
         run: bazel run //zserio -- generate $PWD/testdata -r github.com/woven-planet/go-zserio/test/go-schema -o $PWD/test/go-schema
-      
-      # This test cannot run with Bazel, as the generated Go files do not generate Bazel files
-      - run: go test ./test
+
+      - name: Generate the Bazel files for the generated code
+        run: bazel run //:gazelle
+        
+      - name: Workaround - restore the bazel files for the generator
+        run: git restore $PWD/internal/parser/BUILD.bazel
+
+      - run: bazel test //...
         
 
 
