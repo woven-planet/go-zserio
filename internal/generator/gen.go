@@ -92,6 +92,10 @@ func generatePackage(rootPath string, pkg *ast.Package, options *Options) error 
 	}
 
 	for _, u := range pkg.Unions {
+		if len(u.TemplateParameters) > 0 {
+			// We only need to generate source for instantiated templates
+			continue
+		}
 		if err = writeSource(rootPath, pkg.Name, strcase.ToSnake(u.Name)+".go", options.DoNotFormatSource, "union.go.tmpl", map[string]interface{}{
 			"pkg":         pkg,
 			"union":       u,
@@ -112,6 +116,10 @@ func generatePackage(rootPath string, pkg *ast.Package, options *Options) error 
 	}
 
 	for _, c := range pkg.Choices {
+		if len(c.TemplateParameters) > 0 {
+			// We only need to generate source for instantiated templates
+			continue
+		}
 		if err = writeSource(rootPath, pkg.Name, strcase.ToSnake(c.Name)+".go", options.DoNotFormatSource, "choice.go.tmpl", map[string]interface{}{
 			"pkg":         pkg,
 			"choice":      c,
