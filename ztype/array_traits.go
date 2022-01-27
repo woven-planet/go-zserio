@@ -4,7 +4,7 @@ import (
 	"constraints"
 
 	"github.com/icza/bitio"
-	"github.com/woven-planet/go-zserio/interface"
+	zserio "github.com/woven-planet/go-zserio/interface"
 )
 
 // IArrayTraits is the interface used by all array traits.
@@ -372,6 +372,52 @@ func (trait VarUInt32ArrayTraits) AsUint64(value uint32) uint64 {
 
 func (trait VarUInt32ArrayTraits) FromUint64(value uint64) uint32 {
 	return uint32(value)
+}
+
+type VarUInt64ArrayTraits struct {
+}
+
+func (trait VarUInt64ArrayTraits) PackedTraits() IPackedArrayTraits[uint64] {
+	return &PackedArrayTraits[uint64, VarUInt64ArrayTraits]{
+		ArrayTraits: trait,
+	}
+}
+
+func (trait VarUInt64ArrayTraits) BitSizeOfIsConstant() bool {
+	return false
+}
+
+func (trait VarUInt64ArrayTraits) NeedsBitsizeOfPosition() bool {
+	return false
+}
+
+func (trait VarUInt64ArrayTraits) NeedsReadIndex() bool {
+	return false
+}
+
+func (trait VarUInt64ArrayTraits) BitSizeOf(element uint64, endBitPosition int) int {
+	bitSize, _ := UnsignedBitSize(uint64(element), 8)
+	return bitSize
+}
+
+func (trait VarUInt64ArrayTraits) InitializeOffsets(bitPosition int, value uint64) int {
+	return bitPosition + trait.BitSizeOf(value, 0) // endBitPosition is ignored
+}
+
+func (trait VarUInt64ArrayTraits) Read(reader *bitio.CountReader, endBitPosition int) (uint64, error) {
+	return ReadVaruint64(reader)
+}
+
+func (trait VarUInt64ArrayTraits) Write(writer *bitio.CountWriter, value uint64) error {
+	return WriteVaruint64(writer, value)
+}
+
+func (trait VarUInt64ArrayTraits) AsUint64(value uint64) uint64 {
+	return value
+}
+
+func (trait VarUInt64ArrayTraits) FromUint64(value uint64) uint64 {
+	return value
 }
 
 type VarUIntArrayTraits struct{}
