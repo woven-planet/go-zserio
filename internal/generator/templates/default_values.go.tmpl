@@ -1,13 +1,13 @@
 {{ $scope := .pkg }}
 {{ $field := .field }}
 {{ $native := goNativeType $scope $field.Type }} 
-{{- $bit_size := $field.Type.Bits }}
 {{- $field_name := printf "v.%s" $field.Name }}
 {{- if and $native.RequiresCast (not $field.Array) }}
     {{- if $native.IsMarshaler }}
         {{- $field_name = printf "(*%s)(&v.%s)" (goType $scope $native.Type) $field.Name }}
-    {{- else }}
-        {{- $field_name = printf "%s(%s)" (goType $scope $native.Type) $field_name }}
+        {{- if $field.IsOptional}}
+            {{- $field_name = printf "(*%s)(v.%s)" (goType $scope $native.Type) $field.Name }}
+        {{- end }}
     {{- end }}
 {{- end }}
 
@@ -18,7 +18,7 @@
         }
     {{- else if not $field.Array }}
         {{- if $field.Initializer }}
-        {{- $field_name }} = {{ goExpression $scope $field.Initializer }}
+        {{- $field_name }} = {{ if $native.RequiresCast }}{{ goType $scope $field.Type }}({{ end }}{{ goExpression $scope $field.Initializer }}{{ if $native.RequiresCast }}){{ end }}
         {{- end }}
     {{- end }}
 {{- end }}
