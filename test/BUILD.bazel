@@ -5,7 +5,7 @@ go_test(
     srcs = ["integration_test.go"],
     deps = [
         "//test/go-schema/reference_modules/testobject1/testobject",
-        "@com_github_cucumber_godog//:go_default_library",
+        "@com_github_cucumber_godog//:godog",
         "@com_github_icza_bitio//:bitio",
     ],
 )
