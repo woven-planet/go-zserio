@@ -157,7 +157,7 @@ func (p *Package) GoArrayTraits(t *TypeReference) (string, error) {
 	case *Union:
 		return objArrayTraitsStr, nil
 	case *BitmaskType:
-		return "ztype.BitFieldArrayTraits", nil
+		return objArrayTraitsStr, nil
 	case *Choice:
 		return objArrayTraitsStr, nil
 	default:
