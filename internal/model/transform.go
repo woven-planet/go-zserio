@@ -301,6 +301,22 @@ func (m *Model) instantiateStruct(
 			}
 		}
 
+		// resolve the template for the functions
+		for _, function := range templStruct.Functions {
+			if tt := templateTypes[function.ReturnType.Name]; tt != nil && function.ReturnType.Package == "" {
+				// the function return type is a template
+				structure.Functions = append(structure.Functions, &ast.Function{
+					Name:       function.Name,
+					Comment:    function.Comment,
+					Result:     function.Result,
+					ReturnType: tt,
+				})
+			} else {
+				// not templated
+				structure.Functions = append(structure.Functions, function)
+			}
+		}
+
 		// update the scope with the newly created scope
 		pkgScope.Structs[newType.Name] = structure
 		pkgScope.LocalSymbols.TypeScope[newType.Name] = structure
@@ -416,6 +432,11 @@ func (m *Model) ResolveTypes() error {
 			}
 
 			for _, functions := range structure.Functions {
+				if functions.ReturnType.Package == "" && templateParams[functions.ReturnType.Name] {
+					// Ignore template types
+					continue
+				}
+
 				if err := m.resolveTypeReference(pkg, functions.ReturnType, templateParams); err != nil {
 					return TypeError{
 						TypeReference: ast.TypeReference{
