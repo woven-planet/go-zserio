@@ -1,6 +1,9 @@
 from re import S
+import os
 import zserio
-from testdata.reference_modules.core.instantiations.instantiated_template_struct import InstantiatedTemplateStruct
+from testdata.reference_modules.core.instantiations.instantiated_template_struct import (
+    InstantiatedTemplateStruct,
+)
 from testdata.reference_modules.testobject1.testobject.test_object import TestObject
 from testdata.reference_modules.core.types.value_wrapper import ValueWrapper
 from testdata.reference_modules.core.types.color import Color
@@ -10,7 +13,7 @@ if __name__ == "__main__":
     # Create a dummy object with some random values
     test_data = TestObject()
     test_data.parameter1 = 7
-    
+
     struct1_field = ValueWrapper(test_data.parameter1)
     struct1_field.value = 72
     struct1_field.other_value = 121
@@ -38,9 +41,8 @@ if __name__ == "__main__":
         test_data.bitmask_array.append(CityAttributes.from_value(2))
 
     # write the testdata
+    os.mkdir("bin")
     byte_data = zserio.serialize_to_bytes(test_data)
-    handle = open(r"bin/testdata.bin", 'wb')
+    handle = open("bin/testdata.bin", "wb")
     handle.write(byte_data)
     handle.close()
-    
-

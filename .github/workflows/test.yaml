@@ -32,6 +32,11 @@ jobs:
       - name: Workaround - restore the bazel files for the generator
         run: git restore $PWD/internal/parser/BUILD.bazel
 
+      - name: Generate zserio dummy data
+        working-directory: test
+        run: python3 python/write_test_data.py
+
+
       - run: bazel test //...
         
 

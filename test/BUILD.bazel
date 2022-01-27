@@ -2,7 +2,14 @@ load("@io_bazel_rules_go//go:def.bzl", "go_test")
 
 go_test(
     name = "test_test",
-    srcs = ["integration_test.go"],
+    srcs = [
+        "integration_test.go",
+    ],
+    
+    data = glob([
+        "python/**",
+        "bin/testdata.bin",
+        "features/compare_with_zserio_reference.feature"]),
     deps = [
         "//test/go-schema/reference_modules/testobject1/testobject",
         "@com_github_cucumber_godog//:godog",

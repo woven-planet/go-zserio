@@ -5,8 +5,6 @@ import (
 	"context"
 	"errors"
 	"io/ioutil"
-	"os/exec"
-	"syscall"
 	"testing"
 
 	"github.com/cucumber/godog"
@@ -55,9 +53,12 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 }
 
 func generateReferenceZserioFile() error {
+	/* TODO put python into Bazel and reactivate this part
 	cmd := exec.Command("python", "python/write_test_data.py")
 	_, err := cmd.CombinedOutput()
 	return err
+	*/
+	return nil
 }
 
 func reencodeZserioTestBinary() error {
@@ -81,7 +82,7 @@ func reencodeZserioTestBinary() error {
 		return err
 	}
 	w.Close()
-	return ioutil.WriteFile(ReencodedFilePath, buf.Bytes(), syscall.O_RDWR|syscall.O_CREAT|syscall.O_TRUNC)
+	return ioutil.WriteFile(ReencodedFilePath, buf.Bytes(), 0644)
 }
 
 func verifyFilesAreEqual() error {
