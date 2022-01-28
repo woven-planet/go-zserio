@@ -264,6 +264,9 @@ func (expr *Expression) evaluateFunctionCallExpression(scope *Package) error {
 		return err
 	}
 	copyExpressionResult(function.Result, expr)
+	// copy the result symbol, in case the type of the symbol needs to be
+	// evaluated.
+	expr.ResultSymbol = expr.Operand1.ResultSymbol
 	return nil
 }
 
