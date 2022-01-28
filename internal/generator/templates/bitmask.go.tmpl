@@ -17,6 +17,11 @@ const (
 {{- end }}
 )
 
+func (v *{{ $bitmask.Name}}) Clone() zserio.ZserioType {
+  clone := *v
+  return &clone
+}
+
 func (v *{{ $bitmask.Name}}) LoadDefaultValues() error {
   return nil
 }

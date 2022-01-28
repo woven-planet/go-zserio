@@ -35,10 +35,13 @@
     {{- $assign_str_lvalue := printf "v.%s" $field.Name }}
     {{- $assign_str_rvalue := $field_name }}
 
+    {{- if $field.Array }}
+    {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $assign_str_lvalue "array" $field.Array "type" $native.Type }}
+    {{- end }}
+    
     {{- template "decode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field }}
 
     {{- if $field.Array }}
-        {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $assign_str_lvalue "array" $field.Array }}
         {{- if not $field.Array.IsPacked }}
             // This array is implicitly packed, because its parent object is packed
             {{ $assign_str_rvalue }}.IsPacked = true

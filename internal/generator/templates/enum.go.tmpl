@@ -17,6 +17,11 @@ const (
 {{- end }}
 )
 
+func (v *{{ $enum.Name}}) Clone() zserio.ZserioType {
+  clone := *v
+  return &clone
+}
+
 func (v *{{ $enum.Name}}) LoadDefaultValues() error {
   return nil
 }
