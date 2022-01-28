@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -63,7 +64,35 @@ func numBitsOperatorToGoString(scope ast.Scope, expression *ast.Expression) stri
 	return fmt.Sprintf("ztype.TryUnsignedBitSize(uint64(%s))", ExpressionToGoString(scope, expression.Operand1))
 }
 
-func twoOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
+func getSymbolType(scope ast.Scope, symbol *ast.SymbolReference) (*ast.TypeReference, error) {
+
+	switch n := symbol.Symbol.(type) {
+	case *ast.Enum:
+		return n.Type, nil
+	case *ast.Field:
+		return n.Type, nil
+	case *ast.Parameter:
+		return n.Type, nil
+	case *ast.Subtype:
+		return &ast.TypeReference{
+			Name:      n.Name,
+			IsBuiltin: false,
+			Package:   symbol.Package,
+		}, nil
+	case *ast.Function:
+		return n.ReturnType, nil
+	case *ast.BitmaskType:
+		return n.Type, nil
+	default:
+		return nil, errors.New("unable to evaluate the symbol type")
+	}
+}
+
+// twoOperatorEqualTypesToGoString prints out an expression that uses two
+// operands, where the operator expects to be both sides of the same type.
+// since there are many different integer and type to integer types, casting
+// might be necessary here.
+func twoOperatorEqualTypesToGoString(scope ast.Scope, expression *ast.Expression) string {
 	operator := ""
 	switch expression.Type {
 	case parser.ZserioParserPLUS:
@@ -76,6 +105,53 @@ func twoOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
 		operator = "/"
 	case parser.ZserioParserMODULO:
 		operator = "%"
+	case parser.ZserioParserLT:
+		operator = "<"
+	case parser.ZserioParserLE:
+		operator = "<="
+	case parser.ZserioParserGT:
+		operator = ">"
+	case parser.ZserioParserGE:
+		operator = ">="
+	case parser.ZserioParserEQ:
+		operator = "=="
+	case parser.ZserioParserNE:
+		operator = "!="
+	}
+
+	operand1Str := ExpressionToGoString(scope, expression.Operand1)
+	operand2Str := ExpressionToGoString(scope, expression.Operand2)
+
+	// If the type definitions are not matching, a typecast might be needed
+	if expression.Operand1.ResultType == ast.ExpressionTypeInteger &&
+		expression.Operand1.ResultSymbol != nil &&
+		expression.Operand2.ResultSymbol != nil {
+		op1Type, err := getSymbolType(scope, expression.Operand1.ResultSymbol)
+		if err != nil {
+			return "TYPE_ERROR"
+		}
+		op2Type, err := getSymbolType(scope, expression.Operand2.ResultSymbol)
+		if err != nil {
+			return "TYPE_ERROR"
+		}
+		if op1Type.Name != op2Type.Name {
+			// implicitly cast
+			op1GoString, err := scope.GoType(op1Type)
+			if err != nil {
+				return "TYPE_ERROR"
+			}
+			operand2Str = fmt.Sprintf("%s(%s)", op1GoString, operand2Str)
+		}
+	}
+	return fmt.Sprintf("%s %s %s",
+		operand1Str,
+		operator,
+		operand2Str)
+}
+
+func twoOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
+	operator := ""
+	switch expression.Type {
 	case parser.ZserioLexerLSHIFT:
 		operator = "<<"
 	case parser.ZserioParserRSHIFT:
@@ -90,19 +166,8 @@ func twoOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
 		operator = "&&"
 	case parser.ZserioParserLOGICAL_OR:
 		operator = "||"
-	case parser.ZserioParserLT:
-		operator = "<"
-	case parser.ZserioParserLE:
-		operator = "<="
-	case parser.ZserioParserGT:
-		operator = ">"
-	case parser.ZserioParserGE:
-		operator = ">="
-	case parser.ZserioParserEQ:
-		operator = "=="
-	case parser.ZserioParserNE:
-		operator = "!="
 	}
+
 	return fmt.Sprintf("%s %s %s",
 		ExpressionToGoString(scope, expression.Operand1),
 		operator,
@@ -153,17 +218,17 @@ func ExpressionToGoString(scope ast.Scope, expression *ast.Expression) string {
 	case parser.ZserioParserNUMBITS:
 		return numBitsOperatorToGoString(scope, expression)
 	case parser.ZserioParserPLUS:
-		return twoOperatorToGoString(scope, expression)
+		return twoOperatorEqualTypesToGoString(scope, expression)
 	case parser.ZserioParserMINUS:
-		return twoOperatorToGoString(scope, expression)
+		return twoOperatorEqualTypesToGoString(scope, expression)
 	case parser.ZserioParserMULTIPLY:
-		return twoOperatorToGoString(scope, expression)
+		return twoOperatorEqualTypesToGoString(scope, expression)
 	case parser.ZserioParserDIVIDE:
-		return twoOperatorToGoString(scope, expression)
+		return twoOperatorEqualTypesToGoString(scope, expression)
 	case parser.ZserioParserBANG: // the ! (negation operator)
 		return fmt.Sprintf("!%s", ExpressionToGoString(scope, expression.Operand1))
 	case parser.ZserioParserMODULO:
-		return twoOperatorToGoString(scope, expression)
+		return twoOperatorEqualTypesToGoString(scope, expression)
 	case parser.ZserioLexerLSHIFT:
 		return twoOperatorToGoString(scope, expression)
 	case parser.ZserioParserRSHIFT:
@@ -179,17 +244,17 @@ func ExpressionToGoString(scope ast.Scope, expression *ast.Expression) string {
 	case parser.ZserioParserLOGICAL_OR:
 		return twoOperatorToGoString(scope, expression)
 	case parser.ZserioParserLT:
-		return twoOperatorToGoString(scope, expression)
+		return twoOperatorEqualTypesToGoString(scope, expression)
 	case parser.ZserioParserLE:
-		return twoOperatorToGoString(scope, expression)
+		return twoOperatorEqualTypesToGoString(scope, expression)
 	case parser.ZserioParserGT:
-		return twoOperatorToGoString(scope, expression)
+		return twoOperatorEqualTypesToGoString(scope, expression)
 	case parser.ZserioParserGE:
-		return twoOperatorToGoString(scope, expression)
+		return twoOperatorEqualTypesToGoString(scope, expression)
 	case parser.ZserioParserEQ:
-		return twoOperatorToGoString(scope, expression)
+		return twoOperatorEqualTypesToGoString(scope, expression)
 	case parser.ZserioParserNE:
-		return twoOperatorToGoString(scope, expression)
+		return twoOperatorEqualTypesToGoString(scope, expression)
 	case parser.ZserioParserID:
 		return IdentifierToGoString(scope, expression)
 	case parser.ZserioParserQUESTIONMARK:
