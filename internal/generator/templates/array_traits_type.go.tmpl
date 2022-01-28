@@ -3,4 +3,4 @@
 {{- $traits := goArrayTraits $scope $type }}
 {{- $traits }}
 {{- if eq $traits "ztype.BitFieldArrayTraits" }}[{{ goType $scope $type }}]{{- end -}}
-{{- if eq $traits "ztype.ObjectArrayTraits" }}[{{ goType $scope $type }}, *{{ goType $scope $type }}]{{- end -}}
+{{- if eq $traits "ztype.ObjectArrayTraits" }}[*{{ goType $scope $type }}]{{- end -}}

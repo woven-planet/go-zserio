@@ -36,11 +36,14 @@
     {{- end }}
 
     {{- $read_str_lvalue := $field_name }}
+    
+    {{- if $field.Array }}
+        {{- template "encode_array_init.go.tmpl" dict "pkg" $scope "field_name" $read_str_lvalue "array" $field.Array "type" $native.Type }}
+    {{- end }}
 
     {{- template "encode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field }}
     
     {{- if $field.Array }}
-        {{- template "encode_array_init.go.tmpl" dict "pkg" $scope "field_name" $read_str_lvalue "array" $field.Array }}
         {{- if not $field.Array.IsPacked }}
             // This array is implicitly packed, because its parent object is packed
             {{ $read_str_lvalue }}.IsPacked = true

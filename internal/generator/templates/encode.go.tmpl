@@ -37,7 +37,7 @@
 {{- end }}
 {{- template "encode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field }}
 {{- if $field.Array }}
-    {{- template "encode_array_init.go.tmpl" dict "pkg" $scope "field_name" $field_name "array" $field.Array }}
+    {{- template "encode_array_init.go.tmpl" dict "pkg" $scope "field_name" $field_name "array" $field.Array "type" $native.Type }}
 {{- end }}
 {{- if and (not $native.IsMarshaler) (not $field.Array) }}
     {{- if or (gt $native.Type.Bits 0) $native.Type.LengthExpression}}
