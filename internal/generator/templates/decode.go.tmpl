@@ -36,7 +36,7 @@
     } else if present {
 
     {{- if $field.Array }}
-        var value ztype.Array[{{if $native.IsMarshaler }}*{{ end }}{{ goType $scope $field.Type -}}, {{ template "array_traits_type.go.tmpl" dict "pkg" $scope "type" $field.Type }}]
+        var value ztype.Array[{{if $native.IsMarshaler }}*{{ end }}{{ goType $scope $native.Type -}}, {{ template "array_traits_type.go.tmpl" dict "pkg" $scope "type" $native.Type }}]
     {{- else }}
         var value {{ goType $scope $field.Type }}
     {{- end }}
@@ -55,10 +55,10 @@
         return err
     }
 {{- else}}
-    {{- template "decode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field }}
     {{- if $field.Array }}
-        {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $assign_str_lvalue "array" $field.Array }}
+        {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $assign_str_lvalue "array" $field.Array "type" $native.Type }}
     {{- end }}
+    {{- template "decode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field }}
     if err = {{ $assign_str_rvalue }}.UnmarshalZserio(r); err != nil {
         return err
     }

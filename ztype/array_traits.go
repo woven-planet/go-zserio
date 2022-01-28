@@ -609,61 +609,55 @@ func (trait StringArrayTraits) FromUint64(value uint64) string {
 	return "" // not supported for string objects
 }
 
-// ObjectArrayTraitsType is an interface type which points to a zserioType, and must not be an interface.
-type ObjectArrayTraitsType[B any] interface {
-	zserio.PackableZserioType
-	*B // non-interface type constraint element
-}
-
 // ObjectArrayTraits is an array traits for zserio structs, choice, union or enum types
-type ObjectArrayTraits[T any, PT ObjectArrayTraitsType[T]] struct {
+type ObjectArrayTraits[T zserio.PackableZserioType] struct {
 	DefaultObject T
 }
 
-func (trait ObjectArrayTraits[T, PT]) PackedTraits() IPackedArrayTraits[PT] {
-	return &ObjectPackedArrayTraits[T, PT, ObjectArrayTraits[T, PT]]{
+func (trait ObjectArrayTraits[T]) PackedTraits() IPackedArrayTraits[T] {
+	return &ObjectPackedArrayTraits[T, ObjectArrayTraits[T]]{
 		ArrayTraits:   trait,
 		DefaultObject: trait.DefaultObject,
 	}
 }
 
-func (trait ObjectArrayTraits[T, PT]) BitSizeOfIsConstant() bool {
+func (trait ObjectArrayTraits[T]) BitSizeOfIsConstant() bool {
 	return false
 }
 
-func (trait ObjectArrayTraits[T, PT]) NeedsBitsizeOfPosition() bool {
+func (trait ObjectArrayTraits[T]) NeedsBitsizeOfPosition() bool {
 	return true
 }
 
-func (trait ObjectArrayTraits[T, PT]) NeedsReadIndex() bool {
+func (trait ObjectArrayTraits[T]) NeedsReadIndex() bool {
 	return true
 }
 
-func (trait ObjectArrayTraits[T, PT]) BitSizeOf(element PT, endBitPosition int) int {
+func (trait ObjectArrayTraits[T]) BitSizeOf(element T, endBitPosition int) int {
 	bitSize, _ := element.ZserioBitSize(endBitPosition)
 	return bitSize
 }
 
-func (trait ObjectArrayTraits[T, PT]) InitializeOffsets(bitPosition int, value PT) int {
-	offset := 0 // , _ := value.InitializeOffsets(bitPosition)
+func (trait ObjectArrayTraits[T]) InitializeOffsets(bitPosition int, value T) int {
+	offset := 0
 	return offset
 }
 
-func (trait ObjectArrayTraits[T, PT]) Read(reader *bitio.CountReader, endBitPosition int) (PT, error) {
-	value := PT(new(T))
-	*value = trait.DefaultObject
+func (trait ObjectArrayTraits[T]) Read(reader *bitio.CountReader, endBitPosition int) (T, error) {
+	value := trait.DefaultObject.Clone().(T)
 	err := value.UnmarshalZserio(reader)
 	return value, err
 }
 
-func (trait ObjectArrayTraits[T, PT]) Write(writer *bitio.CountWriter, value PT) error {
+func (trait ObjectArrayTraits[T]) Write(writer *bitio.CountWriter, value T) error {
 	return value.MarshalZserio(writer)
 }
 
-func (trait ObjectArrayTraits[T, PT]) AsUint64(value PT) uint64 {
+func (trait ObjectArrayTraits[T]) AsUint64(value T) uint64 {
 	return 0 // not supported
 }
 
-func (trait ObjectArrayTraits[T, PT]) FromUint64(value uint64) PT {
-	return nil // not supported
+func (trait ObjectArrayTraits[T]) FromUint64(value uint64) T {
+	var dummy T
+	return dummy // not supported
 }

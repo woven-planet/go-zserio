@@ -1,6 +1,8 @@
 {{ $scope := .pkg }}
 {{ $field_name := .field_name }}
 {{ $array := .array }}
+{{ $type := .type }}
+{{- $traits := goArrayTraits $scope $type }}
 {{- if $array.IsPacked }}
     {{ $field_name }}.IsPacked = true
 {{- end }}
@@ -8,4 +10,7 @@
     {{ $field_name }}.FixedSize = int({{ goExpression $scope $array.Length }})
 {{- else }}
     {{ $field_name }}.IsAuto = true
+{{- end }}
+{{- if eq $traits "ztype.ObjectArrayTraits" }}
+    {{ $field_name }}.ArrayTraits.DefaultObject = new({{ goType $scope $type }})
 {{- end }}

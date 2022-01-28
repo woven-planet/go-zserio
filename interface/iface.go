@@ -20,6 +20,7 @@ type Marshaler interface {
 type ZserioType interface {
 	Marshaler
 	Unmarshaler
+	Clone() ZserioType
 }
 
 type PackableUnmarshaler interface {

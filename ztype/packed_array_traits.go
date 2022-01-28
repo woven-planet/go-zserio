@@ -2,7 +2,7 @@ package ztype
 
 import (
 	"github.com/icza/bitio"
-	"github.com/woven-planet/go-zserio/interface"
+	zserio "github.com/woven-planet/go-zserio/interface"
 )
 
 // IPackedArrayTraits is the interface for array traits that are packed.
@@ -57,19 +57,19 @@ func (traits *PackedArrayTraits[T, Y]) Write(contextNode *zserio.PackingContextN
 }
 
 // ObjectPackedArrayTraits is a wrapper around array traits for zserio objects.
-type ObjectPackedArrayTraits[T any, PT ObjectArrayTraitsType[T], Y IArrayTraits[PT]] struct {
+type ObjectPackedArrayTraits[T zserio.PackableZserioType, Y IArrayTraits[T]] struct {
 	ArrayTraits   Y
 	DefaultObject T
 }
 
-func (traits *ObjectPackedArrayTraits[T, PT, Y]) CreateContext() (*zserio.PackingContextNode, error) {
+func (traits *ObjectPackedArrayTraits[T, Y]) CreateContext() (*zserio.PackingContextNode, error) {
 	// Create a packing context without a context set (it will be set by the
 	// compund object fields).
 	node := &zserio.PackingContextNode{}
 
 	// this is deliberately a null pointer (simulating static methods), as the
 	// objects are not created yet.
-	var dummyObjectPtr PT
+	var dummyObjectPtr T
 
 	// Iterate over all fields in the object, an generate one packing context
 	// for each field.
@@ -78,29 +78,28 @@ func (traits *ObjectPackedArrayTraits[T, PT, Y]) CreateContext() (*zserio.Packin
 }
 
 // InitContext initializes a packing context for a packed array traits.
-func (traits *ObjectPackedArrayTraits[T, PT, Y]) InitContext(contextNode *zserio.PackingContextNode, element PT) error {
+func (traits *ObjectPackedArrayTraits[T, Y]) InitContext(contextNode *zserio.PackingContextNode, element T) error {
 	return element.ZserioInitPackingContext(contextNode)
 }
 
 // BitSizeOf returns the bit size of an element of a packed array traits.
-func (traits *ObjectPackedArrayTraits[T, PT, Y]) BitSizeOf(contextNode *zserio.PackingContextNode, bitPosition int, element PT) (int, error) {
+func (traits *ObjectPackedArrayTraits[T, Y]) BitSizeOf(contextNode *zserio.PackingContextNode, bitPosition int, element T) (int, error) {
 	return element.ZserioBitSizePacked(contextNode, bitPosition)
 }
 
 // InitializeOffsets calculates the offsets of the packed array element.
-func (traits *ObjectPackedArrayTraits[T, PT, Y]) InitializeOffsets(contextNode *zserio.PackingContextNode, bitPosition int, element PT) int {
+func (traits *ObjectPackedArrayTraits[T, Y]) InitializeOffsets(contextNode *zserio.PackingContextNode, bitPosition int, element T) int {
 	return element.ZserioInitializeOffsetsPacked(contextNode, bitPosition)
 }
 
 // Read reads an array element of a packed array traits.
-func (traits *ObjectPackedArrayTraits[T, PT, Y]) Read(contextNode *zserio.PackingContextNode, reader *bitio.CountReader, index int) (PT, error) {
-	value := PT(new(T))
-	*value = traits.DefaultObject
+func (traits *ObjectPackedArrayTraits[T, Y]) Read(contextNode *zserio.PackingContextNode, reader *bitio.CountReader, index int) (T, error) {
+	value := traits.DefaultObject.Clone().(T)
 	err := value.UnmarshalZserioPacked(contextNode, reader)
 	return value, err
 }
 
 // Write writes an array element of a packed array traits.
-func (traits *ObjectPackedArrayTraits[T, PT, Y]) Write(contextNode *zserio.PackingContextNode, writer *bitio.CountWriter, element PT) {
+func (traits *ObjectPackedArrayTraits[T, Y]) Write(contextNode *zserio.PackingContextNode, writer *bitio.CountWriter, element T) {
 	element.MarshalZserioPacked(contextNode, writer)
 }
