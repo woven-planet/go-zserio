@@ -40,12 +40,12 @@ type Array[T any, Y IArrayTraits[T]] struct {
 	// FixedSize is the size of the array, if the array is of fixed size
 	FixedSize int
 
-	// SetOffsetMethod is an optional function to set the offset to the buffer.
-	SetOffsetMethod   *OffsetMethod
-	CheckOffsetMethod *OffsetMethod
-
 	// The node used by this array for packing
 	PackedContext *zserio.PackingContextNode
+
+	// SetOffsetMethod is an optional function to set the offset to the buffer.
+	setOffsetMethod   OffsetMethod
+	checkOffsetMethod OffsetMethod
 }
 
 // Size returns the number of elements in an array.
@@ -67,7 +67,7 @@ func (array *Array[T, Y]) ZserioBitSize(bitPosition int) (int, error) {
 	if array.ArrayTraits.BitSizeOfIsConstant() && size > 0 {
 		var dummy T
 		elementSize := array.ArrayTraits.BitSizeOf(dummy, 0)
-		if array.SetOffsetMethod != nil {
+		if array.setOffsetMethod != nil {
 			endBitPosition += size * elementSize
 		} else {
 			// all elements are spaced in the same way
@@ -76,7 +76,7 @@ func (array *Array[T, Y]) ZserioBitSize(bitPosition int) (int, error) {
 		}
 	} else {
 		for _, element := range array.RawArray {
-			if array.SetOffsetMethod != nil {
+			if array.setOffsetMethod != nil {
 				endBitPosition = alignTo(8, endBitPosition)
 			}
 			endBitPosition += array.ArrayTraits.BitSizeOf(element, endBitPosition)
@@ -109,7 +109,7 @@ func (array *Array[T, Y]) ZserioBitSizePacked(bitPosition int) (int, error) {
 		}
 		endBitPosition += delta
 		for _, element := range array.RawArray {
-			if array.SetOffsetMethod != nil {
+			if array.setOffsetMethod != nil {
 				endBitPosition = alignTo(8, endBitPosition)
 			}
 			delta, err := array.ArrayTraits.PackedTraits().BitSizeOf(array.PackedContext, endBitPosition, element)
