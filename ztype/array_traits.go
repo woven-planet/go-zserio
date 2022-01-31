@@ -329,6 +329,54 @@ func (trait VarInt32ArrayTraits) FromUint64(value uint64) int32 {
 	return int32(value)
 }
 
+// VarInt64ArrayTraits is the implementation of an array traits for a VarInt64.
+type VarInt64ArrayTraits struct {
+}
+
+func (trait VarInt64ArrayTraits) PackedTraits() IPackedArrayTraits[int64] {
+	return &PackedArrayTraits[int64, VarInt64ArrayTraits]{
+		ArrayTraits: trait,
+	}
+}
+
+func (trait VarInt64ArrayTraits) BitSizeOfIsConstant() bool {
+	return false
+}
+
+func (trait VarInt64ArrayTraits) NeedsBitsizeOfPosition() bool {
+	return false
+}
+
+func (trait VarInt64ArrayTraits) NeedsReadIndex() bool {
+	return false
+}
+
+func (trait VarInt64ArrayTraits) BitSizeOf(element int64, endBitPosition int) int {
+	bitSize, _ := SignedBitSize(int64(element), 8)
+	return bitSize
+}
+
+func (trait VarInt64ArrayTraits) InitializeOffsets(bitPosition int, value int64) int {
+	return bitPosition + trait.BitSizeOf(value, 0) // endBitPosition is ignored
+}
+
+func (trait VarInt64ArrayTraits) Read(reader *bitio.CountReader, endBitPosition int) (int64, error) {
+	return ReadVarint64(reader)
+}
+
+func (trait VarInt64ArrayTraits) Write(writer *bitio.CountWriter, value int64) error {
+	return WriteVarint64(writer, value)
+}
+
+func (trait VarInt64ArrayTraits) AsUint64(value int64) uint64 {
+	return uint64(value)
+}
+
+func (trait VarInt64ArrayTraits) FromUint64(value uint64) int64 {
+	return int64(value)
+}
+
+// VarUInt16ArrayTraits is the implementation of an array traits for a VarUint16.
 type VarUInt16ArrayTraits struct {
 }
 
