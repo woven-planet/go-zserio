@@ -1,21 +1,21 @@
 {{- $scope := .pkg }}
-{{- $native := .native }}
-{{- $traits := goArrayTraits $scope $native.Type }}
-{{- template "array_traits_type.go.tmpl" dict "pkg" $scope "type" $native.Type }} {
+{{- $type := .type }}
+{{- $traits := goArrayTraits $scope $type }}
+{{- template "array_traits_type.go.tmpl" dict "pkg" $scope "type" $type }} {
 {{- if eq $traits "ztype.BitFieldArrayTraits" -}}
     NumBits: uint8(
-    {{- if gt $native.Type.Bits 0 }}
-        {{- $native.Type.Bits }}
-    {{- else if $native.Type.LengthExpression }}
-        {{- goExpression $scope $native.Type.LengthExpression }}
-    {{- else if eq $native.Type.Name "uint8" }}8
-    {{- else if eq $native.Type.Name "uint16" }}16
-    {{- else if eq $native.Type.Name "uint32" }}32
-    {{- else if eq $native.Type.Name "uint64" }}64
-    {{- else if eq $native.Type.Name "int8" }}8
-    {{- else if eq $native.Type.Name "int16" }}16
-    {{- else if eq $native.Type.Name "int32" }}32
-    {{- else if eq $native.Type.Name "int64" }}64
+    {{- if gt $type.Bits 0 }}
+        {{- $type.Bits }}
+    {{- else if $type.LengthExpression }}
+        {{- goExpression $scope $type.LengthExpression }}
+    {{- else if eq $type.Name "uint8" }}8
+    {{- else if eq $type.Name "uint16" }}16
+    {{- else if eq $type.Name "uint32" }}32
+    {{- else if eq $type.Name "uint64" }}64
+    {{- else if eq $type.Name "int8" }}8
+    {{- else if eq $type.Name "int16" }}16
+    {{- else if eq $type.Name "int32" }}32
+    {{- else if eq $type.Name "int64" }}64
     {{- else }}UNSUPPORTED
     {{- end }})
 {{- end -}}
