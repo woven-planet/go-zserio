@@ -13,9 +13,9 @@ go_library(
         "bool_decode.go",
         "bool_encode.go",
         "delta_context.go",
+        "extern.go",
         "extern_decode.go",
         "extern_encode.go",
-        "extern.go",
         "float_decode.go",
         "float_encode.go",
         "limits.go",
@@ -32,8 +32,8 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//interface",
-        "@com_github_icza_bitio//:go_default_library",
-        "@com_github_x448_float16//:go_default_library",
+        "@com_github_icza_bitio//:bitio",
+        "@com_github_x448_float16//:float16",
     ],
 )
 
@@ -57,8 +57,8 @@ go_test(
     ],
     deps = [
         ":ztype",
-        "@com_github_google_go_cmp//cmp:go_default_library",
-        "@com_github_google_go_cmp//cmp/cmpopts:go_default_library",
-        "@com_github_icza_bitio//:go_default_library",
+        "@com_github_google_go_cmp//cmp",
+        "@com_github_google_go_cmp//cmp/cmpopts",
+        "@com_github_icza_bitio//:bitio",
     ],
 )

@@ -1,9 +1,15 @@
+# Direnv
+
+Install `direnv` tool to setup your PATH automatically to include the `bin`
+directory to be able to use the extra helper scripts for managing go
+dependencies, otherwise, add it manually to your shell.
+
 # Bazel
 
 Update `BUILD.bazel` files:
 
 ```shell
-bazel run //:gazelle
+gazelle
 ```
 
 Run all tests:
@@ -21,5 +27,5 @@ bazel run //cmd:hello
 Update modules:
 
 ```shell
-bazel run //:gazelle -- update-repos -from_file=go.mod -to_macro=repositories.bzl%go_repositories
+gazelle-update-repos
 ```
