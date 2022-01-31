@@ -4,7 +4,7 @@ go_library(
     name = "cmd",
     srcs = [
         "d.go",
-	"generate.go",
+        "generate.go",
         "root.go",
     ],
     importpath = "github.com/woven-planet/go-zserio/zserio/cmd",
@@ -12,6 +12,6 @@ go_library(
     deps = [
         "//internal/generator",
         "//internal/model",
-        "@com_github_spf13_cobra//:go_default_library",
+        "@com_github_spf13_cobra//:cobra",
     ],
 )
