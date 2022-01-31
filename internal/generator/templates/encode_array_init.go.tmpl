@@ -1,6 +1,8 @@
 {{ $scope := .pkg }}
 {{ $field_name := .field_name }}
 {{ $array := .array }}
+{{ $type := .type }}
+{{- $field_name }}.ArrayTraits = {{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $type }}
 {{- if $array.IsPacked }}
     {{ $field_name }}.IsPacked = true
 {{- end }}
