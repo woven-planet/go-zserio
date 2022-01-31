@@ -1,6 +1,9 @@
 from re import S
 import os
 import zserio
+import sys
+sys.path.append(os.path.dirname(__file__))
+
 from testdata.reference_modules.core.instantiations.instantiated_template_struct import (
     InstantiatedTemplateStruct,
 )
