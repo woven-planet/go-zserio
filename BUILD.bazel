@@ -1,4 +1,5 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
 
 # gazelle:prefix github.com/woven-planet/go-zserio
+# gazelle:resolve go github.com/antlr/antlr4/runtime/Go/antlr @antlr4_runtimes//:go
 gazelle(name = "gazelle")
