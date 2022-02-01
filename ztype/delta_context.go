@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	MAX_BIT_NUMBER_BITS  = 6
-	MAX_BIT_NUMBER_LIMIT = 62
+	MaxBitNumberBits  = 6
+	MaxBitNumberLimit = 62
 )
 
 // DeltaContext is a packing context used when writing data using delta
@@ -44,7 +44,7 @@ func absDiff(lhs, rhs uint64) uint64 {
 
 // Init initializes a delta context array, and calculates the needed space per element in the final array.
 func (context *DeltaContext[T]) Init(arrayTraits IArrayTraits[T], element T) {
-	context.numElements += 1
+	context.numElements++
 	context.unpackedBitSize += arrayTraitsBitsizeOf(arrayTraits, 0, element)
 
 	if context.previousElement == nil {
@@ -52,7 +52,7 @@ func (context *DeltaContext[T]) Init(arrayTraits IArrayTraits[T], element T) {
 		context.previousElement = &elementAsUint64
 		context.firstElementBitSize = context.unpackedBitSize
 	} else {
-		if context.maxBitNumber <= MAX_BIT_NUMBER_LIMIT {
+		if context.maxBitNumber <= MaxBitNumberLimit {
 			context.isPacked = true
 			// Calculate the delta to the previous value, and calculate how many
 			// bits are needed to store the delta.
@@ -62,7 +62,7 @@ func (context *DeltaContext[T]) Init(arrayTraits IArrayTraits[T], element T) {
 				context.maxBitNumber = maxBitNumber
 				// cannot store using delta packing if the 64bit range is
 				// exhausted
-				if maxBitNumber > MAX_BIT_NUMBER_LIMIT {
+				if maxBitNumber > MaxBitNumberLimit {
 					context.isPacked = false
 				}
 			}
@@ -75,7 +75,7 @@ func (context *DeltaContext[T]) Init(arrayTraits IArrayTraits[T], element T) {
 func (context *DeltaContext[T]) BitSizeOfDescriptor() int {
 	context.finishInit()
 	if context.isPacked {
-		return 1 + MAX_BIT_NUMBER_BITS
+		return 1 + MaxBitNumberBits
 	}
 	return 1
 }
@@ -101,7 +101,7 @@ func (context *DeltaContext[T]) ReadDescriptor(reader *bitio.CountReader) error 
 	}
 	if context.isPacked {
 		numOfBits := uint64(0)
-		numOfBits, err = reader.ReadBits(MAX_BIT_NUMBER_BITS)
+		numOfBits, err = reader.ReadBits(MaxBitNumberBits)
 		context.maxBitNumber = int(numOfBits)
 	}
 	return nil
@@ -134,7 +134,7 @@ func (context *DeltaContext[T]) WriteDescriptor(writer *bitio.CountWriter) error
 		return err
 	}
 	if context.isPacked {
-		writer.WriteBits(uint64(context.maxBitNumber), MAX_BIT_NUMBER_BITS)
+		writer.WriteBits(uint64(context.maxBitNumber), MaxBitNumberBits)
 	}
 	return nil
 }
@@ -170,7 +170,7 @@ func (context *DeltaContext[T]) finishInit() {
 		// decide if this array should be packed or not by comparing the array
 		// bit sizes of both methods. Packed is usually more efficient if the
 		// the array values are not differing too much from each other.
-		packedBitsizeWithDescriptor := 1 + MAX_BIT_NUMBER_BITS +
+		packedBitsizeWithDescriptor := 1 + MaxBitNumberBits +
 			context.firstElementBitSize + (context.numElements-1)*deltaBitsize
 
 		unpackedBitsizeWithDescriptor := 1 + context.unpackedBitSize
