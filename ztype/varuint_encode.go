@@ -6,6 +6,8 @@ import (
 	"github.com/icza/bitio"
 )
 
+// ErrOutOfBounds is an error that is returned when you try to write a
+// value that is too large for the zserio (integer) type.
 var ErrOutOfBounds = errors.New("value too large or too small for type")
 
 func WriteVaruint16(w *bitio.CountWriter, v uint16) error {

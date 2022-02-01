@@ -6,6 +6,9 @@ import (
 	"github.com/icza/bitio"
 )
 
+// ErrValueOutOfBitRange is an error that is returned when you try to
+// write a bit field type with a value that is larger than the number of
+// bits allows for.
 var ErrValueOutOfBitRange = errors.New("value is out of range for the given number of bits")
 
 // WriteUnsignedBits writes an unsigned number with a given number of bits
