@@ -69,16 +69,17 @@ func TryUnsignedBitSize(v uint64) int {
 }
 
 // UnsignedBitSize returns the size in bits of the zserio encoding of an unsigned
-// value. Unlike the Python zserio version this version is generic and does
-// not need a per-type table, but still gets identical performance.
-//
-//   goos: darwin
-//   goarch: amd64
-//   pkg: github.com/woven-planet/go-zserio
-//   cpu: Intel(R) Core(TM) i7-6567U CPU @ 3.30GHz
-//   BenchmarkBitsize-4              322097268                3.659 ns/op
-//   BenchmarkBitsizeTable-4         324647538                3.642 ns/op
+// value.
 func UnsignedBitSize(v uint64, maxBytes int) (int, error) {
+	// Unlike the Python zserio version this version is generic and does
+	// not need a per-type table, but still gets identical performance.
+	//
+	//   goos: darwin
+	//   goarch: amd64
+	//   pkg: github.com/woven-planet/go-zserio
+	//   cpu: Intel(R) Core(TM) i7-6567U CPU @ 3.30GHz
+	//   BenchmarkBitsize-4              322097268                3.659 ns/op
+	//   BenchmarkBitsizeTable-4         324647538                3.642 ns/op
 	var max uint64 = (1 << 7) - 1
 	bytes := 1
 	for {

@@ -62,10 +62,10 @@ func writeVarInt(w *bitio.CountWriter, v int64, maxBytes int) error {
 }
 
 // SignedBitSize returns the size in bits of the zserio encoding of a signed
-// value. Unlike the Python zserio version this version is generic and does
-// not need a per-type table, but still gets identical performance.
-//
+// value.
 func SignedBitSize(v int64, maxBytes int) (int, error) {
+	// Unlike the Python zserio version this version is generic and does
+	// not need a per-type table, but still gets identical performance.
 	if v < 0 {
 		v = -v
 	}
