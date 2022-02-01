@@ -43,15 +43,11 @@ load("@rules_antlr//antlr:repositories.bzl", "rules_antlr_dependencies")
 load("@rules_antlr//antlr:lang.bzl", "GO")
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
 load("//:deps.bzl", "go_dependencies")
-load("//:repositories.bzl", "go_repositories")
-
-# gazelle:repository_macro repositories.bzl%go_repositories
-go_repositories()
-
-rules_antlr_dependencies("4.8", GO)
 
 # gazelle:repository_macro deps.bzl%go_dependencies
 go_dependencies()
+
+rules_antlr_dependencies("4.8", GO)
 
 go_rules_dependencies()
 
