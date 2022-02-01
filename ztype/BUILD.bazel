@@ -42,6 +42,7 @@ go_test(
     srcs = [
         "array_decode_test.go",
         "array_encode_test.go",
+        "array_test.go",
         "bits_decode_test.go",
         "bits_encode_test.go",
         "bool_decode_test.go",
@@ -57,6 +58,7 @@ go_test(
     ],
     deps = [
         ":ztype",
+        "//interface",
         "@com_github_google_go_cmp//cmp",
         "@com_github_google_go_cmp//cmp/cmpopts",
         "@com_github_icza_bitio//:bitio",
