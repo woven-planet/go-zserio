@@ -61,4 +61,4 @@ subtype uint32 BlockIndex;
 
 struct PackedAutoSubtypeUInt32Array {
     packed BlockIndex blockIndexArray[];
-}
+};
