@@ -38,7 +38,7 @@ func TestVarintArrayDecoding(t *testing.T) {
 			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
 			array, err := ztype.ArrayFromReader[int64](
 				r, &ztype.VarIntArrayTraits{}, test.arraySize,
-				test.isPacked, test.isAuto, nil, nil)
+				test.isPacked, test.isAuto)
 			if err != nil {
 				t.Fatalf("error reading array: %v", err)
 			}
@@ -100,7 +100,7 @@ func TestUint32ArrayDecoding(t *testing.T) {
 				r, &ztype.BitFieldArrayTraits[uint32]{
 					NumBits: 32,
 				},
-				test.arraySize, test.isPacked, test.isAuto, nil, nil)
+				test.arraySize, test.isPacked, test.isAuto)
 			if err != nil {
 				t.Fatalf("error reading array: %v", err)
 			}
@@ -154,7 +154,7 @@ func TestVarInt32ArrayDecoding(t *testing.T) {
 			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
 			array, err := ztype.ArrayFromReader[int32, *ztype.VarInt32ArrayTraits](
 				r, &ztype.VarInt32ArrayTraits{},
-				test.arraySize, test.isPacked, test.isAuto, nil, nil)
+				test.arraySize, test.isPacked, test.isAuto)
 			if err != nil {
 				t.Fatalf("error reading array: %v", err)
 			}
@@ -184,7 +184,7 @@ func TestFloat16ArrayDecoding(t *testing.T) {
 			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
 			array, err := ztype.ArrayFromReader[float32, *ztype.Float16ArrayTraits](
 				r, &ztype.Float16ArrayTraits{},
-				test.arraySize, false, test.isAuto, nil, nil)
+				test.arraySize, false, test.isAuto)
 			if err != nil {
 				t.Fatalf("error reading array: %v", err)
 			}
@@ -214,7 +214,7 @@ func TestFloat32ArrayDecoding(t *testing.T) {
 			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
 			array, err := ztype.ArrayFromReader[float32, *ztype.Float32ArrayTraits](
 				r, &ztype.Float32ArrayTraits{},
-				test.arraySize, false, test.isAuto, nil, nil)
+				test.arraySize, false, test.isAuto)
 			if err != nil {
 				t.Fatalf("error reading array: %v", err)
 			}
@@ -248,7 +248,7 @@ func TestFloat64ArrayDecoding(t *testing.T) {
 			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
 			array, err := ztype.ArrayFromReader[float64, *ztype.Float64ArrayTraits](
 				r, &ztype.Float64ArrayTraits{},
-				test.arraySize, false, test.isAuto, nil, nil)
+				test.arraySize, false, test.isAuto)
 			if err != nil {
 				t.Fatalf("error reading array: %v", err)
 			}
@@ -304,7 +304,7 @@ func TestStringArrayDecoding(t *testing.T) {
 			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
 			array, err := ztype.ArrayFromReader[string, *ztype.StringArrayTraits](
 				r, &ztype.StringArrayTraits{},
-				test.arraySize, false, test.isAuto, nil, nil)
+				test.arraySize, false, test.isAuto)
 			if err != nil {
 				t.Fatalf("error reading array: %v", err)
 			}

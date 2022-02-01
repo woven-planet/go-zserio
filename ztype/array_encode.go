@@ -44,9 +44,9 @@ func (array *Array[T, Y]) MarshalZserio(writer *bitio.CountWriter) error {
 			writeDescriptor(array.PackedContext, writer)
 		}
 		for index, element := range array.RawArray {
-			if array.CheckOffsetMethod != nil {
+			if array.checkOffsetMethod != nil {
 				writer.Align()
-				(*array.CheckOffsetMethod)(index, writer.BitsCount)
+				array.checkOffsetMethod(index, writer.BitsCount)
 			}
 			if array.IsPacked {
 				packedTraits.Write(array.PackedContext, writer, element)
