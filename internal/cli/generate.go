@@ -24,13 +24,14 @@ var generateCmd = &cobra.Command{
 			fmt.Fprintf(cmd.ErrOrStderr(), "Parse error: %v", err)
 			return err
 		}
-
+		fmt.Printf("Parsing complete, generating files...\n")
 		if err = generator.Generate(m, strings.TrimSpace(outputDirectory), &generator.Options{
 			RootPackage: strings.TrimSpace(topLevelPackage),
 		}); err != nil {
 			fmt.Fprintf(cmd.ErrOrStderr(), "Code generation error: %v", err)
 			return err
 		}
+		fmt.Printf("Code generation completed.\n")
 		return nil
 	},
 }
