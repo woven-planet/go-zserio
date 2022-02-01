@@ -15,7 +15,7 @@ func WriteVarint64(w *bitio.CountWriter, v int64) error {
 }
 
 func WriteVarint(w *bitio.CountWriter, v int64) error {
-	if v == INT64_MIN {
+	if v == MinInt64 {
 		return w.WriteByte(0x80)
 	}
 	return writeVarInt(w, int64(v), 9)

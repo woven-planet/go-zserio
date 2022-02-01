@@ -19,22 +19,22 @@ type Visitor struct {
 	parser.BaseZserioParserVisitor
 }
 
-func (c *Visitor) Visit(tree antlr.ParseTree) interface{} {
+func (v *Visitor) Visit(tree antlr.ParseTree) interface{} {
 	switch t := tree.(type) {
 	case *antlr.ErrorNodeImpl:
 		fmt.Printf("syntax error near '%s'", t.GetText())
 	default:
-		return tree.Accept(c)
+		return tree.Accept(v)
 	}
 
 	return fmt.Errorf("visit result not of a Node")
 }
 
-func (c *Visitor) VisitChildren(node antlr.RuleNode) interface{} {
+func (v *Visitor) VisitChildren(node antlr.RuleNode) interface{} {
 	var children []interface{}
 
 	for _, n := range node.GetChildren() {
-		cr := c.Visit(n.(antlr.ParseTree))
+		cr := v.Visit(n.(antlr.ParseTree))
 		if err, isErr := cr.(error); isErr {
 			return err
 		}
@@ -81,9 +81,9 @@ func (v *Visitor) VisitPackageDeclaration(ctx *parser.PackageDeclarationContext)
 func (v *Visitor) VisitPackageNameDefinition(ctx *parser.PackageNameDefinitionContext) interface{} {
 	// It would be nice of the grammar just reused qualifiedName here, but for some
 	// reason they opted for "id (DOT id)*" again.
-	id_nodes := ctx.AllId()
+	idNodes := ctx.AllId()
 	var ids []string
-	for _, n := range id_nodes {
+	for _, n := range idNodes {
 		ids = append(ids, v.Visit(n.(antlr.ParseTree)).(string))
 	}
 	return strings.Join(ids, ".")
@@ -700,9 +700,9 @@ func (v *Visitor) VisitTypeArgument(ctx *parser.TypeArgumentContext) interface{}
 			Type: token.GetTokenType(),
 			Text: token.GetText(),
 		}
-	} else {
-		return v.Visit(ctx.Expression()).(*ast.Expression)
 	}
+
+	return v.Visit(ctx.Expression()).(*ast.Expression)
 }
 
 func (v *Visitor) VisitTemplateArguments(ctx *parser.TemplateArgumentsContext) interface{} {
@@ -726,8 +726,8 @@ func (v *Visitor) VisitTemplateParameters(ctx *parser.TemplateParametersContext)
 }
 
 func (v *Visitor) VisitId(ctx *parser.IdContext) interface{} {
-	id_node := ctx.GetChild(0)
-	return v.Visit(id_node.(antlr.ParseTree))
+	idNode := ctx.GetChild(0)
+	return v.Visit(idNode.(antlr.ParseTree))
 }
 
 func (v *Visitor) VisitQualifiedName(ctx *parser.QualifiedNameContext) interface{} {

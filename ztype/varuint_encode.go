@@ -25,7 +25,7 @@ func WriteVaruint(w *bitio.CountWriter, v uint64) error {
 }
 
 func WriteVarsize(w *bitio.CountWriter, v uint64) error {
-	if v > VARSIZE_MAX {
+	if v > MaxVarsize {
 		return ErrOutOfBounds
 	}
 	return writeVarUint(w, uint64(v), 5)

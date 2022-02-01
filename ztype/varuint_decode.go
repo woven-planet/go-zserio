@@ -136,7 +136,7 @@ func ReadVarsize(r *bitio.CountReader) (uint64, error) {
 		}
 		v = (v << 8) | uint64(b)
 	}
-	if v > VARSIZE_MAX {
+	if v > MaxVarsize {
 		return 0, ErrOutOfBounds
 	}
 	return v, nil

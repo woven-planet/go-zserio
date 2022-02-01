@@ -25,15 +25,15 @@ func TestWriteVaruint16(t *testing.T) {
 			want:  []byte{0x80, 0x80},
 		},
 		"minimum": {
-			input: []uint16{ztype.VARUINT16_MIN},
+			input: []uint16{ztype.MinVaruint16},
 			want:  []byte{0x00},
 		},
 		"maximum": {
-			input: []uint16{ztype.VARUINT16_MAX},
+			input: []uint16{ztype.MaxVaruint16},
 			want:  []byte{0xff, 0xff},
 		},
 		"too-large": {
-			input: []uint16{ztype.VARUINT16_MAX + 1},
+			input: []uint16{ztype.MaxVaruint16 + 1},
 			err:   ztype.ErrOutOfBounds,
 		},
 		"multi-values": {
@@ -82,15 +82,15 @@ func TestWriteVaruint32(t *testing.T) {
 			want:  []byte{0x81, 0x00},
 		},
 		"minimum": {
-			input: []uint32{ztype.VARUINT32_MIN},
+			input: []uint32{ztype.MinVaruint32},
 			want:  []byte{0x00},
 		},
 		"maximum": {
-			input: []uint32{ztype.VARUINT32_MAX},
+			input: []uint32{ztype.MaxVaruint32},
 			want:  []byte{0xff, 0xff, 0xff, 0xff},
 		},
 		"too-large": {
-			input: []uint32{ztype.VARUINT32_MAX + 1},
+			input: []uint32{ztype.MaxVaruint32 + 1},
 			err:   ztype.ErrOutOfBounds,
 		},
 		"multi-values": {
@@ -139,15 +139,15 @@ func TestWriteVaruint64(t *testing.T) {
 			want:  []byte{0x81, 0x00},
 		},
 		"minimum": {
-			input: []uint64{ztype.VARUINT64_MIN},
+			input: []uint64{ztype.MinVaruint64},
 			want:  []byte{0x00},
 		},
 		"maximum": {
-			input: []uint64{ztype.VARUINT64_MAX},
+			input: []uint64{ztype.MaxVaruint64},
 			want:  []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
 		},
 		"too-large": {
-			input: []uint64{ztype.VARUINT64_MAX + 1},
+			input: []uint64{ztype.MaxVaruint64 + 1},
 			err:   ztype.ErrOutOfBounds,
 		},
 		"multi-values": {
@@ -196,11 +196,11 @@ func TestWriteVaruint(t *testing.T) {
 			want:  []byte{0x81, 0x00},
 		},
 		"minimum": {
-			input: []uint64{ztype.VARUINT_MIN},
+			input: []uint64{ztype.MinVaruint},
 			want:  []byte{0x00},
 		},
 		"maximum": {
-			input: []uint64{ztype.VARUINT_MAX},
+			input: []uint64{ztype.MaxVaruint},
 			want:  []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
 		},
 		// Note that we do not test for VARUINT_MAX + 1 becausea that does
@@ -251,15 +251,15 @@ func TestWriteVarsize(t *testing.T) {
 			want:  []byte{0x81, 0x00},
 		},
 		"minimum": {
-			input: []uint64{ztype.VARSIZE_MIN},
+			input: []uint64{ztype.MinVarsize},
 			want:  []byte{0x00},
 		},
 		"maximum": {
-			input: []uint64{ztype.VARSIZE_MAX},
+			input: []uint64{ztype.MaxVarsize},
 			want:  []byte{0x83, 0xff, 0xff, 0xff, 0xff},
 		},
 		"too-large": {
-			input: []uint64{ztype.VARSIZE_MAX + 1},
+			input: []uint64{ztype.MaxVarsize + 1},
 			err:   ztype.ErrOutOfBounds,
 		},
 		"multi-values": {

@@ -96,7 +96,7 @@ func ReadVarint(r *bitio.CountReader) (int64, error) {
 		return 0, err
 	}
 	if b == 0x80 {
-		return VARINT_MIN, nil
+		return MinVarint, nil
 	}
 
 	isNegative := (b & 0x80) != 0

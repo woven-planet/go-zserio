@@ -18,7 +18,7 @@ type PackingContextNode struct {
 	Context IDeltaContext
 }
 
-// CreateChild adds a new child to a PackingContextNode.
+// AddChild adds a new child to a PackingContextNode.
 func (context *PackingContextNode) AddChild(child *PackingContextNode) {
 	context.children = append(context.children, child)
 }
@@ -28,20 +28,20 @@ func (context *PackingContextNode) GetChildren() []*PackingContextNode {
 	return context.children
 }
 
-// HasDeltaContext reurns true if the packing context has a delta context.
+// HasContext reurns true if the packing context has a delta context.
 func (context *PackingContextNode) HasContext() bool {
 	return (context.Context != nil)
 }
 
-// GetDeltaContext returns the delta context of the packing context.
-func (packingNode *PackingContextNode) ReadDescriptor(r *bitio.CountReader) error {
-	return packingNode.Context.ReadDescriptor(r)
+// ReadDescriptor returns the delta context of the packing context.
+func (context *PackingContextNode) ReadDescriptor(r *bitio.CountReader) error {
+	return context.Context.ReadDescriptor(r)
 }
 
-func (packingNode *PackingContextNode) WriteDescriptor(w *bitio.CountWriter) error {
-	return packingNode.Context.WriteDescriptor(w)
+func (context *PackingContextNode) WriteDescriptor(w *bitio.CountWriter) error {
+	return context.Context.WriteDescriptor(w)
 }
 
-func (packingNode *PackingContextNode) BitSizeOfDescriptor() int {
-	return packingNode.Context.BitSizeOfDescriptor()
+func (context *PackingContextNode) BitSizeOfDescriptor() int {
+	return context.Context.BitSizeOfDescriptor()
 }
