@@ -2,6 +2,7 @@ package ztype
 
 import "github.com/icza/bitio"
 
+// ReadString reads a string from the bitstream.
 func ReadString(r *bitio.CountReader) (string, error) {
 	size, err := ReadVarsize(r)
 	if err != nil {

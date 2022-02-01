@@ -1,5 +1,7 @@
 package ztype
 
+// These constants define the minimum and maximum allowed values of the
+// zserio numeric types.
 const (
 	MaxInt8  = (1 << 7) - 1
 	MinInt8  = -1 << 7

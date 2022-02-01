@@ -2,18 +2,30 @@ package ztype
 
 import "github.com/icza/bitio"
 
+// WriteVarint16 writes a zserio varint16 value to the bitstream.
+// If you pass in a value that is outside to allowed range of
+// (MinVarint16, MaxVarint16) ErrOutOfBounds will be returned.
 func WriteVarint16(w *bitio.CountWriter, v int16) error {
 	return writeVarInt(w, int64(v), 2)
 }
 
+// WriteVarint32 writes a zserio varint32 value to the bitstream.
+// If you pass in a value that is outside to allowed range of
+// (MinVarint32, MaxVarint32) ErrOutOfBounds will be returned.
 func WriteVarint32(w *bitio.CountWriter, v int32) error {
 	return writeVarInt(w, int64(v), 4)
 }
 
+// WriteVarint64 writes a zserio varint64 value to the bitstream.
+// If you pass in a value that is outside to allowed range of
+// (MinVarint64, MaxVarint64) ErrOutOfBounds will be returned.
 func WriteVarint64(w *bitio.CountWriter, v int64) error {
 	return writeVarInt(w, int64(v), 8)
 }
 
+// WriteVarint writes a zserio varint value to the bitstream.
+// If you pass in a value that is outside to allowed range of
+// (MinVarint, MaxVarint) ErrOutOfBounds will be returned.
 func WriteVarint(w *bitio.CountWriter, v int64) error {
 	if v == MinInt64 {
 		return w.WriteByte(0x80)
@@ -62,10 +74,10 @@ func writeVarInt(w *bitio.CountWriter, v int64, maxBytes int) error {
 }
 
 // SignedBitSize returns the size in bits of the zserio encoding of a signed
-// value. Unlike the Python zserio version this version is generic and does
-// not need a per-type table, but still gets identical performance.
-//
+// value.
 func SignedBitSize(v int64, maxBytes int) (int, error) {
+	// Unlike the Python zserio version this version is generic and does
+	// not need a per-type table, but still gets identical performance.
 	if v < 0 {
 		v = -v
 	}

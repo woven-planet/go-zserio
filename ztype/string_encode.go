@@ -2,6 +2,7 @@ package ztype
 
 import "github.com/icza/bitio"
 
+// WriteString writes a string value to the bitstream.
 func WriteString(w *bitio.CountWriter, v string) error {
 	if err := WriteVarsize(w, uint64(len(v))); err != nil {
 		return err
