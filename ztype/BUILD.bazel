@@ -40,9 +40,9 @@ go_library(
 go_test(
     name = "ztype_test",
     srcs = [
-        "array_test.go",
         "array_decode_test.go",
         "array_encode_test.go",
+        "array_test.go",
         "bits_decode_test.go",
         "bits_encode_test.go",
         "bool_decode_test.go",
@@ -57,8 +57,8 @@ go_test(
         "varuint_encode_test.go",
     ],
     deps = [
-        "//interface",
         ":ztype",
+        "//interface",
         "@com_github_google_go_cmp//cmp",
         "@com_github_google_go_cmp//cmp/cmpopts",
         "@com_github_icza_bitio//:bitio",
