@@ -24,7 +24,7 @@ func bitSizeOfDescriptor(packingNode *zserio.PackingContextNode, bitPosition int
 // OffsetMethod is a function used to set/check bit offsets in the buffer.
 type OffsetMethod func(int, int64)
 
-// Array satisfies IZserioObject interface
+// Array allows representing arrays of any type and serialize them to the zserio format.
 type Array[T any, Y IArrayTraits[T]] struct {
 	// ArrayTraits are the array traits used.
 	ArrayTraits Y
@@ -120,4 +120,19 @@ func (array *Array[T, Y]) ZserioBitSizePacked(bitPosition int) (int, error) {
 		}
 	}
 	return endBitPosition - bitPosition, nil
+}
+
+// Clone does a deep copy of the array.
+func (array *Array[T, Y]) Clone() zserio.ZserioType {
+	clone := Array[T, Y]{
+		ArrayTraits:       array.ArrayTraits,
+		RawArray:          array.RawArray,
+		IsAuto:            array.IsAuto,
+		IsPacked:          array.IsPacked,
+		FixedSize:         array.FixedSize,
+		PackedContext:     array.PackedContext,
+		setOffsetMethod:   array.setOffsetMethod,
+		checkOffsetMethod: array.checkOffsetMethod,
+	}
+	return &clone
 }
