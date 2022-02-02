@@ -51,23 +51,21 @@ func (context *DeltaContext[T]) Init(arrayTraits IArrayTraits[T], element T) {
 		elementAsUint64 := arrayTraits.AsUint64(element)
 		context.previousElement = &elementAsUint64
 		context.firstElementBitSize = context.unpackedBitSize
-	} else {
-		if context.maxBitNumber <= maxBitNumberLimit {
-			context.isPacked = true
-			// Calculate the delta to the previous value, and calculate how many
-			// bits are needed to store the delta.
-			delta := absDiff(arrayTraits.AsUint64(element), *context.previousElement)
-			maxBitNumber := bits.Len64(delta)
-			if maxBitNumber > context.maxBitNumber {
-				context.maxBitNumber = maxBitNumber
-				// cannot store using delta packing if the 64bit range is
-				// exhausted
-				if maxBitNumber > maxBitNumberLimit {
-					context.isPacked = false
-				}
+	} else if context.maxBitNumber <= maxBitNumberLimit {
+		context.isPacked = true
+		// Calculate the delta to the previous value, and calculate how many
+		// bits are needed to store the delta.
+		delta := absDiff(arrayTraits.AsUint64(element), *context.previousElement)
+		maxBitNumber := bits.Len64(delta)
+		if maxBitNumber > context.maxBitNumber {
+			context.maxBitNumber = maxBitNumber
+			// cannot store using delta packing if the 64bit range is
+			// exhausted
+			if maxBitNumber > maxBitNumberLimit {
+				context.isPacked = false
 			}
-			*context.previousElement = arrayTraits.AsUint64(element)
 		}
+		*context.previousElement = arrayTraits.AsUint64(element)
 	}
 }
 

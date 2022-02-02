@@ -366,7 +366,7 @@ func (p *Package) GetTypeParameter(typeRef *TypeReference) ([]*Parameter, error)
 	}
 
 	if len(parameters) != len(typeRef.TypeArguments) {
-		return nil, errors.New("number of type arguments does not match number of type parameters")
+		return nil, fmt.Errorf("expected %d type parameters, got %d", len(typeRef.TypeArguments), len(parameters))
 	}
 	return parameters, nil
 }
