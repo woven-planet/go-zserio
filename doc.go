@@ -16,15 +16,51 @@
 //
 // The most common, and strongly preferred, method to use zserio is to write
 // a zserio schema, and then generate code to define the data structures and
-// serialization code. This can be done with the zserio command. To convert a
-// zserio schema defined in a set of files in the "schema" directory you can
-// use the following command:
+// serialization code.
 //
-//   zserio generate --out ./nds -r github.com/acme/myproject ./schema
+// As an example let's look at a zserio schema for a contact list. In a minimal
+// example we only define an Addreses structure to store addres information.
 //
-// This will create a number of code files in the "nds" directory. The root
-// package is set to "github.com/acme/myproject", and must be defined to import
-// statements can be generated.
+//     package contacts;
+//
+//     // Address, so I know where your house lives
+//     struct Address
+//     {
+//         string street;
+//         optional uint8 number;
+//     };
+//
+// After saving this in schema/contacts.zs you can generate Go code for this
+// schema with this command:
+//
+//   zserio generate --out contacts -r myprojects.home/zserio-example/addressbook ./schema
+//
+// This will create a number of code files in the "contacts" directory. The root
+// package is set to "myprojects.home/zserio-example/addressbook", and must be
+// defined to import statements can be generated.
+//
+// Can you now import the generated code, and serialize Address records using zserio:
+//
+//     package main
+//
+//     import (
+//         "fmt"
+//         "os"
+//
+//         "github.com/icza/bitio"
+//         "myprojects.home/zserio-example/contacts"
+//     )
+//
+//     func main() {
+//         address := contacts.Address{Street: "Mainstreet"}
+//         writer := bitio.NewCountWriter(os.Stdout)
+//         if err := address.MarshalZserio(writer); err != nil {
+//             panic(fmt.Sprintf("error serializing address: %v", err))
+//         }
+//         if err := writer.Close(); err != nil {
+//             panic(fmt.Sprintf("error closing writer: %v", err))
+//         }
+//    }
 //
 // See also
 //
