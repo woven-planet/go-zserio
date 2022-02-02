@@ -353,7 +353,7 @@ func (p *Package) GetTypeParameter(typeRef *TypeReference) ([]*Parameter, error)
 		return nil, err
 	}
 
-	parameters := []*Parameter{}
+	var parameters []*Parameter
 	switch n := symbol.Symbol.(type) {
 	case *Union:
 		parameters = n.TypeParameters
