@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/cucumber/godog"
@@ -24,6 +24,8 @@ const (
 	GoZserioRoot string = `github.com/woven-planet/go-zserio/` + GoZserioOutputDirectory
 )
 
+var ReferenceBinaryContent []byte
+
 func TestIntegration(t *testing.T) {
 	suite := godog.TestSuite{
 		Name:                "Integration",
@@ -38,9 +40,8 @@ func TestIntegration(t *testing.T) {
 }
 
 func InitializeScenario(ctx *godog.ScenarioContext) {
-
 	ctx.Step(`^I have a zserio binary created using the reference implementation`, func(ctx context.Context) (context.Context, error) {
-		return ctx, generateReferenceZserioFile()
+		return ctx, readReferenceZserioFile()
 	})
 
 	ctx.Step(`^I decode this binary with go-zerio and encode it again`, func(ctx context.Context) (context.Context, error) {
@@ -52,46 +53,43 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	})
 }
 
-func generateReferenceZserioFile() error {
-	/* TODO put python into Bazel and reactivate this part
-	cmd := exec.Command("python", "python/write_test_data.py")
-	_, err := cmd.CombinedOutput()
-	return err
-	*/
+func readReferenceZserioFile() error {
+	var err error
+	ReferenceBinaryContent, err = io.ReadFile(ReferenceFilePath)
+	if err != nil {
+		return fmt.Errorf("read reference binary: %w", err)
+	}
+	
 	return nil
 }
 
 func reencodeZserioTestBinary() error {
 	// read the binary file...
-	binaryContent, err := ioutil.ReadFile(ReferenceFilePath)
-	if err != nil {
-		return err
-	}
-
 	var testObject testobject.TestObject
-	r := bitio.NewCountReader(bytes.NewBuffer(binaryContent))
-	err = testObject.UnmarshalZserio(r)
-	if err != nil {
-		return err
+	r := bitio.NewCountReader(bytes.NewBuffer(ReferenceBinaryContent))
+
+	if err := testObject.UnmarshalZserio(r); err != nil {
+		return fmt.Errorf("unmarshal reference: %w", err)
 	}
 
-	buf := bytes.Buffer{}
+	var buf bytes.Buffer
 	w := bitio.NewCountWriter(&buf)
-	err = testObject.MarshalZserio(w)
-	if err != nil {
-		return err
+	defer w.Close()
+
+	if err := testObject.MarshalZserio(w); err != nil {
+		return fmt.Errorf("marshal: %w", err)
 	}
-	w.Close()
-	return ioutil.WriteFile(ReencodedFilePath, buf.Bytes(), 0644)
+
+	return io.WriteFile(ReencodedFilePath, buf.Bytes(), 0644)
 }
 
 func verifyFilesAreEqual() error {
-	fileA, err := ioutil.ReadFile(ReferenceFilePath)
+	fileA, err := io.ReadFile(ReferenceFilePath)
 	if err != nil {
 		return err
 	}
 
-	fileB, err := ioutil.ReadFile(ReencodedFilePath)
+	fileB, err := io.ReadFile(ReencodedFilePath)
 	if err != nil {
 		return err
 	}
