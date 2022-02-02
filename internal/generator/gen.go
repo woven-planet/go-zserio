@@ -3,6 +3,7 @@ package generator
 import (
 	"bytes"
 	"go/format"
+	"log"
 	"os"
 	"path"
 	"strings"
@@ -55,6 +56,8 @@ func writeSource(rootPath, zserioPkg, fn string, doNotFormatCode bool, tmpl stri
 			return err
 		}
 	}
+
+	log.Printf("Writing %s\n", outputFile)
 	if err = os.MkdirAll(outputDir, 0755); err != nil {
 		return err
 	}
@@ -64,6 +67,7 @@ func writeSource(rootPath, zserioPkg, fn string, doNotFormatCode bool, tmpl stri
 		return err
 	}
 	defer f.Close()
+
 	if _, err = f.Write(code); err != nil {
 		_ = os.Remove(outputFile)
 		return err
