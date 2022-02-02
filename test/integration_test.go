@@ -14,11 +14,14 @@ import (
 
 const (
 	// ReferenceFilePath is the path to the input data
+	// TODO @aignas 2022-02-02: use env variables to inject this into the test
 	ReferenceFilePath string = `bin/testdata.bin`
 
 	// ReencodedFilePath is the path where to write the data again
+	// TODO @aignas 2022-02-02: put this into the bazel test directory for undefined outputs
 	ReencodedFilePath string = `bin/testdata_reencoded.bin`
 
+	// TODO @aignas 2022-02-02: can the following constants be injected by bazel?
 	GoZserioOutputDirectory string = `test/go-schema`
 
 	GoZserioRoot string = `github.com/woven-planet/go-zserio/` + GoZserioOutputDirectory
