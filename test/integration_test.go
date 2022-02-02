@@ -3,23 +3,31 @@ package go_test
 import (
 	"bytes"
 	"context"
+	"path"
 	"errors"
-	"io"
+	"os"
+	"fmt"
 	"testing"
 
 	"github.com/cucumber/godog"
 	"github.com/icza/bitio"
-	"github.com/woven-planet/go-zserio/test/go-schema/reference_modules/testobject1/testobject"
+	"github.com/woven-planet/go-zserio/test/go/reference_modules/testobject1/testobject"
+)
+
+func testWorkspace(filePath string) string {
+	return path.Join(os.Getenv("TEST_SRCDIR"), os.Getenv("TEST_WORKSPACE"), filePath)
+}
+
+var (
+	// ReferenceFilePath is the path to the input data
+	// TODO @aignas 2022-02-02: use env variables to inject this into the test
+	ReferenceFilePath string = testWorkspace(os.Getenv("TESTDATA_BIN"))
 )
 
 const (
-	// ReferenceFilePath is the path to the input data
-	// TODO @aignas 2022-02-02: use env variables to inject this into the test
-	ReferenceFilePath string = `bin/testdata.bin`
-
 	// ReencodedFilePath is the path where to write the data again
 	// TODO @aignas 2022-02-02: put this into the bazel test directory for undefined outputs
-	ReencodedFilePath string = `bin/testdata_reencoded.bin`
+	ReencodedFilePath string = `testdata_reencoded.bin`
 
 	// TODO @aignas 2022-02-02: can the following constants be injected by bazel?
 	GoZserioOutputDirectory string = `test/go-schema`
@@ -58,7 +66,7 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 
 func readReferenceZserioFile() error {
 	var err error
-	ReferenceBinaryContent, err = io.ReadFile(ReferenceFilePath)
+	ReferenceBinaryContent, err = os.ReadFile(ReferenceFilePath)
 	if err != nil {
 		return fmt.Errorf("read reference binary: %w", err)
 	}
@@ -83,16 +91,16 @@ func reencodeZserioTestBinary() error {
 		return fmt.Errorf("marshal: %w", err)
 	}
 
-	return io.WriteFile(ReencodedFilePath, buf.Bytes(), 0644)
+	return os.WriteFile(ReencodedFilePath, buf.Bytes(), 0644)
 }
 
 func verifyFilesAreEqual() error {
-	fileA, err := io.ReadFile(ReferenceFilePath)
+	fileA, err := os.ReadFile(ReferenceFilePath)
 	if err != nil {
 		return err
 	}
 
-	fileB, err := io.ReadFile(ReencodedFilePath)
+	fileB, err := os.ReadFile(ReencodedFilePath)
 	if err != nil {
 		return err
 	}
