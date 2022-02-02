@@ -1,0 +1,18 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "testobject",
+    srcs = [
+        "pkg.go",
+        "test_object.go",
+    ],
+    importpath = "github.com/woven-planet/go-zserio/test/go/reference_modules/testobject1/testobject",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//interface",
+        "//test/go/reference_modules/core/instantiations",
+        "//test/go/reference_modules/core/types",
+        "//ztype",
+        "@com_github_icza_bitio//:bitio",
+    ],
+)

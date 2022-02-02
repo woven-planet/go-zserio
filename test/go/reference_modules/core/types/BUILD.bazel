@@ -1,0 +1,18 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "types",
+    srcs = [
+        "city_attributes.go",
+        "color.go",
+        "pkg.go",
+        "value_wrapper.go",
+    ],
+    importpath = "github.com/woven-planet/go-zserio/test/go/reference_modules/core/types",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//interface",
+        "//ztype",
+        "@com_github_icza_bitio//:bitio",
+    ],
+)

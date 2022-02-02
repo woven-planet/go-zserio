@@ -1,0 +1,16 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "instantiations",
+    srcs = [
+        "instantiated_template_struct.go",
+        "pkg.go",
+    ],
+    importpath = "github.com/woven-planet/go-zserio/test/go/reference_modules/core/instantiations",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//interface",
+        "//test/go/reference_modules/core/types",
+        "@com_github_icza_bitio//:bitio",
+    ],
+)
