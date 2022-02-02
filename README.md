@@ -2,7 +2,7 @@
 
 [zserio] code generation in Go.
 
-## Setup
+## Developement
 ### Direnv
 
 Install `direnv` tool to setup your PATH automatically to include the `bin`
