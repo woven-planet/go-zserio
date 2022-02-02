@@ -96,7 +96,7 @@ func TestUint32ArrayDecoding(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
-			array, err := ztype.ArrayFromReader[uint32, *ztype.BitFieldArrayTraits[uint32]](
+			array, err := ztype.ArrayFromReader[uint32](
 				r, &ztype.BitFieldArrayTraits[uint32]{
 					NumBits: 32,
 				},
@@ -152,7 +152,7 @@ func TestVarInt32ArrayDecoding(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
-			array, err := ztype.ArrayFromReader[int32, *ztype.VarInt32ArrayTraits](
+			array, err := ztype.ArrayFromReader[int32](
 				r, &ztype.VarInt32ArrayTraits{},
 				test.arraySize, test.isPacked, test.isAuto)
 			if err != nil {
@@ -182,7 +182,7 @@ func TestFloat16ArrayDecoding(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
-			array, err := ztype.ArrayFromReader[float32, *ztype.Float16ArrayTraits](
+			array, err := ztype.ArrayFromReader[float32](
 				r, &ztype.Float16ArrayTraits{},
 				test.arraySize, false, test.isAuto)
 			if err != nil {
@@ -212,7 +212,7 @@ func TestFloat32ArrayDecoding(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
-			array, err := ztype.ArrayFromReader[float32, *ztype.Float32ArrayTraits](
+			array, err := ztype.ArrayFromReader[float32](
 				r, &ztype.Float32ArrayTraits{},
 				test.arraySize, false, test.isAuto)
 			if err != nil {
@@ -246,7 +246,7 @@ func TestFloat64ArrayDecoding(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
-			array, err := ztype.ArrayFromReader[float64, *ztype.Float64ArrayTraits](
+			array, err := ztype.ArrayFromReader[float64](
 				r, &ztype.Float64ArrayTraits{},
 				test.arraySize, false, test.isAuto)
 			if err != nil {
@@ -302,7 +302,7 @@ func TestStringArrayDecoding(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
-			array, err := ztype.ArrayFromReader[string, *ztype.StringArrayTraits](
+			array, err := ztype.ArrayFromReader[string](
 				r, &ztype.StringArrayTraits{},
 				test.arraySize, false, test.isAuto)
 			if err != nil {
