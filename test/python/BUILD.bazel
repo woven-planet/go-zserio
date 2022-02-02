@@ -51,6 +51,7 @@ py_library(
     srcs = [
         ":zserio_code",
     ],
+    imports = ["."],
 )
 
 py_binary(
@@ -61,4 +62,15 @@ py_binary(
         requirement("zserio"),
     ],
     visibility = ["//visibility:public"],
+)
+
+genrule(
+    name = "testdata_bin",
+    tools = [
+        ":write_test_data",
+    ],
+    outs = [
+        "testdata.bin",
+    ],
+    cmd = "$(location write_test_data) $@",
 )
