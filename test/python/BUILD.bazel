@@ -9,7 +9,7 @@ java_binary(
 )
 
 genrule(
-    name = "zserio_code",
+    name = "testdata_zs_py_gen",
     srcs = [
         "//testdata:zserio_schema",
         "//testdata:zserio_schema_all",
@@ -40,16 +40,18 @@ genrule(
         "testdata/reference_modules/testobject1/testobject/api.py",
         "testdata/reference_modules/testobject1/testobject/test_object.py",
     ],
+    # NOTE @aignas 2022-02-02: this depends on the `dirname` command being present on the machine.
     cmd = "$(location zserio_compiler) -src $$(dirname $$(dirname $(location //testdata:zserio_schema))) reference_modules/all.zs -setTopLevelPackage testdata -python $(RULEDIR)",
+    message = "Generating Python bindings to zserio test schema",
     tools = [
         ":zserio_compiler",
     ],
 )
 
 py_library(
-    name = "py_reference_modules",
+    name = "testdata_zs_py",
     srcs = [
-        ":zserio_code",
+        ":testdata_zs_py_gen",
     ],
     imports = ["."],
 )
@@ -58,22 +60,10 @@ py_binary(
     name = "write_test_data",
     srcs = [
         "write_test_data.py",
-        ":zserio_code",
     ],
     visibility = ["//visibility:public"],
     deps = [
-        ":py_reference_modules",
+        ":testdata_zs_py",
         requirement("zserio"),
-    ],
-)
-
-genrule(
-    name = "testdata_bin",
-    outs = [
-        "testdata.bin",
-    ],
-    cmd = "$(location write_test_data) $@",
-    tools = [
-        ":write_test_data",
     ],
 )
