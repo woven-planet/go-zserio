@@ -10,9 +10,6 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "go-zserio",
 	Short: "go-zserio generates Go code to (de)serialize zserio data.",
-	Run: func(cmd *cobra.Command, args []string) {
-		// Do Stuff Here
-	},
 }
 
 func Execute() {

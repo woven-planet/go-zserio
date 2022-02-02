@@ -29,19 +29,19 @@ func TestWriteVarint16(t *testing.T) {
 			want:  []byte{0xc1, 0xff},
 		},
 		"minimum": {
-			input: []int16{ztype.VARINT16_MIN},
+			input: []int16{ztype.MinVarint16},
 			want:  []byte{0xff, 0xff},
 		},
 		"maximum": {
-			input: []int16{ztype.VARINT16_MAX},
+			input: []int16{ztype.MaxVarint16},
 			want:  []byte{0x7f, 0xff},
 		},
 		"too-small": {
-			input: []int16{ztype.VARINT16_MIN - 1},
+			input: []int16{ztype.MinVarint16 - 1},
 			err:   ztype.ErrOutOfBounds,
 		},
 		"too-large": {
-			input: []int16{ztype.VARINT16_MAX + 1},
+			input: []int16{ztype.MaxVarint16 + 1},
 			err:   ztype.ErrOutOfBounds,
 		},
 		"multi-values": {
@@ -94,19 +94,19 @@ func TestWriteVarint32(t *testing.T) {
 			want:  []byte{0x43, 0xff, 0x7f},
 		},
 		"minimum": {
-			input: []int32{ztype.VARINT32_MIN},
+			input: []int32{ztype.MinVarint32},
 			want:  []byte{0xff, 0xff, 0xff, 0xff},
 		},
 		"maximum": {
-			input: []int32{ztype.VARINT32_MAX},
+			input: []int32{ztype.MaxVarint32},
 			want:  []byte{0x7f, 0xff, 0xff, 0xff},
 		},
 		"too-small": {
-			input: []int32{ztype.VARINT32_MIN - 1},
+			input: []int32{ztype.MinVarint32 - 1},
 			err:   ztype.ErrOutOfBounds,
 		},
 		"too-large": {
-			input: []int32{ztype.VARINT32_MAX + 1},
+			input: []int32{ztype.MaxVarint32 + 1},
 			err:   ztype.ErrOutOfBounds,
 		},
 		"multi-values": {
@@ -159,19 +159,19 @@ func TestWriteVarint64(t *testing.T) {
 			want:  []byte{0x43, 0xff, 0x7f},
 		},
 		"minimum": {
-			input: []int64{ztype.VARINT64_MIN},
+			input: []int64{ztype.MinVarint64},
 			want:  []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
 		},
 		"maximum": {
-			input: []int64{ztype.VARINT64_MAX},
+			input: []int64{ztype.MaxVarint64},
 			want:  []byte{0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
 		},
 		"too-small": {
-			input: []int64{ztype.VARINT64_MIN - 1},
+			input: []int64{ztype.MinVarint64 - 1},
 			err:   ztype.ErrOutOfBounds,
 		},
 		"too-large": {
-			input: []int64{ztype.VARINT64_MAX + 1},
+			input: []int64{ztype.MaxVarint64 + 1},
 			err:   ztype.ErrOutOfBounds,
 		},
 		"multi-values": {
@@ -224,15 +224,15 @@ func TestWriteVarint(t *testing.T) {
 			want:  []byte{0x43, 0xff, 0x7f},
 		},
 		"minimum": {
-			input: []int64{ztype.VARINT_MIN},
+			input: []int64{ztype.MinVarint},
 			want:  []byte{0x80},
 		},
 		"non-magic-minimum": {
-			input: []int64{ztype.VARINT_MIN + 1},
+			input: []int64{ztype.MinVarint + 1},
 			want:  []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
 		},
 		"maximum": {
-			input: []int64{ztype.VARINT_MAX},
+			input: []int64{ztype.MaxVarint},
 			want:  []byte{0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
 		},
 		// Note that we do not test for (VARINT_MIN - 1) and (VARINT_MAX + 1)
@@ -324,8 +324,8 @@ func TestSignedBitSize(t *testing.T) {
 				{32, (1 << (6 + 7 + 7 + 8)) - 1, nil},
 				{32, -((1 << (6 + 7 + 7 + 8)) - 1), nil},
 
-				{32, ztype.VARINT32_MIN, nil},
-				{32, ztype.VARINT32_MAX, nil},
+				{32, ztype.MinVarint32, nil},
+				{32, ztype.MaxVarint32, nil},
 
 				{0, (1 << (6 + 7 + 7 + 8)), ztype.ErrOutOfBounds},
 				{0, -(1 << (6 + 7 + 7 + 8)), ztype.ErrOutOfBounds},

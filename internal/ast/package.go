@@ -265,10 +265,10 @@ func (p *Package) GetOtherType(name string) (*SymbolReference, error) {
 	return nil, errors.New("other type not found")
 }
 
-func (scope *Package) GetZserioNativeType(typeRef *TypeReference) (*NativeZserioTypeReference, error) {
+func (p *Package) GetZserioNativeType(typeRef *TypeReference) (*NativeZserioTypeReference, error) {
 	requiresCast := false
 	counter := 0
-	currentScope := scope
+	currentScope := p
 	for {
 		if typeRef.IsBuiltin {
 			return &NativeZserioTypeReference{
@@ -339,12 +339,12 @@ func GoPackageAlias(packageName string) string {
 }
 
 // GetTypeParameter returns the parameters of a referenced type
-func (scope *Package) GetTypeParameter(typeRef *TypeReference) ([]*Parameter, error) {
-	nativeType, err := scope.GetZserioNativeType(typeRef)
+func (p *Package) GetTypeParameter(typeRef *TypeReference) ([]*Parameter, error) {
+	nativeType, err := p.GetZserioNativeType(typeRef)
 	if err != nil {
 		return nil, err
 	}
-	typeScope, err := scope.GetImportedScope(nativeType.Type.Package)
+	typeScope, err := p.GetImportedScope(nativeType.Type.Package)
 	if err != nil {
 		return nil, err
 	}
@@ -353,7 +353,7 @@ func (scope *Package) GetTypeParameter(typeRef *TypeReference) ([]*Parameter, er
 		return nil, err
 	}
 
-	parameters := []*Parameter{}
+	var parameters []*Parameter
 	switch n := symbol.Symbol.(type) {
 	case *Union:
 		parameters = n.TypeParameters
@@ -366,26 +366,26 @@ func (scope *Package) GetTypeParameter(typeRef *TypeReference) ([]*Parameter, er
 	}
 
 	if len(parameters) != len(typeRef.TypeArguments) {
-		return nil, errors.New("Number of type arguments does not match number of type parameters")
+		return nil, fmt.Errorf("expected %d type parameters, got %d", len(typeRef.TypeArguments), len(parameters))
 	}
 	return parameters, nil
 }
 
 // GetImportedScope returns a scope, if it can be found within the imported scope
-func (scope *Package) GetImportedScope(name string) (*Package, error) {
+func (p *Package) GetImportedScope(name string) (*Package, error) {
 	if name == "" {
 		return nil, errors.New("unresolved package scope")
 	}
-	if name == scope.Name {
-		return scope, nil
+	if name == p.Name {
+		return p, nil
 	}
-	for _, pkg := range scope.ImportedPackages {
+	for _, pkg := range p.ImportedPackages {
 		if pkg.Name == name {
 			return pkg, nil
 		}
 	}
 	// still not found? try the imports of all imports
-	for _, pkg := range scope.ImportedPackages {
+	for _, pkg := range p.ImportedPackages {
 		obj, err := pkg.GetImportedScope(name)
 		if err == nil {
 			return obj, nil
