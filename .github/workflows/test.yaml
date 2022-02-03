@@ -17,4 +17,10 @@ jobs:
           path: "~/.cache/bazel"
           key: bazel
 
+      - name: buildifier and gazelle checks
+        run: |
+          ./bin/ensure-unchanged bazel run //:buildifier
+          ./bin/ensure-unchanged ./bin/gazelle
+          ./bin/ensure-unchanged ./bin/gazelle-update-repos
+
       - run: bazel test //...

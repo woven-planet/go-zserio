@@ -1,0 +1,16 @@
+#!/bin/bash
+set -euo pipefail
+
+echo "Running: $*"
+"$@"
+
+fail=
+git diff --quiet --exit-code || fail=1
+test -z "$(git ls-files --exclude-standard --others)" || fail=1
+
+if [[ -n $fail ]]; then
+    echo "ERROR: Detected uncommited changes when running '$*'"
+    echo "ERROR: Run the command and commit the changes to fix this error."
+    git status --short
+    exit 1
+fi
