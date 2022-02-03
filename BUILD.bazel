@@ -5,13 +5,6 @@ load("@com_github_bazelbuild_buildtools//buildifier:def.bzl", "buildifier")
 # gazelle:resolve go github.com/antlr/antlr4/runtime/Go/antlr @antlr4_runtimes//:go
 gazelle(name = "gazelle")
 gazelle(
-    name = "gazelle_check",
-    args = [
-        "-mode=diff",
-    ],
-)
-
-gazelle(
     name = "gazelle-update-repos",
     args = [
         "-from_file=go.mod",
@@ -22,16 +15,7 @@ gazelle(
 )
 
 buildifier(
-    name = "buildifier_check",
-    lint_mode = "warn",
-    lint_warnings = ["all"],
-    mode = "check",
-    verbose = True,
-)
-
-buildifier(
     name = "buildifier",
     lint_mode = "warn",
     lint_warnings = ["all"],
-    mode = "check",
 )

@@ -2,7 +2,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 # gazelle:ignore
 
-rootpkg="github.com/woven-planet/go-zserio/test/go"
+rootpkg = "github.com/woven-planet/go-zserio/test/go"
 
 genrule(
     name = "gen",
@@ -23,9 +23,9 @@ genrule(
         "reference_modules/core/types/value_wrapper.go",
     ],
     cmd = "$(execpath //zserio) generate --rootpackage {rootpackage} --out {out} {proto_dir} &>1".format(
-        rootpackage=rootpkg,
-        out="$(@D)",
-        proto_dir="testdata/reference_modules",
+        rootpackage = rootpkg,
+        out = "$(@D)",
+        proto_dir = "testdata/reference_modules",
     ),
     tools = [
         "//zserio",
@@ -39,26 +39,26 @@ go_library(
         "reference_modules/testobject1/testobject/test_object.go",
     ],
     importpath = rootpkg + "/reference_modules/testobject1/testobject",
+    visibility = ["//visibility:public"],
     deps = [
+        ":core_instantiations",
+        ":core_types",
         "//interface",
         "//ztype",
-        ":core_types",
-        ":core_instantiations",
         "@com_github_icza_bitio//:bitio",
     ],
-    visibility = ["//visibility:public"],
 )
 
 go_library(
     name = "core_instantiations",
     srcs = [
-        "reference_modules/core/instantiations/pkg.go",
         "reference_modules/core/instantiations/instantiated_template_struct.go",
+        "reference_modules/core/instantiations/pkg.go",
     ],
     importpath = rootpkg + "/reference_modules/core/instantiations",
     deps = [
-        "//interface",
         ":core_types",
+        "//interface",
         "@com_github_icza_bitio//:bitio",
     ],
 )
@@ -66,9 +66,9 @@ go_library(
 go_library(
     name = "core_types",
     srcs = [
-        "reference_modules/core/types/pkg.go",
-        "reference_modules/core/types/color.go",
         "reference_modules/core/types/city_attributes.go",
+        "reference_modules/core/types/color.go",
+        "reference_modules/core/types/pkg.go",
         "reference_modules/core/types/value_wrapper.go",
     ],
     importpath = rootpkg + "/reference_modules/core/types",
