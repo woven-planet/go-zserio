@@ -22,13 +22,13 @@ genrule(
         "reference_modules/core/types/city_attributes.go",
         "reference_modules/core/types/value_wrapper.go",
     ],
-    cmd = "$(execpath //zserio) generate --rootpackage {rootpackage} --out {out} {proto_dir} &>1".format(
+    cmd = "$(execpath //cmd/zserio) generate --rootpackage {rootpackage} --out {out} {proto_dir} &>1".format(
         rootpackage = rootpkg,
         out = "$(@D)",
         proto_dir = "testdata/reference_modules",
     ),
     tools = [
-        "//zserio",
+        "//cmd/zserio",
     ],
 )
 
