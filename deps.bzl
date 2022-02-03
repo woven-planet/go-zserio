@@ -681,6 +681,7 @@ def go_dependencies():
     go_repository(
         name = "com_github_miekg_dns",
         importpath = "github.com/miekg/dns",
+        replace = "github.com/miekg/dns",
         sum = "h1:g5fRIhm9nx7g8osrAvgb16QJfmyMsyOCb+J7LSv+Qzk=",
         version = "v1.1.45",
     )
@@ -1183,12 +1184,14 @@ def go_dependencies():
     go_repository(
         name = "org_golang_x_mod",
         importpath = "golang.org/x/mod",
+        replace = "golang.org/x/mod",
         sum = "h1:OJxoQ/rynoF0dcCdI7cLPktw/hR2cueqYfjm43oqK38=",
         version = "v0.5.1",
     )
     go_repository(
         name = "org_golang_x_net",
         importpath = "golang.org/x/net",
+        replace = "golang.org/x/net",
         sum = "h1:6u6sik+bn/y7vILcYkK3iwTBWN7WtBvB0+SZswQnbf8=",
         version = "v0.0.0-20220121210141-e204ce36a2ba",
     )
@@ -1207,6 +1210,7 @@ def go_dependencies():
     go_repository(
         name = "org_golang_x_sys",
         importpath = "golang.org/x/sys",
+        replace = "golang.org/x/sys",
         sum = "h1:XfKQ4OlFl8okEOr5UvAqFRVj8pY/4yfcXrddB8qAbU0=",
         version = "v0.0.0-20220114195835-da31bd327af9",
     )
@@ -1235,6 +1239,7 @@ def go_dependencies():
             "--exclude=go/packages/packagestest",
         ],
         importpath = "golang.org/x/tools",
+        replace = "golang.org/x/tools",
         sum = "h1:P1HhGGuLW4aAclzjtmJdf0mJOjVUZUzOTqkAkWL+l6w=",
         version = "v0.1.8",
     )
