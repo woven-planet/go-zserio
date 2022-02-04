@@ -1,6 +1,7 @@
 package model
 
 import (
+	"log"
 	"io/fs"
 	"path/filepath"
 	"strings"
@@ -37,6 +38,7 @@ func FromFilesystem(root string) (*Model, error) {
 			return nil
 		}
 
+		log.Printf("Parsing file %s...\n", path)
 		pkg, err := PackageFromFile(path)
 		if err != nil {
 			return err

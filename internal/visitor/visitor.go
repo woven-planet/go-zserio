@@ -2,6 +2,7 @@ package visitor
 
 import (
 	"errors"
+	"log"
 	"fmt"
 	"math"
 	"strconv"
@@ -22,12 +23,12 @@ type Visitor struct {
 func (v *Visitor) Visit(tree antlr.ParseTree) interface{} {
 	switch t := tree.(type) {
 	case *antlr.ErrorNodeImpl:
-		fmt.Printf("syntax error near '%s'", t.GetText())
+		log.Printf("syntax error near '%s'", t.GetText())
 	default:
 		return tree.Accept(v)
 	}
 
-	return fmt.Errorf("visit result not of a Node")
+	return errors.New("visit result not of a Node")
 }
 
 func (v *Visitor) VisitChildren(node antlr.RuleNode) interface{} {
