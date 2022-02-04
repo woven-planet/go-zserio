@@ -25,7 +25,7 @@ FROM base AS builder
 ARG bazelisk_version=1.11.0
 
 # Extra dependencies:
-# Pacakges required by go-zerio:
+# Pacakges required by go-zserio:
 # * default-jdk is required for ANTLR
 #
 # Packages required by bazel, see (https://docs.bazel.build/versions/main/install-ubuntu.html#step-1-install-required-packages)
