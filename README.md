@@ -1,4 +1,4 @@
-# go-zerio
+# go-zserio
 
 [zserio] code generation in Go.
 
