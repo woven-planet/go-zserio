@@ -10,11 +10,29 @@ http_archive(
 )
 
 http_archive(
+    name = "com_github_bazelbuild_buildtools",
+    sha256 = "b8b69615e8d9ade79f3612311b8d0c4dfe01017420c90eed11db15e9e7c9ff3c",
+    strip_prefix = "buildtools-4.2.1",
+    urls = [
+        "https://github.com/bazelbuild/buildtools/archive/refs/tags/4.2.1.tar.gz",
+    ],
+)
+
+http_archive(
     name = "bazel_gazelle",
     sha256 = "de69a09dc70417580aabf20a28619bb3ef60d038470c7cf8442fafcf627c21cb",
     urls = [
         "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz",
         "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz",
+    ],
+)
+
+http_archive(
+    name = "com_google_protobuf",
+    sha256 = "9b4ee22c250fe31b16f1a24d61467e40780a3fbb9b91c3b65be2a376ed913a1a",
+    strip_prefix = "protobuf-3.13.0",
+    urls = [
+        "https://github.com/protocolbuffers/protobuf/archive/v3.13.0.tar.gz",
     ],
 )
 
@@ -32,17 +50,20 @@ http_archive(
     url = "https://github.com/bazelbuild/rules_python/archive/0.6.0.tar.gz",
 )
 
-http_archive (
+http_archive(
     name = "zserio",
     sha256 = "62b61ab7d47ae62f54b74122ddf932a10fb7b2d9049c591b6516889032a2f9cb",
     url = "https://github.com/ndsev/zserio/releases/download/v2.4.2/zserio-2.4.2-bin.zip",
 )
 
-load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
-load("@rules_antlr//antlr:repositories.bzl", "rules_antlr_dependencies")
-load("@rules_antlr//antlr:lang.bzl", "GO")
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
+load("@rules_antlr//antlr:lang.bzl", "GO")
+load("@rules_antlr//antlr:repositories.bzl", "rules_antlr_dependencies")
 load("//:deps.bzl", "go_dependencies")
+
+protobuf_deps()
 
 # gazelle:repository_macro deps.bzl%go_dependencies
 go_dependencies()
@@ -58,16 +79,17 @@ gazelle_dependencies()
 load("@rules_python//python:pip.bzl", "pip_install")
 
 pip_install(
-   requirements = "//test/python:requirements.txt",
+    requirements = "//test/python:requirements.txt",
 )
 
 RULES_JVM_EXTERNAL_TAG = "4.2"
+
 RULES_JVM_EXTERNAL_SHA = "cd1a77b7b02e8e008439ca76fd34f5b07aecb8c752961f9640dea15e9e5ba1ca"
 
 http_archive(
     name = "rules_jvm_external",
-    strip_prefix = "rules_jvm_external-%s" % RULES_JVM_EXTERNAL_TAG,
     sha256 = RULES_JVM_EXTERNAL_SHA,
+    strip_prefix = "rules_jvm_external-%s" % RULES_JVM_EXTERNAL_TAG,
     url = "https://github.com/bazelbuild/rules_jvm_external/archive/%s.zip" % RULES_JVM_EXTERNAL_TAG,
 )
 

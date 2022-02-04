@@ -67,4 +67,4 @@ See also
 
 https://zserio.org
 */
-package main
+package zserio

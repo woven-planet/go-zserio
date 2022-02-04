@@ -13,6 +13,7 @@ go_library(
         "bool_decode.go",
         "bool_encode.go",
         "delta_context.go",
+        "doc.go",
         "extern.go",
         "extern_decode.go",
         "extern_encode.go",

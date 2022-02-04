@@ -3,9 +3,9 @@ load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 go_library(
     name = "zserio_lib",
     srcs = ["main.go"],
-    importpath = "github.com/woven-planet/go-zserio/zserio",
+    importpath = "github.com/woven-planet/go-zserio/cmd/zserio",
     visibility = ["//visibility:private"],
-    deps = ["//zserio/cmd"],
+    deps = ["//internal/cli"],
 )
 
 go_binary(
