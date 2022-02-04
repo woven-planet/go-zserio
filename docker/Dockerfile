@@ -27,6 +27,7 @@ ARG bazelisk_version=1.11.0
 # Extra dependencies:
 # Pacakges required by go-zserio:
 # * default-jdk is required for ANTLR
+# * python3-dev is used for our integration test
 #
 # Packages required by bazel, see (https://docs.bazel.build/versions/main/install-ubuntu.html#step-1-install-required-packages)
 # * g++
@@ -43,6 +44,8 @@ RUN apt-get update && \
         direnv \
         git \
         g++ \
+        python3-dev \
+        python-is-python3 \
         unzip \
         zip \
     && \

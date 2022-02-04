@@ -17,6 +17,7 @@ _docker_run() {
     run_args=(
         # Creats volumes for build cache
         --volume go-zserio-bazel-dev-user-root:/home/$DOCKER_USER/.cache/bazel:rw
+        --volume go-zserio-bazel-dev-xdg-local:/home/$DOCKER_USER/.cache/bazelisk:rw
         --volume go-zserio-bazel-dev-xdg-local:/home/$DOCKER_USER/.local:rw
         -e XDG_DATA_HOME=/home/$DOCKER_USER/.local
         # Local setup and/or mimicking CI setup
@@ -38,7 +39,7 @@ _docker_run() {
     docker run "${run_args[@]}" \
         --user root \
         "${TAG}" \
-        -c "chown $DOCKER_USER:$DOCKER_GROUP /home/$DOCKER_USER/.local && chown $DOCKER_USER:$DOCKER_GROUP /home/$DOCKER_USER/.cache/bazel"
+        -c "chown $DOCKER_USER:$DOCKER_GROUP /home/$DOCKER_USER/{.local,.cache/bazel,.cache/bazelisk}"
 
     local args=()
 
