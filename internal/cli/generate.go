@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -21,17 +22,15 @@ var generateCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		m, err := model.FromFilesystem(args[0])
 		if err != nil {
-			fmt.Fprintf(cmd.ErrOrStderr(), "Parse error: %v", err)
-			return err
+			return fmt.Errorf("parse schema: %w", err)
 		}
-		fmt.Printf("Parsing complete, generating files...\n")
+		log.Println("Parsing complete, generating files...")
 		if err = generator.Generate(m, strings.TrimSpace(outputDirectory), &generator.Options{
 			RootPackage: strings.TrimSpace(topLevelPackage),
 		}); err != nil {
-			fmt.Fprintf(cmd.ErrOrStderr(), "Code generation error: %v", err)
-			return err
+			return fmt.Errorf("generate code: %w", err)
 		}
-		fmt.Printf("Code generation completed.\n")
+		log.Println("Code generation completed.")
 		return nil
 	},
 }
