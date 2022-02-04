@@ -4,7 +4,7 @@
 # When testing a new bazel runner image you can use a locally built image by using:
 #
 #```bash
-# $ env DEV_TAG bazel-ci bazel test //...
+# $ env DEV_TAG bazel-dev bazel test //...
 #```
 set -euxo pipefail
 
