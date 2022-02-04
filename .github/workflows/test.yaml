@@ -10,10 +10,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
       - name: Mount bazel cache
         uses: actions/cache@v2
         with:
           path: "~/.cache/bazel"
           key: bazel
-      - run: bazel test //...
 
+      - name: buildifier and gazelle checks
+        run: |
+          ./bin/ensure-unchanged bazel run //:buildifier
+          ./bin/ensure-unchanged ./bin/gazelle
+          ./bin/ensure-unchanged ./bin/gazelle-update-repos
+
+      - run: bazel test //...

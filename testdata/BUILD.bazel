@@ -1,0 +1,15 @@
+filegroup(
+    name = "zserio_schema",
+    srcs = [
+        "reference_modules/all.zs",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "zserio_schema_all",
+    srcs = glob([
+        "reference_modules/*/*.zs",
+    ]),
+    visibility = ["//visibility:public"],
+)

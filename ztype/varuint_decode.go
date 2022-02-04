@@ -2,6 +2,7 @@ package ztype
 
 import "github.com/icza/bitio"
 
+// ReadVaruint16 reads a zserio varuint16 value from the bitstream
 func ReadVaruint16(r *bitio.CountReader) (uint16, error) {
 	b, err := r.ReadByte()
 	if err != nil {
@@ -17,6 +18,7 @@ func ReadVaruint16(r *bitio.CountReader) (uint16, error) {
 	return v, nil
 }
 
+// ReadVaruint32 reads a zserio varuint32 value from the bitstream
 func ReadVaruint32(r *bitio.CountReader) (uint32, error) {
 	b, err := r.ReadByte()
 	if err != nil {
@@ -45,6 +47,7 @@ func ReadVaruint32(r *bitio.CountReader) (uint32, error) {
 	return v, nil
 }
 
+// ReadVaruint64 reads a zserio varuint64 value from the bitstream
 func ReadVaruint64(r *bitio.CountReader) (uint64, error) {
 	b, err := r.ReadByte()
 	if err != nil {
@@ -78,6 +81,7 @@ func ReadVaruint64(r *bitio.CountReader) (uint64, error) {
 	return v, nil
 }
 
+// ReadVaruint reads a zserio varuint value from the bitstream
 func ReadVaruint(r *bitio.CountReader) (uint64, error) {
 	b, err := r.ReadByte()
 	if err != nil {
@@ -111,6 +115,7 @@ func ReadVaruint(r *bitio.CountReader) (uint64, error) {
 	return v, nil
 }
 
+// ReadVarsize reads a zserio varsize value from the bitstream
 func ReadVarsize(r *bitio.CountReader) (uint64, error) {
 	b, err := r.ReadByte()
 	if err != nil {
@@ -136,7 +141,7 @@ func ReadVarsize(r *bitio.CountReader) (uint64, error) {
 		}
 		v = (v << 8) | uint64(b)
 	}
-	if v > VARSIZE_MAX {
+	if v > MaxVarsize {
 		return 0, ErrOutOfBounds
 	}
 	return v, nil

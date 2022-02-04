@@ -89,7 +89,7 @@ func copyExpressionResult(src, dst *Expression) {
 
 func evaluateExpressionType(typeRef *TypeReference, scope *Package) (ExpressionType, error) {
 	if !typeRef.IsBuiltin && typeRef.Package == "" {
-		return "", errors.New("Type is not fully resolved")
+		return "", errors.New("type is not fully resolved")
 	}
 	if typeRef.IsBuiltin {
 		switch typeRef.Name {
@@ -237,7 +237,7 @@ func (expr *Expression) evaluateCompoundDotExpression(scope *Package) error {
 func (expr *Expression) evaluateFunctionCallExpression(scope *Package) error {
 	function, ok := expr.Operand1.ResultSymbol.Symbol.(*Function)
 	if !ok {
-		return errors.New("function expression expected!")
+		return errors.New("function expression expected")
 	}
 
 	// find the compound type that defines the function
@@ -496,7 +496,7 @@ func (expr *Expression) evaluateComparisonExpression() error {
 		case parser.ZserioParserGE:
 			expr.ResultBoolValue = expr.Operand1.ResultFloatValue >= expr.Operand2.ResultFloatValue
 		default:
-			return errors.New("Equal/notequal operator not supported for float types")
+			return errors.New("equal/notequal operator not supported for float types")
 		}
 	} else if expr.Operand1.ResultType == ExpressionTypeString {
 		switch expr.Type {

@@ -1,0 +1,71 @@
+load("@pip//:requirements.bzl", "requirement")
+load("@rules_java//java:defs.bzl", "java_binary")
+load("@rules_python//python:defs.bzl", "py_binary", "py_library")
+
+java_binary(
+    name = "zserio_compiler",
+    main_class = "zserio.tools.ZserioToolPython",
+    runtime_deps = [
+        "@maven//:io_github_ndsev_zserio",
+    ],
+)
+
+genrule(
+    name = "testdata_zs_py_gen",
+    srcs = [
+        "//testdata:zserio_schema",
+        "//testdata:zserio_schema_all",
+        requirement("zserio"),
+    ],
+    outs = [
+        "testdata/__init__.py",
+        "testdata/api.py",
+        "testdata/reference_modules/core/types/color.py",
+        "testdata/reference_modules/core/types/value_wrapper.py",
+        "testdata/reference_modules/core/types/__init__.py",
+        "testdata/reference_modules/core/types/api.py",
+        "testdata/reference_modules/core/types/city_attributes.py",
+        "testdata/reference_modules/core/__init__.py",
+        "testdata/reference_modules/core/instantiations/__init__.py",
+        "testdata/reference_modules/core/instantiations/api.py",
+        "testdata/reference_modules/core/instantiations/instantiated_template_struct.py",
+        "testdata/reference_modules/core/api.py",
+        "testdata/reference_modules/core/templates/__init__.py",
+        "testdata/reference_modules/core/templates/api.py",
+        "testdata/reference_modules/all/__init__.py",
+        "testdata/reference_modules/all/api.py",
+        "testdata/reference_modules/__init__.py",
+        "testdata/reference_modules/api.py",
+        "testdata/reference_modules/testobject1/__init__.py",
+        "testdata/reference_modules/testobject1/api.py",
+        "testdata/reference_modules/testobject1/testobject/__init__.py",
+        "testdata/reference_modules/testobject1/testobject/api.py",
+        "testdata/reference_modules/testobject1/testobject/test_object.py",
+    ],
+    # NOTE @aignas 2022-02-02: this depends on the `dirname` command being present on the machine.
+    cmd = "$(location zserio_compiler) -src $$(dirname $$(dirname $(location //testdata:zserio_schema))) reference_modules/all.zs -setTopLevelPackage testdata -python $(RULEDIR)",
+    message = "Generating Python bindings to zserio test schema",
+    tools = [
+        ":zserio_compiler",
+    ],
+)
+
+py_library(
+    name = "testdata_zs_py",
+    srcs = [
+        ":testdata_zs_py_gen",
+    ],
+    imports = ["."],
+)
+
+py_binary(
+    name = "write_test_data",
+    srcs = [
+        "write_test_data.py",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":testdata_zs_py",
+        requirement("zserio"),
+    ],
+)

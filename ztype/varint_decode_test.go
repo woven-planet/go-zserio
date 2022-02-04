@@ -20,11 +20,11 @@ func TestReadVarint16(t *testing.T) {
 		},
 		"minimum": {
 			input: []byte{0xff, 0xff},
-			want:  ztype.VARINT16_MIN,
+			want:  ztype.MinVarint16,
 		},
 		"maximum": {
 			input: []byte{0x7f, 0xff},
-			want:  ztype.VARINT16_MAX,
+			want:  ztype.MaxVarint16,
 		},
 	}
 	for name, test := range tests {
@@ -52,11 +52,11 @@ func TestReadVarint32(t *testing.T) {
 		},
 		"minimum": {
 			input: []byte{0xff, 0xff, 0xff, 0xff},
-			want:  ztype.VARINT32_MIN,
+			want:  ztype.MinVarint32,
 		},
 		"maximum": {
 			input: []byte{0x7f, 0xff, 0xff, 0xff},
-			want:  ztype.VARINT32_MAX,
+			want:  ztype.MaxVarint32,
 		},
 	}
 	for name, test := range tests {
@@ -84,11 +84,11 @@ func TestReadVarint64(t *testing.T) {
 		},
 		"minimum": {
 			input: []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
-			want:  ztype.VARINT64_MIN,
+			want:  ztype.MinVarint64,
 		},
 		"maximum": {
 			input: []byte{0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
-			want:  ztype.VARINT64_MAX,
+			want:  ztype.MaxVarint64,
 		},
 	}
 	for name, test := range tests {
@@ -116,15 +116,15 @@ func TestReadVarint(t *testing.T) {
 		},
 		"minimum": {
 			input: []byte{0x80},
-			want:  ztype.VARINT_MIN,
+			want:  ztype.MinVarint,
 		},
 		"non-magic-minimum": {
 			input: []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
-			want:  ztype.VARINT_MIN + 1,
+			want:  ztype.MinVarint + 1,
 		},
 		"maximum": {
 			input: []byte{0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
-			want:  ztype.VARINT_MAX,
+			want:  ztype.MaxVarint,
 		},
 	}
 	for name, test := range tests {

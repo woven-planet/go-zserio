@@ -357,7 +357,7 @@ func (m *Model) instantiateType(pkgScope *ast.Package, tr *ast.TypeReference, te
 	case *ast.Struct:
 		instantiatedType, err = m.instantiateStruct(pkgScope, n, templateArguments, instantiatedName)
 	default:
-		return nil, errors.New("Template instantiation not supported for this type")
+		return nil, errors.New("template instantiation not supported for this type")
 	}
 
 	if err != nil {
@@ -384,7 +384,8 @@ func (m *Model) ResolveImports() error {
 	return nil
 }
 
-// This assumes that Template Instantiation has already happened
+// ResolveTypes resolves all type references.
+// This assumes that template instantiation has already happened.
 func (m *Model) ResolveTypes() error {
 	for _, pkg := range m.Packages {
 		for _, structure := range pkg.Structs {
