@@ -32,7 +32,9 @@
         if field{{ $field.Name }}Context, ok := childrenNodes[{{ $index }}].Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}]); !ok {
             return errors.New("unknown context type")
         } else {
-            field{{ $field.Name }}Context.Init(&{{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}, {{ goType $scope $native.Type }}({{ $field_name }}))
+
+            traits := {{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
+            field{{ $field.Name }}Context.Init(&traits, {{ goType $scope $native.Type }}({{ $field_name }}))
         }
     {{- end }}
     {{- if $field.OptionalClause }}

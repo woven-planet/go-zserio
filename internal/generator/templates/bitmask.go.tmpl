@@ -88,7 +88,9 @@ func (v *{{ $bitmask.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingCo
   if !ok {
     return errors.New("unsupported packing context type")
   }
-  if tempValue, err := context.Read(&{{- template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}, r); err != nil {
+
+  traits := {{- template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
+  if tempValue, err := context.Read(&traits, r); err != nil {
     return err
   } else {
     (*v) = {{ $bitmask.Name }}(tempValue)
@@ -101,7 +103,9 @@ func (v *{{ $bitmask.Name}}) MarshalZserioPacked(contextNode *zserio.PackingCont
   if !ok {
     return errors.New("unsupported packing context type")
   }
-  return context.Write(&{{- template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}, w, {{ goType $scope $native.Type }}(*v))
+
+  traits := {{- template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
+  return context.Write(&traits, w, {{ goType $scope $native.Type }}(*v))
 }
 
 func (v *{{ $bitmask.Name}}) ZserioInitializeOffsetsPacked(contextNode *zserio.PackingContextNode, bitPosition int) int {
