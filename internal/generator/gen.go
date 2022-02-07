@@ -2,6 +2,7 @@ package generator
 
 import (
 	"bytes"
+	"fmt"
 	"go/format"
 	"log"
 	"os"
@@ -32,47 +33,61 @@ func writeSource(rootPath, zserioPkg, fn string, doNotFormatCode bool, tmpl stri
 	outputDir := path.Join(append([]string{rootPath}, ids...)...)
 	outputFile := path.Join(outputDir, fn)
 
-	var out bytes.Buffer
-	var err error
-
 	templ := templates.Lookup(tmpl)
 	if templ == nil {
 		panic("Package template is missing")
 	}
 
-	if err = templ.Execute(&out, data); err != nil {
+	var out bytes.Buffer
+	if err := templ.Execute(&out, data); err != nil {
 		return err
 	}
-
 	code := out.Bytes()
 
-	if !doNotFormatCode {
-		code, err = StripImports(out.Bytes())
-		if err != nil {
-			return err
-		}
-		code, err = format.Source(code)
-		if err != nil {
-			return err
-		}
+	if doNotFormatCode {
+		return writeGoSource(outputDir, outputFile, code)
 	}
 
-	log.Printf("Writing %s\n", outputFile)
-	if err = os.MkdirAll(outputDir, 0755); err != nil {
+	formatted, err := formatGoSource(code)
+	if err != nil {
 		return err
+	}
+
+	return writeGoSource(outputDir, outputFile, formatted)
+}
+
+func writeGoSource(outputDir, outputFile string, code []byte) error {
+	log.Printf("Writing %s\n", outputFile)
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return fmt.Errorf("mkdir: %w", err)
 	}
 
 	f, err := os.OpenFile(outputFile, FileOpenFlags, 0644)
 	if err != nil {
-		return err
+		return fmt.Errorf("open: %w", err)
 	}
 	defer f.Close()
 
-	if _, err = f.Write(code); err != nil {
+	if _, err := f.Write(code); err != nil {
 		_ = os.Remove(outputFile)
-		return err
+		return fmt.Errorf("write: %w", err)
 	}
 	return nil
+}
+
+func formatGoSource(code []byte) ([]byte, error) {
+	code, err := StripImports(code)
+	if err != nil {
+		return nil, fmt.Errorf("strip imports: %w", err)
+	}
+
+	formatted, err := format.Source(code)
+	if err != nil {
+		log.Println(code)
+		return nil, fmt.Errorf("format: %w", err)
+	}
+
+	return formatted, nil
 }
 
 func generatePackage(rootPath string, pkg *ast.Package, options *Options) error {
