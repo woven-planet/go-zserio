@@ -20,7 +20,7 @@ jobs:
 
       - uses: pre-commit/action@v2.0.3
 
-      - name: buildifier and gazelle checks
+      - name: gazelle
         run: |
           ./bin/ensure-unchanged ./bin/gazelle
           ./bin/ensure-unchanged ./bin/gazelle-update-repos
