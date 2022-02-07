@@ -1,0 +1,27 @@
+# See https://pre-commit.com/#usage
+repos:
+- repo: https://github.com/executablebooks/mdformat
+  rev: 0.7.7
+  hooks:
+  - id: mdformat
+    additional_dependencies:
+    - mdformat-gfm
+    - mdformat-black
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v2.3.0
+  hooks:
+  - id: check-yaml
+    args: [--allow-multiple-documents]
+  - id: end-of-file-fixer
+    # TODO @aignas 2022-02-04: currently templates do not pass this, but we need to change them in order to introduce the changes.
+    exclude: .go.tmpl$
+  #- id: trailing-whitespace
+  #- id: requirements-txt-fixer
+- repo: local
+  hooks:
+    - id: buildifier
+      name: buildifier
+      language: system
+      entry: bazel run -- //:buildifier --mode=fix --lint=warn --warnings=all
+      types: [file]
+      files: /(BUILD.bazel|WORKSPACE|.*\.bzl)$
