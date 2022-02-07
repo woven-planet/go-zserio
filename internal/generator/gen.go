@@ -83,7 +83,7 @@ func formatGoSource(code []byte) ([]byte, error) {
 
 	formatted, err := format.Source(code)
 	if err != nil {
-		log.Println(code)
+		log.Println(string(code))
 		return nil, fmt.Errorf("format: %w", err)
 	}
 
