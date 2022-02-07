@@ -13,8 +13,6 @@ repos:
   - id: check-yaml
     args: [--allow-multiple-documents]
   - id: end-of-file-fixer
-    # TODO @aignas 2022-02-04: currently templates do not pass this, but we need to change them in order to introduce the changes.
-    exclude: .go.tmpl$
   #- id: trailing-whitespace
   #- id: requirements-txt-fixer
 - repo: local
