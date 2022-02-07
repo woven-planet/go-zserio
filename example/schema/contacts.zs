@@ -6,4 +6,3 @@ struct Address
     string street;
     optional uint8 number;
 };
-

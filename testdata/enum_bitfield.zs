@@ -14,4 +14,3 @@ struct Palette
     Color secondary;
     Color background;
 };
-
