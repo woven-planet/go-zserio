@@ -30,7 +30,7 @@ type Array[T any, Y IArrayTraits[T]] struct {
 	ArrayTraits Y
 
 	// RawArray is a reference to the raw array.
-	RawArray *[]T
+	RawArray []T
 
 	// IsAuto specifies if the array size is automatically calculated.
 	IsAuto bool
@@ -51,7 +51,7 @@ type Array[T any, Y IArrayTraits[T]] struct {
 
 // Size returns the number of elements in an array.
 func (array *Array[T, Y]) Size() int {
-	return len(*array.RawArray)
+	return len(array.RawArray)
 }
 
 // ZserioBitSize returns the total size of the unpacked array in bits.
@@ -76,7 +76,7 @@ func (array *Array[T, Y]) ZserioBitSize(bitPosition int) (int, error) {
 			endBitPosition += elementSize + (size-1)*alignTo(8, elementSize)
 		}
 	} else {
-		for _, element := range *array.RawArray {
+		for _, element := range array.RawArray {
 			if array.setOffsetMethod != nil {
 				endBitPosition = alignTo(8, endBitPosition)
 			}
@@ -103,7 +103,7 @@ func (array *Array[T, Y]) ZserioBitSizePacked(bitPosition int) (int, error) {
 			return 0, err
 		}
 		endBitPosition += delta
-		for _, element := range *array.RawArray {
+		for _, element := range array.RawArray {
 			if array.setOffsetMethod != nil {
 				endBitPosition = alignTo(8, endBitPosition)
 			}

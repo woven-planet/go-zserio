@@ -42,7 +42,7 @@ func TestVarintArrayDecoding(t *testing.T) {
 			if err != nil {
 				t.Fatalf("error reading array: %v", err)
 			}
-			if diff := cmp.Diff(test.want, *array.RawArray); diff != "" {
+			if diff := cmp.Diff(test.want, array.RawArray); diff != "" {
 				t.Errorf("incorrect encoding: %s", diff)
 			}
 		})
@@ -104,7 +104,7 @@ func TestUint32ArrayDecoding(t *testing.T) {
 			if err != nil {
 				t.Fatalf("error reading array: %v", err)
 			}
-			if diff := cmp.Diff(test.want, *array.RawArray); diff != "" {
+			if diff := cmp.Diff(test.want, array.RawArray); diff != "" {
 				t.Errorf("incorrect encoding: %s", diff)
 			}
 		})
@@ -158,7 +158,7 @@ func TestVarInt32ArrayDecoding(t *testing.T) {
 			if err != nil {
 				t.Fatalf("error reading array: %v", err)
 			}
-			if diff := cmp.Diff(test.want, *array.RawArray); diff != "" {
+			if diff := cmp.Diff(test.want, array.RawArray); diff != "" {
 				t.Errorf("incorrect encoding: %s", diff)
 			}
 		})
@@ -188,7 +188,7 @@ func TestFloat16ArrayDecoding(t *testing.T) {
 			if err != nil {
 				t.Fatalf("error reading array: %v", err)
 			}
-			if diff := cmp.Diff(test.want, *array.RawArray); diff != "" {
+			if diff := cmp.Diff(test.want, array.RawArray); diff != "" {
 				t.Errorf("incorrect encoding: %s", diff)
 			}
 		})
@@ -218,7 +218,7 @@ func TestFloat32ArrayDecoding(t *testing.T) {
 			if err != nil {
 				t.Fatalf("error reading array: %v", err)
 			}
-			if diff := cmp.Diff(test.want, *array.RawArray); diff != "" {
+			if diff := cmp.Diff(test.want, array.RawArray); diff != "" {
 				t.Errorf("incorrect encoding: %s", diff)
 			}
 		})
@@ -252,7 +252,7 @@ func TestFloat64ArrayDecoding(t *testing.T) {
 			if err != nil {
 				t.Fatalf("error reading array: %v", err)
 			}
-			if diff := cmp.Diff(test.want, *array.RawArray); diff != "" {
+			if diff := cmp.Diff(test.want, array.RawArray); diff != "" {
 				t.Errorf("incorrect encoding: %s", diff)
 			}
 		})
@@ -308,7 +308,7 @@ func TestStringArrayDecoding(t *testing.T) {
 			if err != nil {
 				t.Fatalf("error reading array: %v", err)
 			}
-			if diff := cmp.Diff(test.want, *array.RawArray); diff != "" {
+			if diff := cmp.Diff(test.want, array.RawArray); diff != "" {
 				t.Errorf("incorrect encoding: %s", diff)
 			}
 		})

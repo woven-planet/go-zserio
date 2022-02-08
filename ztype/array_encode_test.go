@@ -37,7 +37,7 @@ func TestVarintArrayEncoding(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			arrayInstance := ztype.Array[int64, *ztype.VarIntArrayTraits]{
 				ArrayTraits: &ztype.VarIntArrayTraits{},
-				RawArray:    &test.arrayData,
+				RawArray:    test.arrayData,
 				IsAuto:      test.isAuto,
 				IsPacked:    test.isPacked,
 			}
@@ -113,7 +113,7 @@ func TestBitfieldArrayEncoding(t *testing.T) {
 
 			arrayInstance := ztype.Array[uint32, *ztype.BitFieldArrayTraits[uint32]]{
 				ArrayTraits: arrayTraits,
-				RawArray:    &test.arrayData,
+				RawArray:    test.arrayData,
 				IsAuto:      test.isAuto,
 				IsPacked:    test.isPacked,
 			}
@@ -175,7 +175,7 @@ func TestVarInt32ArrayEncoding(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			arrayInstance := ztype.Array[int32, *ztype.VarInt32ArrayTraits]{
 				ArrayTraits: &ztype.VarInt32ArrayTraits{},
-				RawArray:    &test.arrayData,
+				RawArray:    test.arrayData,
 				IsAuto:      test.isAuto,
 				IsPacked:    test.isPacked,
 			}
@@ -213,7 +213,7 @@ func TestFloat16ArrayEncoding(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			arrayInstance := ztype.Array[float32, *ztype.Float16ArrayTraits]{
 				ArrayTraits: &ztype.Float16ArrayTraits{},
-				RawArray:    &test.arrayData,
+				RawArray:    test.arrayData,
 				IsAuto:      test.isAuto,
 			}
 			// convert to binary buffer
@@ -250,7 +250,7 @@ func TestFloat32ArrayEncoding(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			arrayInstance := ztype.Array[float32, *ztype.Float32ArrayTraits]{
 				ArrayTraits: &ztype.Float32ArrayTraits{},
-				RawArray:    &test.arrayData,
+				RawArray:    test.arrayData,
 				IsAuto:      test.isAuto,
 			}
 			// convert to binary buffer
@@ -291,7 +291,7 @@ func TestFloat64ArrayEncoding(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			arrayInstance := ztype.Array[float64, *ztype.Float64ArrayTraits]{
 				ArrayTraits: &ztype.Float64ArrayTraits{},
-				RawArray:    &test.arrayData,
+				RawArray:    test.arrayData,
 				IsAuto:      test.isAuto,
 			}
 			// convert to binary buffer
@@ -353,7 +353,7 @@ func TestStringArrayEncoding(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			arrayInstance := ztype.Array[string, *ztype.StringArrayTraits]{
 				ArrayTraits: &ztype.StringArrayTraits{},
-				RawArray:    &test.arrayData,
+				RawArray:    test.arrayData,
 				IsAuto:      test.isAuto,
 			}
 			// convert to binary buffer
