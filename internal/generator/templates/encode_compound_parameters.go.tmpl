@@ -1,18 +1,20 @@
 
 {{- $scope := .pkg }}
 {{- $field := .field }}
-{{- $native := goNativeType $scope $field.Type }}
+{{- $field_name := .field_name }}
 
 {{- if $field.Type.TypeArguments }}
-    {{- $lvalue := printf "v.%s" $field.Name }}
     {{- if $field.Array }}
-        for _, arrayElement := range {{ $lvalue }} {
-        {{- $lvalue = "arrayElement" }}
+        for _, element := range {{ $field_name }} {
+        {{- $field_name = "element" }}
+    {{- end }}
+    {{- if $field.IsOptional }}
+        {{- $field_name = "element" }}
     {{- end }}
     {{- $type_parameter := getTypeParameter $scope $field.Type }}
     {{- range $i, $argument := $field.Type.TypeArguments }}
         {{- $current_type_parameter := index $type_parameter $i }}
-        {{ $lvalue }}.{{ $current_type_parameter.Name}} = {{ goType $scope $current_type_parameter.Type }}({{ goExpression $scope $argument }})
+        {{ $field_name }}.{{ $current_type_parameter.Name}} = {{ goType $scope $current_type_parameter.Type }}({{ goExpression $scope $argument }})
     {{- end}}
     {{- if $field.Array }}
     }

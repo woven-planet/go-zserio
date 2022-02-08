@@ -43,18 +43,20 @@
             }
         {{- end }}
     {{- end }}
-    {{- template "encode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field }}
     
+    {{- template "encode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field "field_name" $field_name }}
     {{- if $field.Array }}
         {{- if not $field.Array.IsPacked }}
             // This array is implicitly packed, because its parent object is packed
             {{ $field.Name }}ArrayProperties.IsPacked = true
         {{- end }}
         {{- if $native.IsMarshaler }}
-        // The array type is a zserio object. The array traits expect array of
-        // pointers, so convert from array of struct to array of struct pointers
         for index, _ := range {{ $field_name }} {
-            {{ $field.Name }}PtrArray = append({{ $field.Name }}PtrArray, &{{ $field_name }}[index])
+            {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{if $native.RequiresCast }}(*{{ goType $scope $native.Type }})(&{{ $field_name }}[index]){{ else }}&{{ $field_name }}[index]{{ end }})
+        }
+        {{- else if $native.RequiresCast }}
+        for _, element := range {{ $field_name }} {
+            {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{ goType $scope $native.Type }}(element))
         }
         {{- end }}
         if err = {{ $field.Name }}ArrayProperties.MarshalZserio(w); err != nil {

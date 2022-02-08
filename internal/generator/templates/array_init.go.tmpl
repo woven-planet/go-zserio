@@ -8,10 +8,15 @@
 {{ $field.Name }}ArrayProperties.ArrayTraits = {{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
 
 {{- if $native.IsMarshaler }}
-    {{ $field.Name }}PtrArray := make([]*{{ goType $scope $native.Type }}, 0)
-    {{ $field.Name }}ArrayProperties.RawArray = &{{ $field.Name }}PtrArray
+    // the field type is a zserio object, which requires a list of struct 
+    // pointers.
+    {{ $field.Name }}ArrayProperties.RawArray = make([]*{{ goType $scope $native.Type }}, 0)
+{{- else if $native.RequiresCast }}
+    // the field type is a subtype, which requires to cast the subtype array
+    // to the basic type
+    {{ $field.Name }}ArrayProperties.RawArray = make([]{{ goType $scope $native.Type }}, 0)
 {{- else }}
-    {{ $field.Name }}ArrayProperties.RawArray = &{{ $field_name }}
+    {{ $field.Name }}ArrayProperties.RawArray = {{ $field_name }}
 {{- end }}
 
 {{- if $field.Array.IsPacked }}

@@ -49,12 +49,15 @@
         if err = {{ $field.Name }}ArrayProperties.UnmarshalZserio(r); err != nil {
             return err
         }
+        {{- if or $native.IsMarshaler $native.RequiresCast }}
+        {{- $element := "elem" }}
         {{- if $native.IsMarshaler }}
-        for _, elem := range {{ $field.Name }}PtrArray {
-            {{ $assign_str_lvalue }} = append({{ $assign_str_lvalue }}, *elem)
+            {{- $element = "*elem" }}
+        {{- end }}
+        for _, elem := range {{ $field.Name }}ArrayProperties.RawArray {
+            {{ $assign_str_lvalue }} = append({{ $assign_str_lvalue }}, {{ if $native.RequiresCast }}{{ goType $scope $field.Type }}({{ $element }}){{ else }}{{ $element }}{{ end }})
         }
         {{- end }}
-
     {{- else if eq $native.Type.Name "bool" }}
         {{- if $native.RequiresCast }}
             if tempValue, err := ztype.ReadBool(r); err != nil {
