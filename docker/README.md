@@ -18,4 +18,3 @@ $ bazel-dev build //...
 # Without arguments, the command let you enter a container.
 $ bazel-dev
 ```
-
