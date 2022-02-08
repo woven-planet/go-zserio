@@ -1,0 +1,67 @@
+#!/bin/bash
+#
+# Runs a command within a docker container go-zserio:dev.
+# When testing a new bazel runner image you can use a locally built image by using:
+#
+#```bash
+# $ env DEV_TAG bazel-dev bazel test //...
+#```
+set -euxo pipefail
+
+# Needs to match what is in the Dockerfile.
+readonly TAG=${DEV_TAG:-"go-zserio:dev"}
+readonly DOCKER_USER=${DOCKER_USER:-builder}
+readonly DOCKER_GROUP=${DOCKER_GROUP:-robots}
+
+_docker_run() {
+    run_args=(
+        # Creats volumes for build cache
+        --volume go-zserio-bazel-dev-user-root:/home/$DOCKER_USER/.cache/bazel:rw
+        --volume go-zserio-bazel-dev-xdg-local:/home/$DOCKER_USER/.cache/bazelisk:rw
+        --volume go-zserio-bazel-dev-xdg-local:/home/$DOCKER_USER/.local:rw
+        -e XDG_DATA_HOME=/home/$DOCKER_USER/.local
+        # Local setup and/or mimicking CI setup
+        -e GITHUB_WORKSPACE=/home/$DOCKER_USER/code
+        -e GOPROXY # forward the env variable value instead of setting it
+        --volume ${PWD}:/home/$DOCKER_USER/code:rw
+        --entrypoint=bash
+        --interactive
+        --tty
+        --rm
+        --workdir=/home/$DOCKER_USER/code
+        # Extra things to make remote caching work
+        --add-host=host.docker.internal:host-gateway
+    )
+
+    # Set the permissions inside the volumes, so that our container can run as
+    # a simple user later.
+    echo "Setting correct permissions for volume contents"
+    docker run "${run_args[@]}" \
+        --user root \
+        "${TAG}" \
+        -c "chown $DOCKER_USER:$DOCKER_GROUP /home/$DOCKER_USER/{.local,.cache/bazel,.cache/bazelisk}"
+
+    local args=()
+
+    run_args+=(--user ${DOCKER_USER}:${DOCKER_GROUP})
+
+    case "${1:-}" in
+    '') exec docker run "${run_args[@]}" "${TAG}" ;;
+    build | run | test | query | help)
+        local -r cmd="$1"
+        shift
+        local -r bazel_args=(bazel $cmd "$@")
+        args+=(-c "${bazel_args[*]}")
+        ;;
+    *) args+=(-c "$*") ;;
+    esac
+
+    exec docker run "${run_args[@]}" "${TAG}" "${args[@]:-}"
+}
+
+main() {
+    cd "$(dirname "$0")/.."
+    _docker_run "$@"
+}
+
+main "$@"
