@@ -1,80 +1,38 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("//:rules.bzl", "go_zserio_library")
 
-# gazelle:ignore
+rootpkg = "gen/github.com/woven-planet/go-zserio/test/go"
 
-rootpkg = "github.com/woven-planet/go-zserio/test/go"
-
-genrule(
-    name = "gen",
+go_zserio_library(
+    name = "core_types",
     srcs = [
-        "//testdata:zserio_schema",
         "//testdata:zserio_schema_all",
     ],
-    outs = [
-        "reference_modules/testobject1/testobject/pkg.go",
-        "reference_modules/testobject1/testobject/test_object.go",
-        "reference_modules/all/pkg.go",
-        "reference_modules/core/instantiations/pkg.go",
-        "reference_modules/core/instantiations/instantiated_template_struct.go",
-        "reference_modules/core/templates/pkg.go",
-        "reference_modules/core/types/pkg.go",
-        "reference_modules/core/types/color.go",
-        "reference_modules/core/types/city_attributes.go",
-        "reference_modules/core/types/value_wrapper.go",
+    pkg = "reference_modules.core.types",
+    rootpackage = rootpkg,
+)
+
+go_zserio_library(
+    name = "core_instantiations",
+    srcs = [
+        "//testdata:zserio_schema_all",
     ],
-    cmd = "$(execpath //cmd/zserio) generate --rootpackage {rootpackage} --out {out} {proto_dir} &>1".format(
-        rootpackage = rootpkg,
-        out = "$(@D)",
-        proto_dir = "testdata/reference_modules",
-    ),
-    tools = [
-        "//cmd/zserio",
+    pkg = "reference_modules.core.instantiations",
+    rootpackage = rootpkg,
+    deps = [
+        ":core_types",
     ],
 )
 
-go_library(
+go_zserio_library(
     name = "testobject",
     srcs = [
-        "reference_modules/testobject1/testobject/pkg.go",
-        "reference_modules/testobject1/testobject/test_object.go",
+        "//testdata:zserio_schema_all",
     ],
-    importpath = rootpkg + "/reference_modules/testobject1/testobject",
+    pkg = "reference_modules.testobject1.testobject",
+    rootpackage = rootpkg,
     visibility = ["//visibility:public"],
     deps = [
         ":core_instantiations",
         ":core_types",
-        "//interface",
-        "//ztype",
-        "@com_github_icza_bitio//:bitio",
-    ],
-)
-
-go_library(
-    name = "core_instantiations",
-    srcs = [
-        "reference_modules/core/instantiations/instantiated_template_struct.go",
-        "reference_modules/core/instantiations/pkg.go",
-    ],
-    importpath = rootpkg + "/reference_modules/core/instantiations",
-    deps = [
-        ":core_types",
-        "//interface",
-        "@com_github_icza_bitio//:bitio",
-    ],
-)
-
-go_library(
-    name = "core_types",
-    srcs = [
-        "reference_modules/core/types/city_attributes.go",
-        "reference_modules/core/types/color.go",
-        "reference_modules/core/types/pkg.go",
-        "reference_modules/core/types/value_wrapper.go",
-    ],
-    importpath = rootpkg + "/reference_modules/core/types",
-    deps = [
-        "//interface",
-        "//ztype",
-        "@com_github_icza_bitio//:bitio",
     ],
 )
