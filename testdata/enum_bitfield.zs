@@ -1,4 +1,4 @@
-package bitfield_static;
+package enum_bitfield;
 
 enum bit:3 Color
 {
