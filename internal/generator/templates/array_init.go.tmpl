@@ -1,18 +1,27 @@
-{{ $scope := .pkg }}
-{{ $field_name := .field_name }}
-{{ $array := .array }}
-{{ $type := .type }}
-{{- $traits := goArrayTraits $scope $type }}
 
-{{- $field_name }}.ArrayTraits = {{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $type }}
-{{- if $array.IsPacked }}
-    {{ $field_name }}.IsPacked = true
-{{- end }}
-{{- if $array.Length }}
-    {{ $field_name }}.FixedSize = int({{ goExpression $scope $array.Length }})
+{{- $scope := .pkg }}
+{{- $field_name := .field_name }}
+{{- $field := .field }}
+{{- $native := .native }}
+{{- $traits := goArrayTraits $scope $native.Type }}
+{{ $field.Name }}ArrayProperties := ztype.Array[{{if $native.IsMarshaler }}*{{ end }}{{ goType $scope $native.Type }}, {{ template "array_traits_type.go.tmpl" dict "pkg" $scope "type" $native.Type }}]{}
+{{ $field.Name }}ArrayProperties.ArrayTraits = {{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
+
+{{- if $native.IsMarshaler }}
+    {{ $field.Name }}PtrArray := make([]*{{ goType $scope $native.Type }}, 0)
+    {{ $field.Name }}ArrayProperties.RawArray = &{{ $field.Name }}PtrArray
 {{- else }}
-    {{ $field_name }}.IsAuto = true
+    {{ $field.Name }}ArrayProperties.RawArray = &{{ $field_name }}
+{{- end }}
+
+{{- if $field.Array.IsPacked }}
+    {{ $field.Name }}ArrayProperties.IsPacked = true
+{{- end }}
+{{- if $field.Array.Length }}
+    {{ $field.Name }}ArrayProperties.FixedSize = int({{ goExpression $scope $field.Array.Length }})
+{{- else }}
+    {{ $field.Name }}ArrayProperties.IsAuto = true
 {{- end }}
 {{- if eq $traits "ztype.ObjectArrayTraits" }}
-    {{ $field_name }}.ArrayTraits.DefaultObject = new({{ goType $scope $type }})
+    {{ $field.Name }}ArrayProperties.ArrayTraits.DefaultObject = new({{ goType $scope $native.Type }})
 {{- end }}

@@ -38,12 +38,12 @@ func (array *Array[T, Y]) MarshalZserio(writer *bitio.CountWriter) error {
 			if err != nil {
 				return err
 			}
-			for _, element := range array.RawArray {
+			for _, element := range *array.RawArray {
 				packedTraits.InitContext(array.PackedContext, element)
 			}
 			writeDescriptor(array.PackedContext, writer)
 		}
-		for index, element := range array.RawArray {
+		for index, element := range *array.RawArray {
 			if array.checkOffsetMethod != nil {
 				writer.Align()
 				array.checkOffsetMethod(index, writer.BitsCount)

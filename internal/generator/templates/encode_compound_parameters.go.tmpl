@@ -1,3 +1,4 @@
+
 {{- $scope := .pkg }}
 {{- $field := .field }}
 {{- $native := goNativeType $scope $field.Type }}
@@ -5,7 +6,7 @@
 {{- if $field.Type.TypeArguments }}
     {{- $lvalue := printf "v.%s" $field.Name }}
     {{- if $field.Array }}
-        for _, arrayElement := range {{ $lvalue }}.RawArray {
+        for _, arrayElement := range {{ $lvalue }} {
         {{- $lvalue = "arrayElement" }}
     {{- end }}
     {{- $type_parameter := getTypeParameter $scope $field.Type }}

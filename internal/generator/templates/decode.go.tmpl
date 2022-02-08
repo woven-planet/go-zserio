@@ -36,12 +36,12 @@
     } else if present {
 
     {{- if $field.Array }}
-        var value ztype.Array[{{if $native.IsMarshaler }}*{{ end }}{{ goType $scope $native.Type -}}, {{ template "array_traits_type.go.tmpl" dict "pkg" $scope "type" $native.Type }}]
+        var value []{{ goType $scope $field.Type }}
     {{- else }}
         var value {{ goType $scope $field.Type }}
     {{- end }}
-    {{ $assign_str_lvalue = "value" }}
-    {{ $assign_str_rvalue = "value" }}
+    {{- $assign_str_lvalue = "value" }}
+    {{- $assign_str_rvalue = "value" }}
 {{- end }}
 
 {{- if and (not $native.IsMarshaler) (not $field.Array) }}
@@ -56,12 +56,20 @@
     }
 {{- else}}
     {{- if $field.Array }}
-        {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $assign_str_lvalue "array" $field.Array "type" $native.Type }}
+        {{- $assign_str_rvalue = printf "%sArrayProperties" $field.Name }}
+        {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $assign_str_lvalue "field" $field "native" $native }}
     {{- end }}
     {{- template "decode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field }}
     if err = {{ $assign_str_rvalue }}.UnmarshalZserio(r); err != nil {
         return err
     }
+    {{- if $field.Array }}
+        {{- if $native.IsMarshaler }}
+        for _, elem := range {{ $field.Name }}PtrArray {
+            {{ $assign_str_lvalue }} = append({{ $assign_str_lvalue }}, *elem)
+        }
+        {{- end }}
+    {{- end }}
 {{- end}}
 
 {{- if $field.IsOptional}}

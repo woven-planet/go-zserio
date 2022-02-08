@@ -30,7 +30,7 @@ func (array *Array[T, Y]) UnmarshalZserio(reader *bitio.CountReader) error {
 		arraySize = int(u64ReadSize)
 	}
 
-	array.RawArray = make([]T, arraySize)
+	*array.RawArray = make([]T, arraySize)
 	if arraySize > 0 {
 		if array.IsPacked {
 			var err error
@@ -59,7 +59,7 @@ func (array *Array[T, Y]) UnmarshalZserio(reader *bitio.CountReader) error {
 			if err != nil {
 				return err
 			}
-			array.RawArray[index] = element
+			(*array.RawArray)[index] = element
 		}
 	}
 	return nil
@@ -67,12 +67,13 @@ func (array *Array[T, Y]) UnmarshalZserio(reader *bitio.CountReader) error {
 
 // ArrayFromReader is a helper function to read an array as a one-liner.
 func ArrayFromReader[T any, Y IArrayTraits[T]](reader *bitio.CountReader, arrayTraits Y, size int, isPacked, isAuto bool, options ...ArrayOption[T, Y]) (*Array[T, Y], error) {
+	rawArray := make([]T, 0)
 	arrayInstance := Array[T, Y]{
-		ArrayTraits:       arrayTraits,
-		RawArray:          make([]T, 0),
-		IsAuto:            isAuto,
-		IsPacked:          isPacked,
-		FixedSize:         size,
+		ArrayTraits: arrayTraits,
+		RawArray:    &rawArray,
+		IsAuto:      isAuto,
+		IsPacked:    isPacked,
+		FixedSize:   size,
 	}
 	for _, opt := range options {
 		opt.apply(&arrayInstance)

@@ -1,3 +1,4 @@
+
 {{ $scope := .pkg }}
 {{ $field := .field }}
 {{ $index := .index }}
@@ -27,11 +28,15 @@
 {{- end }}
 
 {{- if $field.Array }}
-    {{- if $field.Array }}
-        if delta, err := {{ $field_name }}.ZserioBitSizePacked(endBitPosition); err != nil {
-    {{- else }}
-        if delta, err := ztype.BitSizeOfString({{ $field_name }}); err != nil {
+    {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $field_name "field" $field "native" $native }}
+    {{- if $native.IsMarshaler }}
+    // The array type is a zserio object. The array traits expect array of
+    // pointers, so convert from array of struct to array of struct pointers
+    for index, _ := range {{ $field_name }} {
+        {{ $field.Name }}PtrArray = append({{ $field.Name }}PtrArray, &{{ $field_name }}[index])
+    }
     {{- end }}
+    if delta, err := {{ $field.Name }}ArrayProperties.ZserioBitSizePacked(endBitPosition); err != nil {
         return 0, err
     } else {
     endBitPosition += delta
@@ -51,9 +56,7 @@
     if field{{ $field.Name }}Context, ok := childrenNodes[{{ $index }}].Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}]); !ok {
         return 0, errors.New("invalid packing context")
     } else {
-        traits := {{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
-
-        if delta, err := field{{ $field.Name }}Context.BitSizeOf(&traits, endBitPosition, {{ goType $scope $native.Type }}({{ $field_name }})); err != nil {
+        if delta, err := field{{ $field.Name }}Context.BitSizeOf(&{{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}, endBitPosition, {{ goType $scope $native.Type }}({{ $field_name }})); err != nil {
             return 0, err
         } else {
             endBitPosition += delta

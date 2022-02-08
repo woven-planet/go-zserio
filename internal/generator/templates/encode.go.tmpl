@@ -35,10 +35,24 @@
     }
     if v.{{ $field.Name }} != nil {
 {{- end }}
-{{- template "encode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field }}
 {{- if $field.Array }}
-    {{- template "encode_array_init.go.tmpl" dict "pkg" $scope "field_name" $field_name "array" $field.Array "type" $native.Type }}
+    {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $field_name "field" $field "native" $native }}
+    {{- if $field.Array.Length }}
+        if len({{ $field_name }}) != int({{ goExpression $scope $field.Array.Length }}) {
+            return errors.New("array size does not match!")
+        }
+    {{- end }}
+    {{- if $native.IsMarshaler }}
+    // The array type is a zserio object. The array traits expect array of
+    // pointers, so convert from array of struct to array of struct pointers
+    for index, _ := range {{ $field_name }} {
+        {{ $field.Name }}PtrArray = append({{ $field.Name }}PtrArray, &{{ $field_name }}[index])
+    }
+    {{- end }}
+    {{- $field_name = printf "%sArrayProperties" $field.Name }}
 {{- end }}
+{{- template "encode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field }}
+
 {{- if and (not $native.IsMarshaler) (not $field.Array) }}
     {{- if or (gt $native.Type.Bits 0) $native.Type.LengthExpression}}
         {{- if eq $native.Type.Name "int" }}
