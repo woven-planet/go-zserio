@@ -13,7 +13,7 @@ genrule(
     tools = ["//test/python:write_test_data"],
 )
 
-# gazelle:resolve go github.com/woven-planet/go-zserio/test/go/reference_modules/testobject1/testobject //test/go:testobject
+# gazelle:resolve go gen/github.com/woven-planet/go-zserio/test/go/reference_modules/testobject1/testobject //test/go:testobject
 
 go_test(
     name = "test_test",
