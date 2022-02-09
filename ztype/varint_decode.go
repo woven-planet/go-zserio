@@ -1,9 +1,9 @@
 package ztype
 
-import "github.com/icza/bitio"
+import "io"
 
 // ReadVarint16 reads a zserio varint16 value from the bitstream.
-func ReadVarint16(r *bitio.CountReader) (int16, error) {
+func ReadVarint16(r io.ByteReader) (int16, error) {
 	b, err := r.ReadByte()
 	if err != nil {
 		return 0, err
@@ -23,7 +23,7 @@ func ReadVarint16(r *bitio.CountReader) (int16, error) {
 }
 
 // ReadVarint32 reads a zserio varint32 value from the bitstream.
-func ReadVarint32(r *bitio.CountReader) (int32, error) {
+func ReadVarint32(r io.ByteReader) (int32, error) {
 	b, err := r.ReadByte()
 	if err != nil {
 		return 0, err
@@ -56,7 +56,7 @@ func ReadVarint32(r *bitio.CountReader) (int32, error) {
 }
 
 // ReadVarint64 reads a zserio varint64 value from the bitstream.
-func ReadVarint64(r *bitio.CountReader) (int64, error) {
+func ReadVarint64(r io.ByteReader) (int64, error) {
 	b, err := r.ReadByte()
 	if err != nil {
 		return 0, err
@@ -94,7 +94,7 @@ func ReadVarint64(r *bitio.CountReader) (int64, error) {
 }
 
 // ReadVarint reads a zserio varint value from the bitstream.
-func ReadVarint(r *bitio.CountReader) (int64, error) {
+func ReadVarint(r io.ByteReader) (int64, error) {
 	b, err := r.ReadByte()
 	if err != nil {
 		return 0, err
