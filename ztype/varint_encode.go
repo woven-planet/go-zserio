@@ -1,39 +1,45 @@
 package ztype
 
-import "github.com/icza/bitio"
+import "io"
+
+type ByteWriter interface {
+	io.ByteWriter
+
+	WriteBitsUnsafe(r uint64, n uint8) error
+}
 
 // WriteVarint16 writes a zserio varint16 value to the bitstream.
 // If you pass in a value that is outside to allowed range of
 // (MinVarint16, MaxVarint16) ErrOutOfBounds will be returned.
-func WriteVarint16(w *bitio.CountWriter, v int16) error {
+func WriteVarint16(w ByteWriter, v int16) error {
 	return writeVarInt(w, int64(v), 2)
 }
 
 // WriteVarint32 writes a zserio varint32 value to the bitstream.
 // If you pass in a value that is outside to allowed range of
 // (MinVarint32, MaxVarint32) ErrOutOfBounds will be returned.
-func WriteVarint32(w *bitio.CountWriter, v int32) error {
+func WriteVarint32(w ByteWriter, v int32) error {
 	return writeVarInt(w, int64(v), 4)
 }
 
 // WriteVarint64 writes a zserio varint64 value to the bitstream.
 // If you pass in a value that is outside to allowed range of
 // (MinVarint64, MaxVarint64) ErrOutOfBounds will be returned.
-func WriteVarint64(w *bitio.CountWriter, v int64) error {
+func WriteVarint64(w ByteWriter, v int64) error {
 	return writeVarInt(w, int64(v), 8)
 }
 
 // WriteVarint writes a zserio varint value to the bitstream.
 // If you pass in a value that is outside to allowed range of
 // (MinVarint, MaxVarint) ErrOutOfBounds will be returned.
-func WriteVarint(w *bitio.CountWriter, v int64) error {
+func WriteVarint(w ByteWriter, v int64) error {
 	if v == MinInt64 {
 		return w.WriteByte(0x80)
 	}
 	return writeVarInt(w, int64(v), 9)
 }
 
-func writeVarInt(w *bitio.CountWriter, v int64, maxBytes int) error {
+func writeVarInt(w ByteWriter, v int64, maxBytes int) error {
 	var absValue uint64
 	if v < 0 {
 		absValue = uint64(-v)
@@ -68,9 +74,11 @@ func writeVarInt(w *bitio.CountWriter, v int64, maxBytes int) error {
 			shiftBits++
 		}
 		b |= (absValue >> int64(shiftBits)) & (0xff >> (8 - remainingBits))
-		w.TryWriteBitsUnsafe(b, 8)
+		if err == nil {
+			err = w.WriteBitsUnsafe(b, 8)
+		}
 	}
-	return w.TryError
+	return err
 }
 
 // SignedBitSize returns the size in bits of the zserio encoding of a signed
