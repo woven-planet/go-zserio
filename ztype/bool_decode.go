@@ -1,8 +1,10 @@
 package ztype
 
-import "github.com/icza/bitio"
+type BoolReader interface {
+	ReadBool() (bool, error)
+}
 
 // ReadBool reads a boolean value from the bitstream
-func ReadBool(r *bitio.CountReader) (bool, error) {
+func ReadBool(r BoolReader) (bool, error) {
 	return r.ReadBool()
 }
