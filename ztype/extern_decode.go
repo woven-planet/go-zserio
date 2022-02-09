@@ -2,12 +2,17 @@ package ztype
 
 import (
 	"errors"
-
-	"github.com/icza/bitio"
+	"io"
 )
 
+type ExternReader interface {
+	io.Reader
+	BitReader
+	io.ByteReader
+}
+
 // ReadExtern reads an zserio extern type (variable size bitbuffer) from a reader.
-func ReadExtern(r *bitio.CountReader) (*ExternType, error) {
+func ReadExtern(r ExternReader) (*ExternType, error) {
 	var err error
 	e := &ExternType{}
 	e.BitSize, err = ReadVarsize(r)
