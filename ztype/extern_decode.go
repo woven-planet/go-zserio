@@ -7,8 +7,8 @@ import (
 
 type ExternReader interface {
 	io.Reader
-	BitReader
 	io.ByteReader
+	BitReader
 }
 
 // ReadExtern reads an zserio extern type (variable size bitbuffer) from a reader.
