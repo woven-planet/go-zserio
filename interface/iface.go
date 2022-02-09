@@ -1,6 +1,27 @@
 package zserio
 
-import "github.com/icza/bitio"
+import (
+	"io"
+
+	"github.com/icza/bitio"
+)
+
+type Reader interface {
+	io.Reader
+	io.ByteReader
+
+	ReadBits(n uint8) (uint64, error)
+	ReadBool() (bool, error)
+}
+
+type Writer interface {
+	io.Writer
+	io.ByteWriter
+
+	WriteBits(r uint64, n uint8) error
+	WriteBool(bool) error
+	WriteBitsUnsafe(r uint64, n uint8) error
+}
 
 // Unmarshaler is the interface implemented by types that can be read from a
 // zserio bitstream. The implementation is normally automatically generated
