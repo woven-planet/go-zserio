@@ -1,9 +1,14 @@
 package ztype
 
-import "github.com/icza/bitio"
+import "io"
+
+type StringReader interface {
+	io.Reader
+	io.ByteReader
+}
 
 // ReadString reads a string from the bitstream.
-func ReadString(r *bitio.CountReader) (string, error) {
+func ReadString(r StringReader) (string, error) {
 	size, err := ReadVarsize(r)
 	if err != nil {
 		return "", err
