@@ -22,6 +22,7 @@ go_library(
         "limits.go",
         "packed_array_traits.go",
         "packing_context_node.go",
+        "reader.go",
         "string_decode.go",
         "string_encode.go",
         "varint_decode.go",

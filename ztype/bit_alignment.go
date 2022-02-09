@@ -1,6 +1,8 @@
 package ztype
 
-import "github.com/icza/bitio"
+import (
+	"github.com/icza/bitio"
+)
 
 // AlignReader aligns a bitio reader to a bit boundary.
 func AlignReader(r *bitio.CountReader, boundary uint8) {
@@ -36,5 +38,4 @@ func alignTo(alignmentValue, bitPosition int) int {
 		return bitPosition
 	}
 	return (((bitPosition - 1) / alignmentValue) + 1) * alignmentValue
-
 }
