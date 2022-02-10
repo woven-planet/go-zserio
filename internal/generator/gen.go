@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"go/format"
+	"io"
 	"log"
 	"os"
 	"path"
+	"sort"
 	"strings"
 
 	"github.com/iancoleman/strcase"
@@ -17,9 +19,31 @@ import (
 type Options struct {
 	RootPackage       string
 	DoNotFormatSource bool
+	OutputPackage     string
+
+	outputToStdout bool
 }
 
+type data map[string]interface{}
+
 func Generate(m *model.Model, rootPath string, options *Options) error {
+	options.outputToStdout = rootPath == "-"
+
+	if options.outputToStdout {
+		pkg, ok := m.Packages[options.OutputPackage]
+		if !ok {
+			var known []string
+			for name := range m.Packages {
+				known = append(known, name)
+			}
+			sort.Strings(known)
+
+			return fmt.Errorf("%q not found, only know about %q", options.OutputPackage, known)
+		}
+
+		return generatePackage(rootPath, pkg, options)
+	}
+
 	for _, pkg := range m.Packages {
 		if err := generatePackage(rootPath, pkg, options); err != nil {
 			return err
@@ -28,35 +52,20 @@ func Generate(m *model.Model, rootPath string, options *Options) error {
 	return nil
 }
 
-func writeSource(rootPath, zserioPkg, fn string, doNotFormatCode bool, tmpl string, data map[string]interface{}) error {
+func executeTemplate(out io.Writer, tmpl string, data data) error {
+	templ := templates.Lookup(tmpl)
+	if templ == nil {
+		return fmt.Errorf("template %q is missing", tmpl)
+	}
+
+	return templ.Execute(out, data)
+}
+
+func writeToFile(code []byte, rootPath, zserioPkg, fn string, doNotFormatCode bool) (retErr error) {
 	ids := strings.Split(strings.ToLower(zserioPkg), ".")
 	outputDir := path.Join(append([]string{rootPath}, ids...)...)
 	outputFile := path.Join(outputDir, fn)
 
-	templ := templates.Lookup(tmpl)
-	if templ == nil {
-		panic("Package template is missing")
-	}
-
-	var out bytes.Buffer
-	if err := templ.Execute(&out, data); err != nil {
-		return err
-	}
-	code := out.Bytes()
-
-	if doNotFormatCode {
-		return writeGoSource(outputDir, outputFile, code)
-	}
-
-	formatted, err := formatGoSource(code)
-	if err != nil {
-		return err
-	}
-
-	return writeGoSource(outputDir, outputFile, formatted)
-}
-
-func writeGoSource(outputDir, outputFile string, code []byte) error {
 	log.Printf("Writing %s\n", outputFile)
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
 		return fmt.Errorf("mkdir: %w", err)
@@ -66,99 +75,165 @@ func writeGoSource(outputDir, outputFile string, code []byte) error {
 	if err != nil {
 		return fmt.Errorf("open: %w", err)
 	}
+	defer func() {
+		if retErr == nil {
+			return
+		}
+
+		_ = os.Remove(outputFile)
+	}()
 	defer f.Close()
 
-	if _, err := f.Write(code); err != nil {
-		_ = os.Remove(outputFile)
-		return fmt.Errorf("write: %w", err)
-	}
-	return nil
+	return writeGoSource(f, code, doNotFormatCode)
 }
 
-func formatGoSource(code []byte) ([]byte, error) {
+func writeGoSource(w io.Writer, code []byte, doNotFormatCode bool) error {
+	if doNotFormatCode {
+		if _, err := w.Write(code); err != nil {
+			return fmt.Errorf("write: %w", err)
+		}
+		return nil
+	}
+
 	code, err := StripImports(code)
 	if err != nil {
-		return nil, fmt.Errorf("strip imports: %w", err)
+		return fmt.Errorf("strip imports: %w", err)
 	}
 
 	formatted, err := format.Source(code)
 	if err != nil {
 		log.Println(string(code))
-		return nil, fmt.Errorf("format: %w", err)
+		return fmt.Errorf("format: %w", err)
 	}
 
-	return formatted, nil
+	if _, err := w.Write(formatted); err != nil {
+		return fmt.Errorf("write: %w", err)
+	}
+	return nil
+}
+
+// output allows us easier passing of arguments to write packages.
+type output struct {
+	name         string // the name of the data structure that is output
+	template     string // template file name
+	data         data
+	withPreamble bool
+}
+
+func newOutput(name, template string, data data, withPreamble bool) output {
+	return output{
+		name:         name,
+		template:     template,
+		data:         data,
+		withPreamble: withPreamble,
+	}
+}
+
+func newTypeOutput(astType interface{}, d data, withPreamble bool) output {
+	var name, typeName string
+	switch t := astType.(type) {
+	case *ast.Enum:
+		name = t.Name
+		typeName = "enum"
+	case *ast.Union:
+		name = t.Name
+		typeName = "union"
+	case *ast.BitmaskType:
+		name = t.Name
+		typeName = "bitmask"
+	case *ast.Choice:
+		name = t.Name
+		typeName = "choice"
+	case *ast.Struct:
+		name = t.Name
+		typeName = "struct"
+	default:
+		panic(fmt.Sprintf("%#T is unsupported", t))
+	}
+
+	templateData := make(data, len(d)+1)
+	for k, v := range d {
+		templateData[k] = v
+	}
+	templateData[typeName] = astType
+	return newOutput(strcase.ToSnake(name)+".go", typeName+".go.tmpl", templateData, withPreamble)
+}
+
+func (o *output) executeTemplate(w io.Writer) error {
+	if o.withPreamble {
+		if err := executeTemplate(w, "preamble.go.tmpl", o.data); err != nil {
+			return fmt.Errorf("generate preamble: %w", err)
+		}
+	}
+
+	return executeTemplate(w, o.template, o.data)
+}
+
+func newOutputs(pkg *ast.Package, rootPackage string, singleFile bool) []output {
+	data := data{
+		"pkg":         pkg,
+		"rootPackage": rootPackage,
+	}
+
+	outs := []output{newOutput("pkg.go", "package.go.tmpl", data, true)}
+
+	for _, t := range pkg.Enums {
+		outs = append(outs, newTypeOutput(t, data, !singleFile))
+	}
+
+	for _, t := range pkg.Unions {
+		if len(t.TemplateParameters) > 0 {
+			// We only need to generate source for instantiated templates
+			continue
+		}
+		outs = append(outs, newTypeOutput(t, data, !singleFile))
+	}
+
+	for _, t := range pkg.Bitmasks {
+		outs = append(outs, newTypeOutput(t, data, !singleFile))
+	}
+
+	for _, t := range pkg.Choices {
+		if len(t.TemplateParameters) > 0 {
+			// We only need to generate source for instantiated templates
+			continue
+		}
+		outs = append(outs, newTypeOutput(t, data, !singleFile))
+	}
+
+	for _, t := range pkg.Structs {
+		if len(t.TemplateParameters) > 0 {
+			// We only need to generate source for instantiated templates
+			continue
+		}
+		outs = append(outs, newTypeOutput(t, data, !singleFile))
+	}
+
+	return outs
 }
 
 func generatePackage(rootPath string, pkg *ast.Package, options *Options) error {
-	var err error
+	outs := newOutputs(pkg, options.RootPackage, options.outputToStdout)
 
-	if err = writeSource(rootPath, pkg.Name, "pkg.go", options.DoNotFormatSource, "package.go.tmpl", map[string]interface{}{
-		"pkg":         pkg,
-		"rootPackage": options.RootPackage,
-	}); err != nil {
-		return err
+	if options.outputToStdout {
+		var out bytes.Buffer
+		for _, o := range outs {
+			if err := o.executeTemplate(&out); err != nil {
+				return fmt.Errorf("generate %s: %w", o.name, err)
+			}
+		}
+
+		return writeGoSource(os.Stdout, out.Bytes(), options.DoNotFormatSource)
 	}
 
-	for _, e := range pkg.Enums {
-		if err = writeSource(rootPath, pkg.Name, strcase.ToSnake(e.Name)+".go", options.DoNotFormatSource, "enum.go.tmpl", map[string]interface{}{
-			"pkg":         pkg,
-			"enum":        e,
-			"rootPackage": options.RootPackage,
-		}); err != nil {
-			return err
+	for _, o := range outs {
+		var out bytes.Buffer
+		if err := o.executeTemplate(&out); err != nil {
+			return fmt.Errorf("generate %s: %w", o.name, err)
 		}
-	}
 
-	for _, u := range pkg.Unions {
-		if len(u.TemplateParameters) > 0 {
-			// We only need to generate source for instantiated templates
-			continue
-		}
-		if err = writeSource(rootPath, pkg.Name, strcase.ToSnake(u.Name)+".go", options.DoNotFormatSource, "union.go.tmpl", map[string]interface{}{
-			"pkg":         pkg,
-			"union":       u,
-			"rootPackage": options.RootPackage,
-		}); err != nil {
-			return err
-		}
-	}
-
-	for _, b := range pkg.Bitmasks {
-		if err = writeSource(rootPath, pkg.Name, strcase.ToSnake(b.Name)+".go", options.DoNotFormatSource, "bitmask.go.tmpl", map[string]interface{}{
-			"pkg":         pkg,
-			"bitmask":     b,
-			"rootPackage": options.RootPackage,
-		}); err != nil {
-			return err
-		}
-	}
-
-	for _, c := range pkg.Choices {
-		if len(c.TemplateParameters) > 0 {
-			// We only need to generate source for instantiated templates
-			continue
-		}
-		if err = writeSource(rootPath, pkg.Name, strcase.ToSnake(c.Name)+".go", options.DoNotFormatSource, "choice.go.tmpl", map[string]interface{}{
-			"pkg":         pkg,
-			"choice":      c,
-			"rootPackage": options.RootPackage,
-		}); err != nil {
-			return err
-		}
-	}
-
-	for _, str := range pkg.Structs {
-		if len(str.TemplateParameters) > 0 {
-			// We only need to generate source for instantiated templates
-			continue
-		}
-		if err = writeSource(rootPath, pkg.Name, strcase.ToSnake(str.Name)+".go", options.DoNotFormatSource, "struct.go.tmpl", map[string]interface{}{
-			"pkg":         pkg,
-			"struct":      str,
-			"rootPackage": options.RootPackage,
-		}); err != nil {
-			return err
+		if err := writeToFile(out.Bytes(), rootPath, pkg.Name, o.name, options.DoNotFormatSource); err != nil {
+			return fmt.Errorf("write %s: %w", o.name, err)
 		}
 	}
 

@@ -11,7 +11,7 @@ import (
 
 	"github.com/cucumber/godog"
 	"github.com/icza/bitio"
-	"github.com/woven-planet/go-zserio/test/go/reference_modules/testobject1/testobject"
+	"gen/github.com/woven-planet/go-zserio/test/go/reference_modules/testobject1/testobject"
 )
 
 func testWorkspace(filePath string) string {

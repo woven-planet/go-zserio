@@ -5,7 +5,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 # gazelle:prefix github.com/woven-planet/go-zserio
 # gazelle:resolve go github.com/antlr/antlr4/runtime/Go/antlr @antlr4_runtimes//:go
 # gazelle:exclude example/**
-# gazelle:exclude **/testobject1/**
+# gazelle:exclude **/*_gen.zs.go
 gazelle(name = "gazelle")
 
 gazelle(

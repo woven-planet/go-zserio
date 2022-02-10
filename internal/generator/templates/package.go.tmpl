@@ -1,4 +1,3 @@
-{{ template "preamble.go.tmpl" dict "rootPackage" .rootPackage "pkg" .pkg "comment" .pkg.Comment }}
 {{ $scope := .pkg }}
 
 {{- range $subtype := .pkg.Subtypes }}
