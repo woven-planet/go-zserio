@@ -22,13 +22,30 @@
 {{- if not (eq $field.Alignment 0) }}
     endBitPosition += ztype.CountAlignBits(endBitPosition, {{ $field.Alignment }})
 {{- end }}
-{{if $field.IsOptional}}
+
+{{- if $field.IsOptional}}
     endBitPosition += 1
     if v.{{ $field.Name }} != nil {
-    {{- template "builtin_bitsizeof.go.tmpl" dict "pkg" $scope "name" $name "native" $native "isarray" $field.Array }}
+{{- end }}
+
+{{- template "encode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field "field_name" $name }}
+{{- if $field.Array }}
+    {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $name "field" $field "native" $native }}
+    {{- if $native.IsMarshaler }}
+    for index, _ := range {{ $name }} {
+        {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{if $native.RequiresCast }}(*{{ goType $scope $native.Type }})(&{{ $name }}[index]){{ else }}&{{ $name }}[index]{{ end }})
     }
-{{- else}}
-    {{- template "builtin_bitsizeof.go.tmpl" dict "pkg" $scope "name" $name "native" $native "isarray" $field.Array }}
+    {{- else if $native.RequiresCast }}
+    for _, element := range {{ $name }} {
+        {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{ goType $scope $native.Type }}(element))
+    }
+    {{- end }}
+    {{- $name = printf "%sArrayProperties" $field.Name }}
+{{- end }}
+{{ template "builtin_bitsizeof.go.tmpl" dict "pkg" $scope "name" $name "native" $native "isarray" $field.Array }}
+
+{{- if $field.IsOptional}}
+    }
 {{- end}}
 {{- if $field.OptionalClause }}
     }

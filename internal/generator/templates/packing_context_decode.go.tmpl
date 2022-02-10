@@ -36,7 +36,7 @@
     {{- $assign_str_rvalue := $field_name }}
 
     {{- if $field.Array }}
-    {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $assign_str_lvalue "array" $field.Array "type" $native.Type }}
+    {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $assign_str_lvalue "field" $field "native" $native }}
     {{- end }}
     
     {{- template "decode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field }}
@@ -44,12 +44,20 @@
     {{- if $field.Array }}
         {{- if not $field.Array.IsPacked }}
             // This array is implicitly packed, because its parent object is packed
-            {{ $assign_str_rvalue }}.IsPacked = true
+            {{ $field.Name }}ArrayProperties.IsPacked = true
         {{- end }}
-        if err = {{ $assign_str_rvalue }}.UnmarshalZserio(r); err != nil {
+        if err = {{ $field.Name }}ArrayProperties.UnmarshalZserio(r); err != nil {
             return err
         }
-
+        {{- if or $native.IsMarshaler $native.RequiresCast }}
+        {{- $element := "elem" }}
+        {{- if $native.IsMarshaler }}
+            {{- $element = "*elem" }}
+        {{- end }}
+        for _, elem := range {{ $field.Name }}ArrayProperties.RawArray {
+            {{ $assign_str_lvalue }} = append({{ $assign_str_lvalue }}, {{ if $native.RequiresCast }}{{ goType $scope $field.Type }}({{ $element }}){{ else }}{{ $element }}{{ end }})
+        }
+        {{- end }}
     {{- else if eq $native.Type.Name "bool" }}
         {{- if $native.RequiresCast }}
             if tempValue, err := ztype.ReadBool(r); err != nil {

@@ -23,7 +23,6 @@ go_library(
         "templates/decode_compound_parameters.go.tmpl",
         "templates/default_values.go.tmpl",
         "templates/encode.go.tmpl",
-        "templates/encode_array_init.go.tmpl",
         "templates/encode_compound_parameters.go.tmpl",
         "templates/enum.go.tmpl",
         "templates/field_declaration.go.tmpl",

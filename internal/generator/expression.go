@@ -182,15 +182,7 @@ func ternaryExpressionToGoString(scope ast.Scope, expression *ast.Expression) st
 }
 
 func lenOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
-
-	innerExpression := ExpressionToGoString(scope, expression.Operand1)
-
-	if f, ok := expression.Operand1.ResultSymbol.Symbol.(*ast.Field); ok {
-		if f.Array != nil {
-			innerExpression += ".RawArray"
-		}
-	}
-	return fmt.Sprintf("len(%s)", innerExpression)
+	return fmt.Sprintf("len(%s)", ExpressionToGoString(scope, expression.Operand1))
 }
 
 func ExpressionToGoString(scope ast.Scope, expression *ast.Expression) string {

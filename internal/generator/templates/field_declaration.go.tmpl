@@ -1,11 +1,7 @@
+
 {{- $scope := .pkg }}
 {{- $field := .field }}
 {{- $native := goNativeType $scope $field.Type }}
 {{- $go_type := goType $scope $field.Type }}
-{{ $field.Name }} {{ if $field.IsOptional }}*{{end}}
-
-{{- if $field.Array -}}
-    ztype.Array[{{if $native.IsMarshaler }}*{{ end }}{{ goType $scope $native.Type }}, {{ template "array_traits_type.go.tmpl" dict "pkg" $scope "type" $native.Type }}]
-{{- else -}}
-    {{ $go_type }}
-{{- end }}
+{{/* Arrays must use the native type, due to the restriction with the array traits */}}
+{{ $field.Name }} {{ if $field.IsOptional }}*{{end}}{{ if $field.Array }}[]{{ end }}{{ $go_type }}

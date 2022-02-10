@@ -68,11 +68,11 @@ func (array *Array[T, Y]) UnmarshalZserio(reader *bitio.CountReader) error {
 // ArrayFromReader is a helper function to read an array as a one-liner.
 func ArrayFromReader[T any, Y IArrayTraits[T]](reader *bitio.CountReader, arrayTraits Y, size int, isPacked, isAuto bool, options ...ArrayOption[T, Y]) (*Array[T, Y], error) {
 	arrayInstance := Array[T, Y]{
-		ArrayTraits:       arrayTraits,
-		RawArray:          make([]T, 0),
-		IsAuto:            isAuto,
-		IsPacked:          isPacked,
-		FixedSize:         size,
+		ArrayTraits: arrayTraits,
+		RawArray:    make([]T, 0),
+		IsAuto:      isAuto,
+		IsPacked:    isPacked,
+		FixedSize:   size,
 	}
 	for _, opt := range options {
 		opt.apply(&arrayInstance)
