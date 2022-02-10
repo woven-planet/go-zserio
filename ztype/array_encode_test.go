@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/icza/bitio"
 	"github.com/woven-planet/go-zserio/ztype"
 )
 
@@ -43,8 +42,8 @@ func TestVarintArrayEncoding(t *testing.T) {
 			}
 			// convert to binary buffer
 			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
-			err := arrayInstance.MarshalZserio(ztype.NewCountWriter(w))
+			w := ztype.NewWriter(&buf)
+			err := arrayInstance.MarshalZserio(w)
 			w.Close()
 			if err != nil {
 				t.Fatalf("error writing array: %v", err)
@@ -119,8 +118,8 @@ func TestBitfieldArrayEncoding(t *testing.T) {
 			}
 			// convert to binary buffer
 			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
-			err := arrayInstance.MarshalZserio(ztype.NewCountWriter(w))
+			w := ztype.NewWriter(&buf)
+			err := arrayInstance.MarshalZserio(w)
 			w.Close()
 			if err != nil {
 				t.Fatalf("error writing array: %v", err)
@@ -181,8 +180,8 @@ func TestVarInt32ArrayEncoding(t *testing.T) {
 			}
 			// convert to binary buffer
 			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
-			err := arrayInstance.MarshalZserio(ztype.NewCountWriter(w))
+			w := ztype.NewWriter(&buf)
+			err := arrayInstance.MarshalZserio(w)
 			w.Close()
 			if err != nil {
 				t.Fatalf("error writing array: %v", err)
@@ -218,8 +217,8 @@ func TestFloat16ArrayEncoding(t *testing.T) {
 			}
 			// convert to binary buffer
 			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
-			err := arrayInstance.MarshalZserio(ztype.NewCountWriter(w))
+			w := ztype.NewWriter(&buf)
+			err := arrayInstance.MarshalZserio(w)
 			w.Close()
 			if err != nil {
 				t.Fatalf("error writing array: %v", err)
@@ -255,8 +254,8 @@ func TestFloat32ArrayEncoding(t *testing.T) {
 			}
 			// convert to binary buffer
 			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
-			err := arrayInstance.MarshalZserio(ztype.NewCountWriter(w))
+			w := ztype.NewWriter(&buf)
+			err := arrayInstance.MarshalZserio(w)
 			w.Close()
 			if err != nil {
 				t.Fatalf("error writing array: %v", err)
@@ -296,8 +295,8 @@ func TestFloat64ArrayEncoding(t *testing.T) {
 			}
 			// convert to binary buffer
 			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
-			err := arrayInstance.MarshalZserio(ztype.NewCountWriter(w))
+			w := ztype.NewWriter(&buf)
+			err := arrayInstance.MarshalZserio(w)
 			w.Close()
 			if err != nil {
 				t.Fatalf("error writing array: %v", err)
@@ -358,8 +357,8 @@ func TestStringArrayEncoding(t *testing.T) {
 			}
 			// convert to binary buffer
 			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
-			err := arrayInstance.MarshalZserio(ztype.NewCountWriter(w))
+			w := ztype.NewWriter(&buf)
+			err := arrayInstance.MarshalZserio(w)
 			w.Close()
 			if err != nil {
 				t.Fatalf("error writing array: %v", err)

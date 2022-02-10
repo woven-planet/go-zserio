@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/cucumber/godog"
-	"github.com/icza/bitio"
 	"github.com/woven-planet/go-zserio/ztype"
 	"gen/github.com/woven-planet/go-zserio/test/go/reference_modules/testobject1/testobject"
 )
@@ -86,10 +85,10 @@ func reencodeZserioTestBinary() error {
 	}
 	defer f.Close()
 
-	w := bitio.NewCountWriter(f)
+	w := ztype.NewWriter(f)
 	defer w.Close()
 
-	if err := testObject.MarshalZserio(ztype.NewCountWriter(w)); err != nil {
+	if err := testObject.MarshalZserio(w); err != nil {
 		return fmt.Errorf("marshal: %w", err)
 	}
 
