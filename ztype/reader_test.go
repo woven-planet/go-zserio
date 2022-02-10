@@ -7,5 +7,5 @@ import (
 )
 
 func NewCountReader(r io.Reader) *ztype.CountReader {
-	return ztype.NewCountReader(r)
+	return ztype.NewReader(r)
 }

@@ -17,7 +17,7 @@ type CountReader struct {
 	bitsCount int64
 }
 
-func NewCountReader(r io.Reader) *CountReader {
+func NewReader(r io.Reader) *CountReader {
 	return &CountReader{r: bitio.NewReader(r)}
 }
 

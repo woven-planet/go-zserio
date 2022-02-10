@@ -74,7 +74,7 @@ func readReferenceZserioFile() error {
 func reencodeZserioTestBinary() error {
 	// read the binary file...
 	var testObject testobject.TestObject
-	r := ztype.NewCountReader(bytes.NewBuffer(ReferenceBinaryContent))
+	r := ztype.NewReader(bytes.NewBuffer(ReferenceBinaryContent))
 
 	if err := testObject.UnmarshalZserio(r); err != nil {
 		return fmt.Errorf("unmarshal reference: %w", err)
