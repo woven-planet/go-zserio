@@ -11,6 +11,11 @@ type {{ $choice.Name }} struct {
     {{- template "field_declaration.go.tmpl" dict "pkg" $scope "field" .Field }}
   {{- end }}
 {{- end }}
+{{- if $choice.DefaultCase }}
+  {{- if $choice.DefaultCase.Field }}
+    {{- template "field_declaration.go.tmpl" dict "pkg" $scope "field" $choice.DefaultCase.Field }}
+  {{- end }}
+{{- end }}
 }
 
 func (v *{{ $choice.Name}}) Clone() zserio.ZserioType {
@@ -25,50 +30,76 @@ func (v *{{ $choice.Name}}) LoadDefaultValues() error {
     {{template "default_values.go.tmpl" dict "pkg" $scope "field" .Field }}
   {{- end }}
 {{- end}}
+{{- if $choice.DefaultCase }}
+  {{- if $choice.DefaultCase.Field }}
+   {{template "default_values.go.tmpl" dict "pkg" $scope "field" $choice.DefaultCase.Field }}
+  {{- end }}
+{{- end }}
   return nil
 }
 
 // MarshalZserio implements the zserio.Marshaler interface.
 func (v *{{ $choice.Name}}) MarshalZserio(w *bitio.CountWriter) error {
-    var err error
+  var err error
 {{- $expr := $choice.Expression }}
+  switch (v.{{ $expr.ResultSymbol.Symbol.Name }}) {
 {{- range $case := $choice.Cases }}
   {{- if .Field }}
-  if v.{{ $expr.ResultSymbol.Symbol.Name }} == {{ (index .Conditions 0).Condition.ResultIntValue }} { 
+  case {{ (index .Conditions 0).Condition.ResultIntValue }}:
     {{- template "encode.go.tmpl" dict "pkg" $scope "field" .Field }}
-  }
   {{- end }}
 {{- end }}
-    _ = err // to avoid "declared but not used" warning
-    return nil
+{{- if $choice.DefaultCase }}
+  {{- if $choice.DefaultCase.Field }}
+  default:
+   {{- template "encode.go.tmpl" dict "pkg" $scope "field" $choice.DefaultCase.Field }}
+  {{- end }}
+{{- end }}
+  }
+  _ = err // to avoid "declared but not used" warning
+  return nil
 }
 
 // UnmarshalZserio implements the zserio.Unmarshaler interface.
 func (v *{{ $choice.Name}}) UnmarshalZserio(r *bitio.CountReader) error {
     var err error
 {{- $expr := $choice.Expression }}
+  switch (v.{{ $expr.ResultSymbol.Symbol.Name }}) {
 {{- range $case := $choice.Cases }}
   {{- if .Field }}
-  if v.{{ $expr.ResultSymbol.Symbol.Name }} == {{ (index .Conditions 0).Condition.ResultIntValue }} { 
+  case {{ (index .Conditions 0).Condition.ResultIntValue }}: 
     {{- template "decode.go.tmpl" dict "pkg" $scope "field" .Field }}
-  }
   {{- end }}
 {{- end }}
-    _ = err // to avoid "declared but not used" warning
-    return nil
+{{- if $choice.DefaultCase }}
+  {{- if $choice.DefaultCase.Field }}
+  default:
+   {{- template "decode.go.tmpl" dict "pkg" $scope "field" $choice.DefaultCase.Field }}
+  {{- end }}
+{{- end }}
+  }
+  _ = err // to avoid "declared but not used" warning
+  return nil
 }
 
 // ZserioBitSize implements the zserio.Marshaler interface.
 func (v *{{ $choice.Name}}) ZserioBitSize(bitPosition int) (int, error) {
   endBitPosition := bitPosition
 {{- $expr := $choice.Expression }}
+  switch (v.{{ $expr.ResultSymbol.Symbol.Name }}) {
 {{- range $case := $choice.Cases }}
   {{- if .Field }}
-  if v.{{ $expr.ResultSymbol.Symbol.Name }} == {{ (index .Conditions 0).Condition.ResultIntValue }} { 
+  case {{ (index .Conditions 0).Condition.ResultIntValue }}:
     {{- template "bitsizeof.go.tmpl" dict "pkg" $scope "field" .Field "isarray" false}}
-  }
   {{- end }}
 {{- end }}
+{{- if $choice.DefaultCase }}
+  {{- if $choice.DefaultCase.Field }}
+  default:
+   {{- template "bitsizeof.go.tmpl" dict "pkg" $scope "field" $choice.DefaultCase.Field "isarray" false}}
+  {{- end }}
+{{- end }}
+  }
   return endBitPosition - bitPosition, nil
 }
 
@@ -78,6 +109,11 @@ func (v *{{ $choice.Name}}) ZserioCreatePackingContext(contextNode *zserio.Packi
     {{- template "packing_context_create.go.tmpl" dict "pkg" $scope "field" .Field }}
   {{- end }}
 {{- end }}
+{{- if $choice.DefaultCase }}
+  {{- if $choice.DefaultCase.Field }}
+   {{- template "packing_context_create.go.tmpl" dict "pkg" $scope "field" $choice.DefaultCase.Field }}
+  {{- end }}
+{{- end }}
   return nil
 }
 
@@ -85,15 +121,22 @@ func (v *{{ $choice.Name}}) ZserioInitPackingContext(contextNode *zserio.Packing
 {{- if $choice.Cases }}
     childrenNodes := contextNode.GetChildren()
     _ = childrenNodes // to avoid "declared but not used" warning
+    switch (v.{{ $expr.ResultSymbol.Symbol.Name }}) {
   {{- $index := 0 }}
   {{- range $case := $choice.Cases }}
     {{- if .Field }}
-      if v.{{ $expr.ResultSymbol.Symbol.Name }} == {{ (index .Conditions 0).Condition.ResultIntValue }} { 
+      case {{ (index .Conditions 0).Condition.ResultIntValue }}:
       {{- template "packing_context_init.go.tmpl" dict "pkg" $scope "field" .Field "index" $index }}
       {{- $index = (add $index 1) }}
-      }
     {{- end }}
   {{- end }}
+  {{- if $choice.DefaultCase }}
+    {{- if $choice.DefaultCase.Field }}
+    default:
+    {{- template "packing_context_create.go.tmpl" dict "pkg" $scope "field" $choice.DefaultCase.Field }}
+    {{- end }}
+  {{- end }}
+  }
 {{- end }}
   return nil
 }
@@ -103,15 +146,22 @@ func (v *{{ $choice.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingCon
     var err error
     childrenNodes := contextNode.GetChildren()
     _ = childrenNodes // to avoid "declared but not used" warning
+    switch (v.{{ $expr.ResultSymbol.Symbol.Name }}) {
   {{- $index := 0 }}
   {{- range $case := $choice.Cases }}
     {{- if .Field }}
-      if v.{{ $expr.ResultSymbol.Symbol.Name }} == {{ (index .Conditions 0).Condition.ResultIntValue }} { 
-      {{template "packing_context_decode.go.tmpl" dict "pkg" $scope "field" .Field "index" $index }}
+      case {{ (index .Conditions 0).Condition.ResultIntValue }}:
+      {{ template "packing_context_decode.go.tmpl" dict "pkg" $scope "field" .Field "index" $index }}
       {{- $index = (add $index 1) }}
-      }
     {{- end }}
   {{- end}}
+  {{- if $choice.DefaultCase }}
+    {{- if $choice.DefaultCase.Field }}
+    default:
+    {{ template "packing_context_decode.go.tmpl" dict "pkg" $scope "field" $choice.DefaultCase.Field "index" $index }}
+    {{- end }}
+  {{- end }}
+  }
     _ = err // to avoid "declared but not used" warning
 {{- end }}
     return nil
@@ -122,15 +172,22 @@ func (v *{{ $choice.Name}}) MarshalZserioPacked(contextNode *zserio.PackingConte
     var err error
     childrenNodes := contextNode.GetChildren()
     _ = childrenNodes // to avoid "declared but not used" warning
+    switch (v.{{ $expr.ResultSymbol.Symbol.Name }}) {
   {{- $index := 0 }}
   {{- range $case := $choice.Cases }}
     {{- if .Field }}
-      if v.{{ $expr.ResultSymbol.Symbol.Name }} == {{ (index .Conditions 0).Condition.ResultIntValue }} { 
+      case {{ (index .Conditions 0).Condition.ResultIntValue }}: 
       {{template "packing_context_encode.go.tmpl" dict "pkg" $scope "field" .Field "index" $index }}
       {{- $index = (add $index 1) }}
-      }
     {{- end }}
   {{- end}}
+  {{- if $choice.DefaultCase }}
+    {{- if $choice.DefaultCase.Field }}
+    default:
+    {{template "packing_context_encode.go.tmpl" dict "pkg" $scope "field" $choice.DefaultCase.Field "index" $index }}
+    {{- end }}
+  {{- end }}
+  }
     _ = err // to avoid "declared but not used" warning
 {{- end }}
     return nil
@@ -145,15 +202,22 @@ func (v *{{ $choice.Name}}) ZserioBitSizePacked(contextNode *zserio.PackingConte
 {{- if $choice.Cases }}
   childrenNodes := contextNode.GetChildren()
   _ = childrenNodes // to avoid "declared but not used" warning
-    {{- $index := 0 }}
+  switch (v.{{ $expr.ResultSymbol.Symbol.Name }}) {
+  {{- $index := 0 }}
   {{- range $case := $choice.Cases }}
     {{- if .Field }}
-      if v.{{ $expr.ResultSymbol.Symbol.Name }} == {{ (index .Conditions 0).Condition.ResultIntValue }} { 
+      case {{ (index .Conditions 0).Condition.ResultIntValue }}:
       {{- template "packing_context_bitsize.go.tmpl" dict "pkg" $scope "field" .Field "index" $index }}
       {{- $index = (add $index 1) }}
-      }
     {{- end }}
   {{- end}}
+  {{- if $choice.DefaultCase }}
+    {{- if $choice.DefaultCase.Field }}
+    default:
+    {{- template "packing_context_bitsize.go.tmpl" dict "pkg" $scope "field" $choice.DefaultCase.Field "index" $index }}
+    {{- end }}
+  {{- end }}
+  }
 {{- end }}
   return endBitPosition - bitPosition, nil
 }
