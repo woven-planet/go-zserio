@@ -73,11 +73,13 @@ func (w *CountWriter) WriteByte(b byte) error {
 }
 
 // Align could replace the AlignReader function.
-func (w *CountWriter) Align(boundary uint8) error {
+func (w *CountWriter) Align(boundary uint8) (int64, error) {
 	misaligned := uint8((w.bitsCount % int64(boundary)))
+
 	if misaligned != 0 {
 		numOfBitsToDiscard := boundary - misaligned
-		return w.WriteBits(0, numOfBitsToDiscard)
+		err := w.WriteBits(0, numOfBitsToDiscard)
+		return w.bitsCount, err
 	}
-	return nil
+	return w.bitsCount, nil
 }

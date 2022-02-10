@@ -1,6 +1,8 @@
 package ztype
 
 import (
+	"fmt"
+
 	zserio "github.com/woven-planet/go-zserio/interface"
 )
 
@@ -42,12 +44,15 @@ func (array *Array[T, Y]) MarshalZserio(writer zserio.Writer) error {
 			}
 			writeDescriptor(array.PackedContext, writer)
 		}
-		for _, element := range array.RawArray {
-			// TODO @aignas 2022-02-10: just make it compile
-			// if array.checkOffsetMethod != nil {
-			// 	writer.Align()
-			// 	array.checkOffsetMethod(index, writer.BitsCount)
-			// }
+		for index, element := range array.RawArray {
+			if array.checkOffsetMethod != nil {
+				// FIXME @aignas 2022-02-10: What is the aligning boundary for arrays?
+				count, err := writer.Align(8)
+				if err != nil {
+					return fmt.Errorf("align: %w", err)
+				}
+				array.checkOffsetMethod(index, count)
+			}
 			if array.IsPacked {
 				packedTraits.Write(array.PackedContext, writer, element)
 			} else {

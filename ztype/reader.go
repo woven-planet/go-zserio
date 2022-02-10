@@ -51,13 +51,13 @@ func (r *Reader) ReadByte() (byte, error) {
 }
 
 // Align could replace the AlignReader function.
-func (r *Reader) Align(boundary uint8) error {
+func (r *Reader) Align(boundary uint8) (int64, error) {
 	misaligned := uint8((r.bitsCount % int64(boundary)))
 	if misaligned == 0 {
-		return nil
+		return r.bitsCount, nil
 	}
 
 	discard := boundary - misaligned
 	_, err := r.ReadBits(discard)
-	return err
+	return r.bitsCount, err
 }

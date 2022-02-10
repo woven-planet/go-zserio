@@ -1,6 +1,8 @@
 package ztype
 
 import (
+	"fmt"
+
 	"github.com/woven-planet/go-zserio/interface"
 )
 
@@ -44,11 +46,14 @@ func (array *Array[T, Y]) UnmarshalZserio(reader zserio.Reader) error {
 			}
 		}
 		for index := 0; index < arraySize; index++ {
-			// TODO @aignas 2022-02-10: make it compile
-			// if array.checkOffsetMethod != nil {
-			// 	reader.Align()
-			// 	array.checkOffsetMethod(index, reader.BitsCount)
-			// }
+			if array.checkOffsetMethod != nil {
+				// FIXME @aignas 2022-02-10: What is the aligning boundary for arrays?
+				count, err := reader.Align(8)
+				if err != nil {
+					return fmt.Errorf("align: %w", err)
+				}
+				array.checkOffsetMethod(index, count)
+			}
 			var err error
 			var element T
 			if array.IsPacked {
