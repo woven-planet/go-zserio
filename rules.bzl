@@ -14,13 +14,13 @@ def go_zserio_srcs(name, srcs, rootpackage, pkg = None, format = True):
         format: Should we format the source code with a code formatter? Default to True.
     """
     script = "\n".join([
-        '#!/bin/bash',
-        './{bin} generate \\',
-        '  --out - \\',
-        '  --rootpackage {rootpackage} \\',
-        '  --only {pkg} \\',
-        '  {noformat} \\',
-        '  {srcs} 2>/dev/null',
+        "#!/bin/bash",
+        "./{bin} generate \\",
+        "  --out - \\",
+        "  --rootpackage {rootpackage} \\",
+        "  --only {pkg} \\",
+        "  {noformat} \\",
+        "  {srcs} 2>/dev/null",
     ]).format(
         bin = "$(execpath //cmd/zserio)",
         rootpackage = rootpackage,
@@ -37,7 +37,7 @@ def go_zserio_srcs(name, srcs, rootpackage, pkg = None, format = True):
         tools = [
             "//cmd/zserio",
         ],
-        executable=True,
+        executable = True,
     )
     native.genrule(
         name = name,
@@ -74,5 +74,5 @@ def go_zserio_library(name, srcs, rootpackage, pkg, **kwargs):
             "//ztype",
             "@com_github_icza_bitio//:bitio",
         ] + kwargs.pop("deps", []),
-        **kwargs,
+        **kwargs
     )

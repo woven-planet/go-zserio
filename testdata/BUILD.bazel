@@ -1,6 +1,11 @@
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("//:rules.bzl", "go_zserio_library")
 
+exports_files(
+    srcs = glob(["*.zs"]),
+    visibility = ["//internal:__subpackages__"],
+)
+
 filegroup(
     name = "examples",
     srcs = glob(["*.zs"]),
