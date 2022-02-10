@@ -213,6 +213,45 @@ func (m *Model) InstantiateTemplates() error {
 	return nil
 }
 
+func (m *Model) instantiateField(pkgScope *ast.Package, field *ast.Field, templateTypes map[string]*ast.TypeReference) (*ast.Field, error) {
+	fieldCopy := *field
+	if len(field.Type.TemplateArguments) > 0 {
+		// the field itself is a templated compound type, and needs to
+		// be instantiated first.
+
+		// the template argument parameter must be recreated, as the
+		// field template arguments might differ from the struct template
+		// arguments. Example:
+		// struct<A, B, C> {
+		//    foo<int, C> field1;
+		//    bar<B, A> field2;
+		// }
+		newTemplateParameters := append([]*ast.TypeReference{}, field.Type.TemplateArguments...)
+		for ix, templateParameter := range newTemplateParameters {
+			if passedTemplateArgument, found := templateTypes[templateParameter.Name]; found {
+				newTemplateParameters[ix] = passedTemplateArgument
+			}
+		}
+
+		tt, err := m.instantiateType(pkgScope, field.Type, newTemplateParameters, "")
+		if err != nil {
+			return nil, err
+		}
+		fieldCopy.Type = tt
+		return &fieldCopy, nil
+	} else if tt := templateTypes[field.Type.Name]; tt != nil && field.Type.Package == "" {
+		// the field a template itself
+		fieldCopy.Type = tt
+		//  If the template has type arguments, these arguments need to
+		// be applied also to the instantiated type.
+		fieldCopy.Type.TypeArguments = field.Type.TypeArguments
+		return &fieldCopy, nil
+	} else {
+		// not templated
+		return field, nil
+	}
+}
+
 func (m *Model) instantiateStruct(
 	pkgScope *ast.Package,
 	templStruct *ast.Struct,
@@ -251,43 +290,11 @@ func (m *Model) instantiateStruct(
 
 		// resolve the templates for the fields
 		for _, field := range templStruct.Fields {
-			fieldCopy := *field
-			if len(field.Type.TemplateArguments) > 0 {
-				// the field itself is a templated compound type, and needs to
-				// be instantiated first.
-
-				// the template argument parameter must be recreated, as the
-				// field template arguments might differ from the struct template
-				// arguments. Example:
-				// struct<A, B, C> {
-				//    foo<int, C> field1;
-				//    bar<B, A> field2;
-				// }
-				newTemplateParameters := append([]*ast.TypeReference{}, field.Type.TemplateArguments...)
-				for ix, templateParameter := range newTemplateParameters {
-					if passedTemplateArgument, found := templateTypes[templateParameter.Name]; found {
-						newTemplateParameters[ix] = passedTemplateArgument
-					}
-				}
-
-				tt, err := m.instantiateType(pkgScope, field.Type, newTemplateParameters, "")
-				if err != nil {
-					return nil, err
-				}
-				fieldCopy.Type = tt
-				structure.Fields = append(structure.Fields, &fieldCopy)
-				continue
-			} else if tt := templateTypes[field.Type.Name]; tt != nil && field.Type.Package == "" {
-				// the field a template itself
-				fieldCopy.Type = tt
-				//  If the template has type arguments, these arguments need to
-				// be applied also to the instantiated type.
-				fieldCopy.Type.TypeArguments = field.Type.TypeArguments
-				structure.Fields = append(structure.Fields, &fieldCopy)
-			} else {
-				// not templated
-				structure.Fields = append(structure.Fields, field)
+			newField, err := m.instantiateField(pkgScope, field, templateTypes)
+			if err != nil {
+				return nil, err
 			}
+			structure.Fields = append(structure.Fields, newField)
 		}
 
 		// resolve the templates for the types
@@ -329,6 +336,113 @@ func (m *Model) instantiateStruct(
 	return newType, nil
 }
 
+func (m *Model) instantiateChoice(
+	pkgScope *ast.Package,
+	templChoice *ast.Choice,
+	templateArguments []*ast.TypeReference,
+	instantiatedName string) (*ast.TypeReference, error) {
+	if len(templateArguments) == 0 {
+		return nil, errors.New("choice instantiation called without parameters")
+	}
+	if len(templChoice.TemplateParameters) != len(templateArguments) {
+		return nil, ErrIncorrectNumberOfTemplateParameters
+	}
+	// templateTypes is a map from the template parameter name to the instantiated
+	// type.
+	templateTypes := map[string]*ast.TypeReference{}
+	for ix, ta := range templateArguments {
+		// Instantiate the subtype
+		ta, err := m.instantiateType(pkgScope, ta, ta.TemplateArguments, "")
+		if err != nil {
+			return nil, err
+		}
+		templateTypes[templChoice.TemplateParameters[ix]] = ta
+	}
+
+	newType := &ast.TypeReference{
+		IsBuiltin: false,
+		Package:   pkgScope.Name,
+		Name:      instantiatedName,
+	}
+	if _, exists := pkgScope.Choices[newType.Name]; !exists {
+		choice := &ast.Choice{
+			Name:           newType.Name,
+			Comment:        templChoice.Comment,
+			Cases:          []*ast.ChoiceCase{},
+			Expression:     templChoice.Expression,
+			TypeParameters: []*ast.Parameter{},
+		}
+
+		// resolve the templates for the choices
+		for _, choiceCase := range templChoice.Cases {
+			newChoiceCase := &ast.ChoiceCase{
+				Conditions: choiceCase.Conditions,
+				Comment:    choiceCase.Comment,
+			}
+			if choiceCase.Field != nil {
+				newField, err := m.instantiateField(pkgScope, choiceCase.Field, templateTypes)
+				if err != nil {
+					return nil, err
+				}
+				newChoiceCase.Field = newField
+			}
+			choice.Cases = append(choice.Cases, newChoiceCase)
+
+		}
+
+		// also resolve the default case
+		if templChoice.DefaultCase != nil {
+			choice.DefaultCase = &ast.ChoiceCase{
+				Conditions: templChoice.DefaultCase.Conditions,
+				Comment:    templChoice.DefaultCase.Comment,
+			}
+			if templChoice.DefaultCase.Field != nil {
+				newField, err := m.instantiateField(pkgScope, templChoice.DefaultCase.Field, templateTypes)
+				if err != nil {
+					return nil, err
+				}
+				choice.DefaultCase.Field = newField
+			}
+
+		}
+		// resolve the templates for the types
+		for _, typeParam := range templChoice.TypeParameters {
+			if tt := templateTypes[typeParam.Type.Name]; tt != nil && typeParam.Type.Package == "" {
+				// the parameter is a template
+				choice.TypeParameters = append(choice.TypeParameters, &ast.Parameter{
+					Name: typeParam.Name,
+					Type: tt,
+				})
+			} else {
+				// not templated
+				choice.TypeParameters = append(choice.TypeParameters, typeParam)
+			}
+		}
+
+		// resolve the template for the functions
+		for _, function := range templChoice.Functions {
+			if tt := templateTypes[function.ReturnType.Name]; tt != nil && function.ReturnType.Package == "" {
+				// the function return type is a template
+				choice.Functions = append(choice.Functions, &ast.Function{
+					Name:       function.Name,
+					Comment:    function.Comment,
+					Result:     function.Result,
+					ReturnType: tt,
+				})
+			} else {
+				// not templated
+				choice.Functions = append(choice.Functions, function)
+			}
+		}
+
+		// update the scope with the newly created scope
+		pkgScope.Choices[newType.Name] = choice
+		pkgScope.LocalSymbols.TypeScope[newType.Name] = choice
+		choice.BuildScope(pkgScope)
+	}
+	return newType, nil
+}
+
 func generateInstantiatedName(tr *ast.TypeReference, templateArguments []*ast.TypeReference) string {
 	name := []string{strings.Title(tr.Name)}
 	for _, ta := range templateArguments {
@@ -359,6 +473,8 @@ func (m *Model) instantiateType(pkgScope *ast.Package, tr *ast.TypeReference, te
 	switch n := templateSymbol.Symbol.(type) {
 	case *ast.Struct:
 		instantiatedType, err = m.instantiateStruct(pkgScope, n, templateArguments, instantiatedName)
+	case *ast.Choice:
+		instantiatedType, err = m.instantiateChoice(pkgScope, n, templateArguments, instantiatedName)
 	default:
 		return nil, errors.New("template instantiation not supported for this type")
 	}
