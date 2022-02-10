@@ -1,12 +1,8 @@
 package zserio
 
-import (
-	"github.com/icza/bitio"
-)
-
 type IDeltaContext interface {
 	ReadDescriptor(r Reader) error
-	WriteDescriptor(w *bitio.CountWriter) error
+	WriteDescriptor(w Writer) error
 	BitSizeOfDescriptor() int
 }
 
@@ -38,7 +34,7 @@ func (context *PackingContextNode) ReadDescriptor(r Reader) error {
 	return context.Context.ReadDescriptor(r)
 }
 
-func (context *PackingContextNode) WriteDescriptor(w *bitio.CountWriter) error {
+func (context *PackingContextNode) WriteDescriptor(w Writer) error {
 	return context.Context.WriteDescriptor(w)
 }
 

@@ -1,7 +1,6 @@
 package ztype
 
 import (
-	"github.com/icza/bitio"
 	zserio "github.com/woven-planet/go-zserio/interface"
 )
 
@@ -12,7 +11,7 @@ type IPackedArrayTraits[T any] interface {
 	BitSizeOf(contextNode *zserio.PackingContextNode, bitPosition int, element T) (int, error)
 	InitializeOffsets(contextNode *zserio.PackingContextNode, bitPosition int, element T) int
 	Read(contextNode *zserio.PackingContextNode, reader zserio.Reader, index int) (T, error)
-	Write(contextNode *zserio.PackingContextNode, writer *bitio.CountWriter, value T)
+	Write(contextNode *zserio.PackingContextNode, writer zserio.Writer, value T)
 }
 
 // PackedArrayTraits is a wrapper around array traits used when the array is
@@ -52,7 +51,7 @@ func (traits *PackedArrayTraits[T, Y]) Read(contextNode *zserio.PackingContextNo
 }
 
 // Write writes an array element of a packed array traits.
-func (traits *PackedArrayTraits[T, Y]) Write(contextNode *zserio.PackingContextNode, writer *bitio.CountWriter, value T) {
+func (traits *PackedArrayTraits[T, Y]) Write(contextNode *zserio.PackingContextNode, writer zserio.Writer, value T) {
 	contextNode.Context.(*DeltaContext[T]).Write(traits.ArrayTraits, writer, value)
 }
 
@@ -100,6 +99,6 @@ func (traits *ObjectPackedArrayTraits[T, Y]) Read(contextNode *zserio.PackingCon
 }
 
 // Write writes an array element of a packed array traits.
-func (traits *ObjectPackedArrayTraits[T, Y]) Write(contextNode *zserio.PackingContextNode, writer *bitio.CountWriter, element T) {
+func (traits *ObjectPackedArrayTraits[T, Y]) Write(contextNode *zserio.PackingContextNode, writer zserio.Writer, element T) {
 	element.MarshalZserioPacked(contextNode, writer)
 }

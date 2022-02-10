@@ -59,6 +59,7 @@ go_test(
         "varint_encode_test.go",
         "varuint_decode_test.go",
         "varuint_encode_test.go",
+        "writer_test.go",
     ],
     deps = [
         ":ztype",

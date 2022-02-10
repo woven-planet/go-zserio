@@ -39,8 +39,8 @@ func (v *{{ $choice.Name}}) LoadDefaultValues() error {
 }
 
 // MarshalZserio implements the zserio.Marshaler interface.
-func (v *{{ $choice.Name}}) MarshalZserio(w *bitio.CountWriter) error {
-  var err error
+func (v *{{ $choice.Name}}) MarshalZserio(w zserio.Writer) error {
+    var err error
 {{- $expr := $choice.Expression }}
   switch (v.{{ $expr.ResultSymbol.Symbol.Name }}) {
 {{- range $case := $choice.Cases }}
@@ -159,7 +159,7 @@ func (v *{{ $choice.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingCon
     return nil
 }
 
-func (v *{{ $choice.Name}}) MarshalZserioPacked(contextNode *zserio.PackingContextNode, w *bitio.CountWriter) error {
+func (v *{{ $choice.Name}}) MarshalZserioPacked(contextNode *zserio.PackingContextNode, w zserio.Writer) error {
 {{- if $choice.Cases }}
     var err error
     childrenNodes := contextNode.GetChildren()

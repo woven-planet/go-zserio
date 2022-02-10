@@ -38,7 +38,7 @@ func (v *{{ $union.Name}}) LoadDefaultValues() error {
 }
 
 // MarshalZserio implements the zserio.Marshaler interface.
-func (v *{{ $union.Name}}) MarshalZserio(w *bitio.CountWriter) error {
+func (v *{{ $union.Name}}) MarshalZserio(w zserio.Writer) error {
   err := ztype.WriteVarsize(w, uint64(v.UnionChoice))
   if err != nil {
     return err
@@ -107,7 +107,7 @@ func (v *{{ $union.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingCont
 }
 
 
-func (v *{{ $union.Name}}) MarshalZserioPacked(contextNode *zserio.PackingContextNode, r *bitio.CountWriter) error {
+func (v *{{ $union.Name}}) MarshalZserioPacked(contextNode *zserio.PackingContextNode, r zserio.Writer) error {
   return nil
 }
 

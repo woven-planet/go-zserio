@@ -3,7 +3,6 @@ package ztype
 import (
 	"math/bits"
 
-	"github.com/icza/bitio"
 	zserio "github.com/woven-planet/go-zserio/interface"
 )
 
@@ -126,7 +125,7 @@ func (context *DeltaContext[T]) Read(arrayTraits IArrayTraits[T], reader zserio.
 	return value, nil
 }
 
-func (context *DeltaContext[T]) WriteDescriptor(writer *bitio.CountWriter) error {
+func (context *DeltaContext[T]) WriteDescriptor(writer zserio.Writer) error {
 	context.finishInit()
 	err := writer.WriteBool(context.isPacked)
 	if err != nil {
@@ -139,7 +138,7 @@ func (context *DeltaContext[T]) WriteDescriptor(writer *bitio.CountWriter) error
 }
 
 // Write writes an element of an delta context array.
-func (context *DeltaContext[T]) Write(arrayTraits IArrayTraits[T], writer *bitio.CountWriter, element T) error {
+func (context *DeltaContext[T]) Write(arrayTraits IArrayTraits[T], writer zserio.Writer, element T) error {
 	if !context.processingStarted || !context.isPacked {
 		context.processingStarted = true
 		context.previousElement = new(uint64)

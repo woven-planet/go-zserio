@@ -25,7 +25,7 @@ func (v *{{ $struct.Name}}) LoadDefaultValues() error {
 }
 
 // MarshalZserio implements the zserio.Marshaler interface.
-func (v *{{ $struct.Name}}) MarshalZserio(w *bitio.CountWriter) error {
+func (v *{{ $struct.Name}}) MarshalZserio(w zserio.Writer) error {
 {{- if $struct.Fields }}
     var err error
 {{- range $field := $struct.Fields }}
@@ -91,7 +91,7 @@ func (v *{{ $struct.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingCon
 }
 
 
-func (v *{{ $struct.Name}}) MarshalZserioPacked(contextNode *zserio.PackingContextNode, w *bitio.CountWriter) error {
+func (v *{{ $struct.Name}}) MarshalZserioPacked(contextNode *zserio.PackingContextNode, w zserio.Writer) error {
 {{- if $struct.Fields }}
     var err error
     childrenNodes := contextNode.GetChildren()

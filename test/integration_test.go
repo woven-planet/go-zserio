@@ -89,7 +89,7 @@ func reencodeZserioTestBinary() error {
 	w := bitio.NewCountWriter(f)
 	defer w.Close()
 
-	if err := testObject.MarshalZserio(w); err != nil {
+	if err := testObject.MarshalZserio(ztype.NewCountWriter(w)); err != nil {
 		return fmt.Errorf("marshal: %w", err)
 	}
 
