@@ -1,6 +1,10 @@
 package ztype
 
-import zserio "github.com/woven-planet/go-zserio/interface"
+import (
+	"io"
+
+	zserio "github.com/woven-planet/go-zserio/interface"
+)
 
 var _ zserio.Writer = (*CountWriter)(nil)
 
@@ -8,9 +12,24 @@ var _ zserio.Writer = (*CountWriter)(nil)
 // wanting to align the writer.
 // TODO @aignas 2022-02-09: replace usage of *bitio.CountWriter with *ztype.CountWriter.
 type CountWriter struct {
-	w zserio.Writer
+	w Writer
 
 	bitsCount int64
+}
+
+type Writer interface {
+	io.Writer
+	io.ByteWriter
+
+	WriteBits(r uint64, n uint8) error
+	WriteBool(bool) error
+	WriteBitsUnsafe(r uint64, n uint8) error
+}
+
+func NewCountWriter(w Writer) *CountWriter {
+	return &CountWriter{
+		w: w,
+	}
 }
 
 func (w *CountWriter) Write(p []byte) (int, error) {
