@@ -22,7 +22,7 @@
     {{- if $field.OptionalClause }}
         if {{ goExpression $scope $field.OptionalClause }} {
     {{- end }}
-    {{- template "decode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field }}
+    {{- template "decode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field "field_name" $field_name }}
     {{- if $native.IsMarshaler }}
         if err := {{ $field_name }}.ZserioInitPackingContext(childrenNodes[{{ $index }}]); err != nil {
             return err

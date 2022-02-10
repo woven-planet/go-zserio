@@ -59,7 +59,7 @@
         {{- $assign_str_rvalue = printf "%sArrayProperties" $field.Name }}
         {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $assign_str_lvalue "field" $field "native" $native }}
     {{- end }}
-    {{- template "decode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field }}
+    {{- template "decode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field "field_name" $assign_str_lvalue }}
     if err = {{ $assign_str_rvalue }}.UnmarshalZserio(r); err != nil {
         return err
     }
