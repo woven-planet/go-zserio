@@ -7,27 +7,27 @@ import (
 	zserio "github.com/woven-planet/go-zserio/interface"
 )
 
-var _ zserio.Reader = (*CountReader)(nil)
+var _ zserio.Reader = (*Reader)(nil)
 
-// CountReader reimplements the counting of bits, which may be important when
+// Reader reimplements the counting of bits, which may be important when
 // wanting to align the reader.
-// TODO @aignas 2022-02-09: replace usage of zserio.Reader with *ztype.CountReader.
-type CountReader struct {
+// TODO @aignas 2022-02-09: replace usage of zserio.Reader with *ztype.Reader.
+type Reader struct {
 	r         *bitio.Reader
 	bitsCount int64
 }
 
-func NewReader(r io.Reader) *CountReader {
-	return &CountReader{r: bitio.NewReader(r)}
+func NewReader(r io.Reader) *Reader {
+	return &Reader{r: bitio.NewReader(r)}
 }
 
-func (r *CountReader) Read(p []byte) (int, error) {
+func (r *Reader) Read(p []byte) (int, error) {
 	n, err := r.r.Read(p)
 	r.bitsCount += int64(n) * 8
 	return n, err
 }
 
-func (r *CountReader) ReadBits(n uint8) (uint64, error) {
+func (r *Reader) ReadBits(n uint8) (uint64, error) {
 	b, err := r.r.ReadBits(n)
 	if err == nil {
 		r.bitsCount += int64(n)
@@ -35,7 +35,7 @@ func (r *CountReader) ReadBits(n uint8) (uint64, error) {
 	return b, err
 }
 
-func (r *CountReader) ReadBool() (bool, error) {
+func (r *Reader) ReadBool() (bool, error) {
 	b, err := r.r.ReadBool()
 	if err == nil {
 		r.bitsCount += 1
@@ -43,7 +43,7 @@ func (r *CountReader) ReadBool() (bool, error) {
 	return b, err
 }
 
-func (r *CountReader) ReadByte() (byte, error) {
+func (r *Reader) ReadByte() (byte, error) {
 	b, err := r.r.ReadByte()
 	if err == nil {
 		r.bitsCount += 8
@@ -52,7 +52,7 @@ func (r *CountReader) ReadByte() (byte, error) {
 }
 
 // Align could replace the AlignReader function.
-func (r *CountReader) Align(boundary uint8) error {
+func (r *Reader) Align(boundary uint8) error {
 	misaligned := uint8((r.bitsCount % int64(boundary)))
 	if misaligned == 0 {
 		return nil
