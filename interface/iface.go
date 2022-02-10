@@ -12,6 +12,7 @@ type Reader interface {
 
 	ReadBits(n uint8) (uint64, error)
 	ReadBool() (bool, error)
+	Align(boundary uint8) error
 }
 
 type Writer interface {
@@ -21,6 +22,7 @@ type Writer interface {
 	WriteBits(r uint64, n uint8) error
 	WriteBool(bool) error
 	WriteBitsUnsafe(r uint64, n uint8) error
+	Align(boundary uint8) error
 }
 
 // Unmarshaler is the interface implemented by types that can be read from a
