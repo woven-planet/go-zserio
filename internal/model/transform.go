@@ -55,6 +55,7 @@ func (m *Model) CapitalizeNames() {
 				typeParameter.Name = strings.Title(typeParameter.Name)
 			}
 			for _, field := range u.Fields {
+				field.ZserioName = field.Name
 				field.Name = strings.Title(field.Name)
 				if !field.Type.IsBuiltin {
 					field.Type.Name = strings.Title(field.Type.Name)
@@ -77,6 +78,7 @@ func (m *Model) CapitalizeNames() {
 				typeParameter.Name = strings.Title(typeParameter.Name)
 			}
 			for _, field := range structure.Fields {
+				field.ZserioName = field.Name
 				field.Name = strings.Title(field.Name)
 				if !field.Type.IsBuiltin {
 					field.Type.Name = strings.Title(field.Type.Name)
@@ -94,6 +96,7 @@ func (m *Model) CapitalizeNames() {
 			}
 			for _, choiceCase := range choice.Cases {
 				if choiceCase.Field != nil {
+					choiceCase.Field.ZserioName = choiceCase.Field.Name
 					choiceCase.Field.Name = strings.Title(choiceCase.Field.Name)
 					if !choiceCase.Field.Type.IsBuiltin {
 						choiceCase.Field.Type.Name = strings.Title(choiceCase.Field.Type.Name)
