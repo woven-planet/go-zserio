@@ -1,16 +1,32 @@
 package ztype
 
-import zserio "github.com/woven-planet/go-zserio/interface"
+import (
+	"io"
+
+	zserio "github.com/woven-planet/go-zserio/interface"
+)
 
 var _ zserio.Reader = (*CountReader)(nil)
 
+type Reader interface {
+	io.Reader
+	io.ByteReader
+
+	ReadBits(n uint8) (uint64, error)
+	ReadBool() (bool, error)
+}
+
 // CountReader reimplements the counting of bits, which may be important when
 // wanting to align the reader.
-// TODO @aignas 2022-02-09: replace usage of *bitio.CountReader with *ztype.CountReader.
+// TODO @aignas 2022-02-09: replace usage of zserio.Reader with *ztype.CountReader.
 type CountReader struct {
-	r zserio.Reader
+	r Reader
 
 	bitsCount int64
+}
+
+func NewCountReader(r Reader) *CountReader {
+	return &CountReader{r: r}
 }
 
 func (r *CountReader) Read(p []byte) (int, error) {
@@ -21,7 +37,9 @@ func (r *CountReader) Read(p []byte) (int, error) {
 
 func (r *CountReader) ReadBits(n uint8) (uint64, error) {
 	b, err := r.r.ReadBits(n)
-	r.bitsCount += int64(b)
+	if err == nil {
+		r.bitsCount += int64(n)
+	}
 	return b, err
 }
 
