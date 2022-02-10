@@ -11,7 +11,6 @@ var _ zserio.Reader = (*Reader)(nil)
 
 // Reader reimplements the counting of bits, which may be important when
 // wanting to align the reader.
-// TODO @aignas 2022-02-09: replace usage of zserio.Reader with *ztype.Reader.
 type Reader struct {
 	r         *bitio.Reader
 	bitsCount int64
