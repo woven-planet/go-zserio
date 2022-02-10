@@ -8,9 +8,6 @@
         for _, element := range {{ $field_name }} {
         {{- $field_name = "element" }}
     {{- end }}
-    {{- if $field.IsOptional }}
-        {{- $field_name = "element" }}
-    {{- end }}
     {{- $type_parameter := getTypeParameter $scope $field.Type }}
     {{- range $i, $argument := $field.Type.TypeArguments }}
         {{- $current_type_parameter := index $type_parameter $i }}
