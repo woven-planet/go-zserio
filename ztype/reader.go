@@ -42,12 +42,13 @@ func (r *CountReader) ReadByte() (byte, error) {
 }
 
 // Align could replace the AlignReader function.
-func (r *CountReader) Align(boundary uint8) {
+func (r *CountReader) Align(boundary uint8) error {
 	misaligned := uint8((r.bitsCount % int64(boundary)))
 	if misaligned == 0 {
-		return
+		return nil
 	}
 
 	discard := boundary - misaligned
-	r.ReadBits(discard)
+	_, err := r.ReadBits(discard)
+	return err
 }

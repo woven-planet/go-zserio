@@ -29,6 +29,7 @@ go_library(
         "varint_encode.go",
         "varuint_decode.go",
         "varuint_encode.go",
+        "writer.go",
     ],
     importpath = "github.com/woven-planet/go-zserio/ztype",
     visibility = ["//visibility:public"],
