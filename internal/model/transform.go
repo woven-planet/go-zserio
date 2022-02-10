@@ -103,6 +103,12 @@ func (m *Model) CapitalizeNames() {
 					}
 				}
 			}
+			if choice.DefaultCase != nil && choice.DefaultCase.Field != nil {
+				choice.DefaultCase.Field.Name = strings.Title(choice.DefaultCase.Field.Name)
+				if !choice.DefaultCase.Field.Type.IsBuiltin {
+					choice.DefaultCase.Field.Type.Name = strings.Title(choice.DefaultCase.Field.Type.Name)
+				}
+			}
 			for _, function := range choice.Functions {
 				function.Name = strings.Title(function.Name)
 			}
