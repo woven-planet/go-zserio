@@ -11,7 +11,6 @@ var _ zserio.Writer = (*Writer)(nil)
 
 // Writer reimplements the counting of bits, which may be important when
 // wanting to align the writer.
-// TODO @aignas 2022-02-09: replace usage of zserio.Writer with *ztype.Writer.
 type Writer struct {
 	writer    *bitio.Writer
 	bitsCount int64
