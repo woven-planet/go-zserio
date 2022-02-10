@@ -4,6 +4,7 @@ import (
 	"math/bits"
 
 	"github.com/icza/bitio"
+	zserio "github.com/woven-planet/go-zserio/interface"
 )
 
 const (
@@ -91,7 +92,7 @@ func (context *DeltaContext[T]) BitSizeOf(arrayTraits IArrayTraits[T], bitPositi
 }
 
 // ReadDescriptor reads the descriptor of a delta context array.
-func (context *DeltaContext[T]) ReadDescriptor(reader *bitio.CountReader) error {
+func (context *DeltaContext[T]) ReadDescriptor(reader zserio.Reader) error {
 	var err error
 	context.isPacked, err = reader.ReadBool()
 	if err != nil {
@@ -106,7 +107,7 @@ func (context *DeltaContext[T]) ReadDescriptor(reader *bitio.CountReader) error 
 }
 
 // Read reads the next element of an array encoded using delta contexts.
-func (context *DeltaContext[T]) Read(arrayTraits IArrayTraits[T], reader *bitio.CountReader) (T, error) {
+func (context *DeltaContext[T]) Read(arrayTraits IArrayTraits[T], reader zserio.Reader) (T, error) {
 	if !context.processingStarted || !context.isPacked {
 		context.processingStarted = true
 		element, err := arrayTraits.Read(reader, 0)

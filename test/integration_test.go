@@ -11,6 +11,7 @@ import (
 
 	"github.com/cucumber/godog"
 	"github.com/icza/bitio"
+	"github.com/woven-planet/go-zserio/ztype"
 	"gen/github.com/woven-planet/go-zserio/test/go/reference_modules/testobject1/testobject"
 )
 
@@ -73,7 +74,7 @@ func readReferenceZserioFile() error {
 func reencodeZserioTestBinary() error {
 	// read the binary file...
 	var testObject testobject.TestObject
-	r := bitio.NewCountReader(bytes.NewBuffer(ReferenceBinaryContent))
+	r := ztype.NewCountReader(bitio.NewCountReader(bytes.NewBuffer(ReferenceBinaryContent)))
 
 	if err := testObject.UnmarshalZserio(r); err != nil {
 		return fmt.Errorf("unmarshal reference: %w", err)

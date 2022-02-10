@@ -5,7 +5,7 @@ import (
 )
 
 type IDeltaContext interface {
-	ReadDescriptor(r *bitio.CountReader) error
+	ReadDescriptor(r Reader) error
 	WriteDescriptor(w *bitio.CountWriter) error
 	BitSizeOfDescriptor() int
 }
@@ -34,7 +34,7 @@ func (context *PackingContextNode) HasContext() bool {
 }
 
 // ReadDescriptor returns the delta context of the packing context.
-func (context *PackingContextNode) ReadDescriptor(r *bitio.CountReader) error {
+func (context *PackingContextNode) ReadDescriptor(r Reader) error {
 	return context.Context.ReadDescriptor(r)
 }
 

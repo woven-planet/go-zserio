@@ -29,7 +29,7 @@
         if {{ goExpression $scope $field.OptionalClause }} {
     {{- end }}
     {{- if not (eq $field.Alignment 0) }}
-        ztype.AlignReader(r, {{ $field.Alignment }})
+        r.Align({{ $field.Alignment }})
     {{- end }}
 
     {{- $assign_str_lvalue := printf "v.%s" $field.Name }}

@@ -52,7 +52,7 @@ func (v *{{ $union.Name}}) MarshalZserio(w *bitio.CountWriter) error {
 }
 
 // UnmarshalZserio implements the zserio.Unmarshaler interface.
-func (v *{{ $union.Name}}) UnmarshalZserio(r *bitio.CountReader) error {
+func (v *{{ $union.Name}}) UnmarshalZserio(r zserio.Reader) error {
     unionChoice, err := ztype.ReadVarsize(r)
     if err != nil {
        return err
@@ -102,7 +102,7 @@ func (v *{{ $union.Name}}) ZserioInitPackingContext(contextNode *zserio.PackingC
   return nil
 }
 
-func (v *{{ $union.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingContextNode, r *bitio.CountReader) error {
+func (v *{{ $union.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingContextNode, r zserio.Reader) error {
   return nil
 }
 

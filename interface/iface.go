@@ -29,7 +29,7 @@ type Writer interface {
 // zserio bitstream. The implementation is normally automatically generated
 // by the zserio compiler.
 type Unmarshaler interface {
-	UnmarshalZserio(r *bitio.CountReader) error
+	UnmarshalZserio(r Reader) error
 }
 
 // Marshaler is the interface implemented by types that can be serialized
@@ -48,7 +48,7 @@ type ZserioType interface {
 
 type PackableUnmarshaler interface {
 	ZserioCreatePackingContext(contextNode *PackingContextNode) error
-	UnmarshalZserioPacked(contextNode *PackingContextNode, r *bitio.CountReader) error
+	UnmarshalZserioPacked(contextNode *PackingContextNode, r Reader) error
 }
 
 type PackableMarshaler interface {

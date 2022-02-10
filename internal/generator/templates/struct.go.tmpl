@@ -37,7 +37,7 @@ func (v *{{ $struct.Name}}) MarshalZserio(w *bitio.CountWriter) error {
 }
 
 // UnmarshalZserio implements the zserio.Unmarshaler interface.
-func (v *{{ $struct.Name}}) UnmarshalZserio(r *bitio.CountReader) error {
+func (v *{{ $struct.Name}}) UnmarshalZserio(r zserio.Reader) error {
 {{- if $struct.Fields }}
     var err error
 {{- range $field := $struct.Fields }}
@@ -77,7 +77,7 @@ func (v *{{ $struct.Name}}) ZserioInitPackingContext(contextNode *zserio.Packing
 }
 
 
-func (v *{{ $struct.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingContextNode, r *bitio.CountReader) error {
+func (v *{{ $struct.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingContextNode, r zserio.Reader) error {
 {{- if $struct.Fields }}
     var err error
     childrenNodes := contextNode.GetChildren()

@@ -61,7 +61,7 @@ func (v *{{ $choice.Name}}) MarshalZserio(w *bitio.CountWriter) error {
 }
 
 // UnmarshalZserio implements the zserio.Unmarshaler interface.
-func (v *{{ $choice.Name}}) UnmarshalZserio(r *bitio.CountReader) error {
+func (v *{{ $choice.Name}}) UnmarshalZserio(r zserio.Reader) error {
     var err error
 {{- $expr := $choice.Expression }}
   switch (v.{{ $expr.ResultSymbol.Symbol.Name }}) {
@@ -135,7 +135,7 @@ func (v *{{ $choice.Name}}) ZserioInitPackingContext(contextNode *zserio.Packing
   return nil
 }
 
-func (v *{{ $choice.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingContextNode, r *bitio.CountReader) error {
+func (v *{{ $choice.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingContextNode, r zserio.Reader) error {
 {{- if $choice.Cases }}
     var err error
     childrenNodes := contextNode.GetChildren()

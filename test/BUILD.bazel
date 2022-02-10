@@ -27,6 +27,7 @@ go_test(
     },
     deps = [
         "//test/go:testobject",
+        "//ztype",
         "@com_github_cucumber_godog//:godog",
         "@com_github_icza_bitio//:bitio",
     ],

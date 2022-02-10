@@ -41,7 +41,7 @@ func (v *{{ $bitmask.Name}}) MarshalZserio(w *bitio.CountWriter) error {
 }
 
 // UnmarshalZserio implements the zserio.Unmarshaler interface.
-func (v *{{ $bitmask.Name }}) UnmarshalZserio(r *bitio.CountReader) error {
+func (v *{{ $bitmask.Name }}) UnmarshalZserio(r zserio.Reader) error {
     {{- if not $native.Type.IsBuiltin }}
       panic("only builtin types supported")
     {{- else }}
@@ -82,7 +82,7 @@ func (v *{{ $bitmask.Name}}) ZserioInitPackingContext(contextNode *zserio.Packin
 }
 
 
-func (v *{{ $bitmask.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingContextNode, r *bitio.CountReader) error {
+func (v *{{ $bitmask.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingContextNode, r zserio.Reader) error {
   context, ok := contextNode.Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}])
   if !ok {
     return errors.New("unsupported packing context type")

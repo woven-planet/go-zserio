@@ -52,6 +52,7 @@ go_test(
         "bool_encode_test.go",
         "float_decode_test.go",
         "float_encode_test.go",
+        "reader_test.go",
         "string_decode_test.go",
         "string_encode_test.go",
         "varint_decode_test.go",
