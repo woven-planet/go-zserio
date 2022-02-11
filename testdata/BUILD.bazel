@@ -2,6 +2,12 @@ load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("//:rules.bzl", "go_zserio_library")
 
 filegroup(
+    name = "examples",
+    srcs = glob(["*.zs"]),
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
     name = "zserio_schema",
     srcs = [
         "reference_modules/all.zs",
