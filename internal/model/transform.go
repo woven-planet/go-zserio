@@ -245,17 +245,17 @@ func (m *Model) instantiateField(pkgScope *ast.Package, field *ast.Field, templa
 		}
 		fieldCopy.Type = tt
 		return &fieldCopy, nil
-	} else if tt := templateTypes[field.Type.Name]; tt != nil && field.Type.Package == "" {
+	}
+	if tt, ok := templateTypes[field.Type.Name]; ok && field.Type.Package == "" {
 		// the field a template itself
 		fieldCopy.Type = tt
 		//  If the template has type arguments, these arguments need to
 		// be applied also to the instantiated type.
 		fieldCopy.Type.TypeArguments = field.Type.TypeArguments
 		return &fieldCopy, nil
-	} else {
-		// not templated
-		return field, nil
 	}
+	// not templated
+	return field, nil
 }
 
 func (m *Model) instantiateStruct(
@@ -286,59 +286,58 @@ func (m *Model) instantiateStruct(
 		Package:   pkgScope.Name,
 		Name:      instantiatedName,
 	}
-	if _, exists := pkgScope.Structs[newType.Name]; !exists {
-		structure := &ast.Struct{
-			Name:           newType.Name,
-			Comment:        templStruct.Comment,
-			Fields:         []*ast.Field{},
-			TypeParameters: []*ast.Parameter{},
-		}
-
-		// resolve the templates for the fields
-		for _, field := range templStruct.Fields {
-			newField, err := m.instantiateField(pkgScope, field, templateTypes)
-			if err != nil {
-				return nil, err
-			}
-			structure.Fields = append(structure.Fields, newField)
-		}
-
-		// resolve the templates for the types
-		for _, typeParam := range templStruct.TypeParameters {
-			if tt := templateTypes[typeParam.Type.Name]; tt != nil && typeParam.Type.Package == "" {
-				// the parameter is a template
-				structure.TypeParameters = append(structure.TypeParameters, &ast.Parameter{
-					Name: typeParam.Name,
-					Type: tt,
-				})
-			} else {
-				// not templated
-				structure.TypeParameters = append(structure.TypeParameters, typeParam)
-			}
-		}
-
-		// resolve the template for the functions
-		for _, function := range templStruct.Functions {
-			if tt := templateTypes[function.ReturnType.Name]; tt != nil && function.ReturnType.Package == "" {
-				// the function return type is a template
-				structure.Functions = append(structure.Functions, &ast.Function{
-					Name:       function.Name,
-					Comment:    function.Comment,
-					Result:     function.Result,
-					ReturnType: tt,
-				})
-			} else {
-				// not templated
-				structure.Functions = append(structure.Functions, function)
-			}
-		}
-
-		// update the scope with the newly created scope
-		pkgScope.Structs[newType.Name] = structure
-		pkgScope.LocalSymbols.TypeScope[newType.Name] = structure
-		structure.BuildScope(pkgScope)
+	// check if the struct was already instantiated
+	if _, exists := pkgScope.Structs[newType.Name]; exists {
+		return newType, nil
+	}
+	structure := &ast.Struct{
+		Name:    newType.Name,
+		Comment: templStruct.Comment,
 	}
 
+	// resolve the templates for the fields
+	for _, field := range templStruct.Fields {
+		newField, err := m.instantiateField(pkgScope, field, templateTypes)
+		if err != nil {
+			return nil, err
+		}
+		structure.Fields = append(structure.Fields, newField)
+	}
+
+	// resolve the templates for the types
+	for _, typeParam := range templStruct.TypeParameters {
+		if tt := templateTypes[typeParam.Type.Name]; tt != nil && typeParam.Type.Package == "" {
+			// the parameter is a template
+			structure.TypeParameters = append(structure.TypeParameters, &ast.Parameter{
+				Name: typeParam.Name,
+				Type: tt,
+			})
+		} else {
+			// not templated
+			structure.TypeParameters = append(structure.TypeParameters, typeParam)
+		}
+	}
+
+	// resolve the template for the functions
+	for _, function := range templStruct.Functions {
+		if tt := templateTypes[function.ReturnType.Name]; tt != nil && function.ReturnType.Package == "" {
+			// the function return type is a template
+			structure.Functions = append(structure.Functions, &ast.Function{
+				Name:       function.Name,
+				Comment:    function.Comment,
+				Result:     function.Result,
+				ReturnType: tt,
+			})
+		} else {
+			// not templated
+			structure.Functions = append(structure.Functions, function)
+		}
+	}
+
+	// update the scope with the newly created scope
+	pkgScope.Structs[newType.Name] = structure
+	pkgScope.LocalSymbols.TypeScope[newType.Name] = structure
+	structure.BuildScope(pkgScope)
 	return newType, nil
 }
 
@@ -370,82 +369,82 @@ func (m *Model) instantiateChoice(
 		Package:   pkgScope.Name,
 		Name:      instantiatedName,
 	}
-	if _, exists := pkgScope.Choices[newType.Name]; !exists {
-		choice := &ast.Choice{
-			Name:           newType.Name,
-			Comment:        templChoice.Comment,
-			Cases:          []*ast.ChoiceCase{},
-			Expression:     templChoice.Expression,
-			TypeParameters: []*ast.Parameter{},
-		}
 
-		// resolve the templates for the choices
-		for _, choiceCase := range templChoice.Cases {
-			newChoiceCase := &ast.ChoiceCase{
-				Conditions: choiceCase.Conditions,
-				Comment:    choiceCase.Comment,
-			}
-			if choiceCase.Field != nil {
-				newField, err := m.instantiateField(pkgScope, choiceCase.Field, templateTypes)
-				if err != nil {
-					return nil, err
-				}
-				newChoiceCase.Field = newField
-			}
-			choice.Cases = append(choice.Cases, newChoiceCase)
-
-		}
-
-		// also resolve the default case
-		if templChoice.DefaultCase != nil {
-			choice.DefaultCase = &ast.ChoiceCase{
-				Conditions: templChoice.DefaultCase.Conditions,
-				Comment:    templChoice.DefaultCase.Comment,
-			}
-			if templChoice.DefaultCase.Field != nil {
-				newField, err := m.instantiateField(pkgScope, templChoice.DefaultCase.Field, templateTypes)
-				if err != nil {
-					return nil, err
-				}
-				choice.DefaultCase.Field = newField
-			}
-
-		}
-		// resolve the templates for the types
-		for _, typeParam := range templChoice.TypeParameters {
-			if tt := templateTypes[typeParam.Type.Name]; tt != nil && typeParam.Type.Package == "" {
-				// the parameter is a template
-				choice.TypeParameters = append(choice.TypeParameters, &ast.Parameter{
-					Name: typeParam.Name,
-					Type: tt,
-				})
-			} else {
-				// not templated
-				choice.TypeParameters = append(choice.TypeParameters, typeParam)
-			}
-		}
-
-		// resolve the template for the functions
-		for _, function := range templChoice.Functions {
-			if tt := templateTypes[function.ReturnType.Name]; tt != nil && function.ReturnType.Package == "" {
-				// the function return type is a template
-				choice.Functions = append(choice.Functions, &ast.Function{
-					Name:       function.Name,
-					Comment:    function.Comment,
-					Result:     function.Result,
-					ReturnType: tt,
-				})
-			} else {
-				// not templated
-				choice.Functions = append(choice.Functions, function)
-			}
-		}
-
-		// update the scope with the newly created scope
-		pkgScope.Choices[newType.Name] = choice
-		pkgScope.LocalSymbols.TypeScope[newType.Name] = choice
-		choice.BuildScope(pkgScope)
+	// check if the type was already instantiated
+	if _, exists := pkgScope.Choices[newType.Name]; exists {
+		return newType, nil
 	}
+	choice := &ast.Choice{
+		Name:       newType.Name,
+		Comment:    templChoice.Comment,
+		Expression: templChoice.Expression,
+	}
+
+	// resolve the templates for the choices
+	for _, choiceCase := range templChoice.Cases {
+		newChoiceCase := &ast.ChoiceCase{
+			Conditions: choiceCase.Conditions,
+			Comment:    choiceCase.Comment,
+		}
+		if choiceCase.Field != nil {
+			newField, err := m.instantiateField(pkgScope, choiceCase.Field, templateTypes)
+			if err != nil {
+				return nil, err
+			}
+			newChoiceCase.Field = newField
+		}
+		choice.Cases = append(choice.Cases, newChoiceCase)
+	}
+
+	// also resolve the default case
+	if templChoice.DefaultCase != nil {
+		choice.DefaultCase = &ast.ChoiceCase{
+			Conditions: templChoice.DefaultCase.Conditions,
+			Comment:    templChoice.DefaultCase.Comment,
+		}
+		if templChoice.DefaultCase.Field != nil {
+			newField, err := m.instantiateField(pkgScope, templChoice.DefaultCase.Field, templateTypes)
+			if err != nil {
+				return nil, err
+			}
+			choice.DefaultCase.Field = newField
+		}
+
+	}
+	// resolve the templates for the types
+	for _, typeParam := range templChoice.TypeParameters {
+		if tt, ok := templateTypes[typeParam.Type.Name]; ok && typeParam.Type.Package == "" {
+			// the parameter is a template
+			choice.TypeParameters = append(choice.TypeParameters, &ast.Parameter{
+				Name: typeParam.Name,
+				Type: tt,
+			})
+		} else {
+			// not templated
+			choice.TypeParameters = append(choice.TypeParameters, typeParam)
+		}
+	}
+
+	// resolve the template for the functions
+	for _, function := range templChoice.Functions {
+		if tt := templateTypes[function.ReturnType.Name]; tt != nil && function.ReturnType.Package == "" {
+			// the function return type is a template
+			choice.Functions = append(choice.Functions, &ast.Function{
+				Name:       function.Name,
+				Comment:    function.Comment,
+				Result:     function.Result,
+				ReturnType: tt,
+			})
+		} else {
+			// not templated
+			choice.Functions = append(choice.Functions, function)
+		}
+	}
+
+	// update the scope with the newly created scope
+	pkgScope.Choices[newType.Name] = choice
+	pkgScope.LocalSymbols.TypeScope[newType.Name] = choice
+	choice.BuildScope(pkgScope)
 	return newType, nil
 }
 
