@@ -33,3 +33,33 @@ struct ValueWrapper(int32 parameter)
         return value + parameter;
     }
 };
+
+
+// SomeEnum defines some values
+enum int32 SomeEnum
+{
+    ATRR_A,
+    ATTR_B,
+    ATTR_C,
+    HAS_A
+};
+
+// SomeOtherEnum defines other values, but note that one entry is already defined
+// in another enum
+enum int32 SomeOtherEnum
+{
+    HAS_A,
+    HAS_B,
+    HAS_C,
+    HAS_D
+};
+
+choice BasicChoice(SomeEnum type) on type
+{
+    case ATRR_A: int32 fieldA;
+    case ATTR_B: int64 fieldB;
+    case SomeEnum.ATTR_C: int8 fieldC;
+
+    // the purpose of this structure is this field - HAS_A must be resolved from SomeOtherEnum
+    case HAS_A: int8 hasA;
+};

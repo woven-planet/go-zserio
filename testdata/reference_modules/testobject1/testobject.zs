@@ -26,6 +26,10 @@ struct TestObject
     // the second optional choice, expected to be present in the data
     optional InstantiatedTemplateChoice(parameter3) optionChoice2;
 
+    // This tests the correct type lookup if the choice selector type is enum
+    SomeEnum choiceSelector;
+    BasicChoice(choiceSelector) basicChoice;
+
     // foo is just there to have something after an optional type
     varint32 foo;
     
