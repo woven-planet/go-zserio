@@ -174,6 +174,7 @@ func (m *Model) EvaluateChoices() error {
 func (m *Model) InstantiateTemplates() error {
 	var err error
 	for _, pkg := range m.Packages {
+		// Instantiate all template instantiation created with "instantiate" keyword
 		for _, instantiatedType := range pkg.InstantiatedTypes {
 			if instantiatedType.Type, err = m.instantiateType(
 				pkg,
@@ -191,6 +192,7 @@ func (m *Model) InstantiateTemplates() error {
 			}
 		}
 
+		// Instantiate all structs that have template fields
 		for _, structure := range pkg.Structs {
 			// don't instantiate template structs
 			if len(structure.TemplateParameters) > 0 {
@@ -210,6 +212,53 @@ func (m *Model) InstantiateTemplates() error {
 							Name:      structure.Name,
 						},
 						Field: field.Name,
+						Err:   err,
+					}
+				}
+			}
+		}
+
+		// instantiate all choices that have template fields
+		for _, choice := range pkg.Choices {
+			// don't instantiate template choices
+			if len(choice.TemplateParameters) > 0 {
+				continue
+			}
+			for _, choiceCase := range choice.Cases {
+				if choiceCase.Field == nil {
+					continue
+				}
+				if choiceCase.Field.Type, err = m.instantiateType(
+					pkg,
+					choiceCase.Field.Type,
+					choiceCase.Field.Type.TemplateArguments,
+					""); // auto-generate a new name
+				err != nil {
+					return TypeError{
+						TypeReference: ast.TypeReference{
+							IsBuiltin: false,
+							Package:   pkg.Name,
+							Name:      choice.Name,
+						},
+						Field: choiceCase.Field.Name,
+						Err:   err,
+					}
+				}
+			}
+			if choice.DefaultCase != nil && choice.DefaultCase.Field != nil {
+				if choice.DefaultCase.Field.Type, err = m.instantiateType(
+					pkg,
+					choice.DefaultCase.Field.Type,
+					choice.DefaultCase.Field.Type.TemplateArguments,
+					""); // auto-generate a new name
+				err != nil {
+					return TypeError{
+						TypeReference: ast.TypeReference{
+							IsBuiltin: false,
+							Package:   pkg.Name,
+							Name:      choice.Name,
+						},
+						Field: choice.DefaultCase.Field.Name,
 						Err:   err,
 					}
 				}
