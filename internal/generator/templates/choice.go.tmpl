@@ -93,11 +93,9 @@ func (v *{{ $choice.Name}}) ZserioBitSize(bitPosition int) (int, error) {
     {{- template "bitsizeof.go.tmpl" dict "pkg" $scope "field" .Field "isarray" false}}
   {{- end }}
 {{- end }}
-{{- if $choice.DefaultCase }}
-  {{- if $choice.DefaultCase.Field }}
+{{- if and $choice.DefaultCase $choice.DefaultCase.Field }}
   default:
    {{- template "bitsizeof.go.tmpl" dict "pkg" $scope "field" $choice.DefaultCase.Field "isarray" false}}
-  {{- end }}
 {{- end }}
   }
   return endBitPosition - bitPosition, nil
@@ -109,10 +107,8 @@ func (v *{{ $choice.Name}}) ZserioCreatePackingContext(contextNode *zserio.Packi
     {{- template "packing_context_create.go.tmpl" dict "pkg" $scope "field" .Field }}
   {{- end }}
 {{- end }}
-{{- if $choice.DefaultCase }}
-  {{- if $choice.DefaultCase.Field }}
+{{- if and $choice.DefaultCase $choice.DefaultCase.Field }}
    {{- template "packing_context_create.go.tmpl" dict "pkg" $scope "field" $choice.DefaultCase.Field }}
-  {{- end }}
 {{- end }}
   return nil
 }
@@ -130,11 +126,9 @@ func (v *{{ $choice.Name}}) ZserioInitPackingContext(contextNode *zserio.Packing
       {{- $index = (add $index 1) }}
     {{- end }}
   {{- end }}
-  {{- if $choice.DefaultCase }}
-    {{- if $choice.DefaultCase.Field }}
+  {{- if and $choice.DefaultCase $choice.DefaultCase.Field }}
     default:
     {{- template "packing_context_create.go.tmpl" dict "pkg" $scope "field" $choice.DefaultCase.Field }}
-    {{- end }}
   {{- end }}
   }
 {{- end }}
@@ -155,11 +149,9 @@ func (v *{{ $choice.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingCon
       {{- $index = (add $index 1) }}
     {{- end }}
   {{- end}}
-  {{- if $choice.DefaultCase }}
-    {{- if $choice.DefaultCase.Field }}
+  {{- if and $choice.DefaultCase $choice.DefaultCase.Field }}
     default:
     {{ template "packing_context_decode.go.tmpl" dict "pkg" $scope "field" $choice.DefaultCase.Field "index" $index }}
-    {{- end }}
   {{- end }}
   }
     _ = err // to avoid "declared but not used" warning
@@ -181,11 +173,9 @@ func (v *{{ $choice.Name}}) MarshalZserioPacked(contextNode *zserio.PackingConte
       {{- $index = (add $index 1) }}
     {{- end }}
   {{- end}}
-  {{- if $choice.DefaultCase }}
-    {{- if $choice.DefaultCase.Field }}
+  {{- if and $choice.DefaultCase $choice.DefaultCase.Field }}
     default:
     {{template "packing_context_encode.go.tmpl" dict "pkg" $scope "field" $choice.DefaultCase.Field "index" $index }}
-    {{- end }}
   {{- end }}
   }
     _ = err // to avoid "declared but not used" warning
@@ -211,11 +201,9 @@ func (v *{{ $choice.Name}}) ZserioBitSizePacked(contextNode *zserio.PackingConte
       {{- $index = (add $index 1) }}
     {{- end }}
   {{- end}}
-  {{- if $choice.DefaultCase }}
-    {{- if $choice.DefaultCase.Field }}
+  {{- if and $choice.DefaultCase $choice.DefaultCase.Field }}
     default:
     {{- template "packing_context_bitsize.go.tmpl" dict "pkg" $scope "field" $choice.DefaultCase.Field "index" $index }}
-    {{- end }}
   {{- end }}
   }
 {{- end }}
