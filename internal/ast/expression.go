@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"fmt"
 	"errors"
 	"math/bits"
 	"strconv"
@@ -317,6 +318,11 @@ func (expr *Expression) evaluateDotExpression(scope *Package) error {
 		if enum, ok := expr.Operand1.ResultSymbol.Symbol.(*Enum); ok {
 			for _, enumItem := range enum.Items {
 				if enumItem.Name == expr.Operand2.Text {
+					if enumItem.EvaluationState != EvaluationStateComplete {
+						if err := enum.Evaluate(scope); err != nil {
+							return fmt.Errorf("recursive evaluation of %q: %w", enum.Name, err)
+						}
+					}
 					copyExpressionResult(enumItem.Expression, expr)
 					return nil
 				}

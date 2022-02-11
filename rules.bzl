@@ -3,7 +3,7 @@
 
 load("@io_bazel_rules_go//go:def.bzl", _go_library = "go_library")
 
-def go_zserio_srcs(name, srcs, rootpackage, pkg = None):
+def go_zserio_srcs(name, srcs, rootpackage, pkg = None, format = True):
     """Generate Go source code for the given zserio files.
 
     Args:
@@ -11,20 +11,45 @@ def go_zserio_srcs(name, srcs, rootpackage, pkg = None):
         srcs: Zserio source files.
         rootpackage: The rootpackage for the generated zserio code.
         pkg: The package name for generation.
+        format: Should we format the source code with a code formatter? Default to True.
     """
+    script = "\n".join([
+        "#!/bin/bash",
+        "./{bin} generate \\",
+        "  --out - \\",
+        "  --rootpackage {rootpackage} \\",
+        "  --only {pkg} \\",
+        "  {noformat} \\",
+        "  {srcs} 2>/dev/null",
+    ]).format(
+        bin = "$(execpath //cmd/zserio)",
+        rootpackage = rootpackage,
+        pkg = pkg,
+        noformat = "" if format else "--noformat",
+        srcs = "$(SRCS)",
+    )
+
+    native.genrule(
+        name = name + ".script",
+        srcs = srcs,
+        outs = [name + "_gen.sh"],
+        cmd = "echo -e '{}' >$@".format(script),
+        tools = [
+            "//cmd/zserio",
+        ],
+        executable = True,
+    )
     native.genrule(
         name = name,
         # TODO @aignas 2022-02-08: use something more similar to rules_proto,
         # so that we can encode dependencies between different zs files.
         srcs = srcs,
         outs = [name + "_gen.zs.go"],
-        cmd = "{bin} generate --out - --rootpackage {rootpackage} --only {pkg} {srcs} > $@ 2>/dev/null".format(
-            bin = "$(execpath //cmd/zserio)",
-            rootpackage = rootpackage,
-            pkg = pkg,
-            srcs = "$(SRCS)",
+        cmd = "{bin} > $@".format(
+            bin = "$(execpath {}.script)".format(name),
         ),
         tools = [
+            name + ".script",
             "//cmd/zserio",
         ],
     )

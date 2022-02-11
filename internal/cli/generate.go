@@ -13,6 +13,7 @@ import (
 var (
 	outputDirectory string
 	topLevelPackage string
+	noFormat        bool
 	outputPackage   string
 )
 
@@ -27,8 +28,9 @@ var generateCmd = &cobra.Command{
 		}
 		log.Println("Parsing complete, generating files...")
 		if err = generator.Generate(m, strings.TrimSpace(outputDirectory), &generator.Options{
-			RootPackage:   strings.TrimSpace(topLevelPackage),
-			OutputPackage: strings.TrimSpace(outputPackage),
+			RootPackage:       strings.TrimSpace(topLevelPackage),
+			OutputPackage:     strings.TrimSpace(outputPackage),
+			DoNotFormatSource: noFormat,
 		}); err != nil {
 			return fmt.Errorf("generate code: %w", err)
 		}
@@ -45,6 +47,9 @@ func init() {
 	generateCmd.MarkFlagRequired("rootpackage")
 
 	generateCmd.Flags().StringVarP(&outputPackage, "only", "", "", "Output only a single package.")
+
+	generateCmd.Flags().BoolVarP(&noFormat, "noformat", "", false, "Do not format the source files.")
+	generateCmd.Flags().MarkHidden("noformat")
 
 	rootCmd.AddCommand(generateCmd)
 }

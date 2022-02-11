@@ -175,7 +175,7 @@ func newOutputs(pkg *ast.Package, rootPackage string, singleFile bool) []output 
 		"rootPackage": rootPackage,
 	}
 
-	outs := []output{newOutput("pkg.go", "package.go.tmpl", data, true)}
+	var outs []output
 
 	for _, t := range pkg.Enums {
 		outs = append(outs, newTypeOutput(t, data, !singleFile))
@@ -209,7 +209,15 @@ func newOutputs(pkg *ast.Package, rootPackage string, singleFile bool) []output 
 		outs = append(outs, newTypeOutput(t, data, !singleFile))
 	}
 
-	return outs
+	sort.Slice(outs, func(i, j int) bool {
+		if outs[i].template == outs[j].template {
+			return outs[i].name > outs[j].name
+		}
+
+		return outs[i].template > outs[j].template
+	})
+
+	return append([]output{newOutput("pkg.go", "package.go.tmpl", data, true)}, outs...)
 }
 
 func generatePackage(rootPath string, pkg *ast.Package, options *Options) error {

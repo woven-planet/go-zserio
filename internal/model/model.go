@@ -21,64 +21,42 @@ func NewModel() *Model {
 	}
 }
 
+func FromFiles(paths ...string) (*Model, error) {
+	m := NewModel()
+
+	for _, p := range paths {
+		if err := m.parseFile(p); err != nil {
+			return nil, err
+		}
+	}
+
+	if err := m.evaluate(); err != nil {
+		return nil, err
+	}
+
+	return m, nil
+}
+
 func FromFilesystem(paths ...string) (*Model, error) {
 	if len(paths) == 0 {
 		return nil, errors.New("at least a single path must be given")
 	}
 
-	m := NewModel()
-
-	if len(paths) > 1 {
-		for _, p := range paths {
-			if err := m.parseFile(p); err != nil {
-				return nil, err
-			}
-		}
-	} else {
-		if err := m.walkDir(paths[0]); err != nil {
-			return nil, fmt.Errorf("walk dir: %w", err)
-		}
+	if len(paths) != 1 {
+		return FromFiles(paths...)
 	}
 
-	if err := m.ResolveImports(); err != nil {
-		return nil, fmt.Errorf("resolve imports: %w", err)
-	}
-
-	if err := m.ResolveTypes(); err != nil {
+	paths, err := walkDir(paths[0])
+	if err != nil {
 		return nil, err
 	}
 
-	if err := m.InstantiateTemplates(); err != nil {
-		return nil, err
-	}
-
-	if err := m.EvaluateEnums(); err != nil {
-		return nil, err
-	}
-
-	if err := m.EvaluateUnions(); err != nil {
-		return nil, err
-	}
-
-	if err := m.EvaluateBitmasks(); err != nil {
-		return nil, err
-	}
-
-	if err := m.EvaluateStructs(); err != nil {
-		return nil, err
-	}
-
-	if err := m.EvaluateChoices(); err != nil {
-		return nil, err
-	}
-
-	m.CapitalizeNames()
-
-	return m, nil
+	return FromFiles(paths...)
 }
 
-func (m *Model) walkDir(root string) error {
-	return filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+func walkDir(root string) ([]string, error) {
+	var paths []string
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -89,12 +67,21 @@ func (m *Model) walkDir(root string) error {
 			return nil
 		}
 
-		if strings.HasPrefix(d.Name(), ".") ||
-			!(strings.HasSuffix(d.Name(), ".zs") || strings.HasSuffix(d.Name(), ".zserio")) {
+		if strings.HasPrefix(d.Name(), ".") {
 			return nil
 		}
-		return m.parseFile(path)
+
+		if (strings.HasSuffix(d.Name(), ".zs") || strings.HasSuffix(d.Name(), ".zserio")) {
+			paths = append(paths, path)
+		}
+
+		return nil
 	})
+	if err != nil {
+		return nil, fmt.Errorf("walkdir: %w", err)
+	}
+
+	return paths, nil
 }
 
 func (m *Model) parseFile(path string) error {
@@ -109,5 +96,42 @@ func (m *Model) parseFile(path string) error {
 	}
 
 	m.Packages[pkg.Name] = pkg
+	return nil
+}
+
+func (m *Model) evaluate() error {
+	if err := m.ResolveImports(); err != nil {
+		return fmt.Errorf("resolve imports: %w", err)
+	}
+
+	if err := m.ResolveTypes(); err != nil {
+		return fmt.Errorf("resolve types: %w", err)
+	}
+
+	if err := m.InstantiateTemplates(); err != nil {
+		return fmt.Errorf("instantiate templates: %w", err)
+	}
+
+	if err := m.EvaluateEnums(); err != nil {
+		return fmt.Errorf("eval enums: %w", err)
+	}
+
+	if err := m.EvaluateUnions(); err != nil {
+		return fmt.Errorf("eval unions: %w", err)
+	}
+
+	if err := m.EvaluateBitmasks(); err != nil {
+		return fmt.Errorf("eval bitmasks: %w", err)
+	}
+
+	if err := m.EvaluateStructs(); err != nil {
+		return fmt.Errorf("eval structs: %w", err)
+	}
+
+	if err := m.EvaluateChoices(); err != nil {
+		return fmt.Errorf("eval choices: %w", err)
+	}
+
+	m.CapitalizeNames()
 	return nil
 }

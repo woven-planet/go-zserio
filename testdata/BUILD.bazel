@@ -1,3 +1,17 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load("//:rules.bzl", "go_zserio_library")
+
+exports_files(
+    srcs = glob(["*.zs"]),
+    visibility = ["//internal:__subpackages__"],
+)
+
+filegroup(
+    name = "examples",
+    srcs = glob(["*.zs"]),
+    visibility = ["//visibility:public"],
+)
+
 filegroup(
     name = "zserio_schema",
     srcs = [
@@ -12,4 +26,39 @@ filegroup(
         "reference_modules/*/*.zs",
     ]),
     visibility = ["//visibility:public"],
+)
+
+[
+    go_zserio_library(
+        name = file.replace(".zs", ""),
+        srcs = [file],
+        pkg = file.replace(".zs", ""),
+        rootpackage = "gen/testdata",
+    )
+    for file in [
+        "array_basic.zs",
+        "bit_field.zs",
+        "enum_basic.zs",
+        "enum_bitfield.zs",
+        "enum_expressions.zs",
+        "field_alignment.zs",
+        "struct_bitfield.zs",
+        "struct_simple.zs",
+        "struct_template.zs",
+    ]
+]
+
+build_test(
+    name = "build_test",
+    targets = [
+        ":array_basic",
+        ":bit_field",
+        ":enum_basic",
+        ":enum_bitfield",
+        ":enum_expressions",
+        ":field_alignment",
+        ":struct_bitfield",
+        ":struct_simple",
+        ":struct_template",
+    ],
 )
