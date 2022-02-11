@@ -3,7 +3,7 @@ package ztype
 import (
 	"math/bits"
 
-	zserio "github.com/woven-planet/go-zserio/interface"
+	zserio "github.com/woven-planet/go-zserio"
 )
 
 const (

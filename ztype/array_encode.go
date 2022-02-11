@@ -3,7 +3,7 @@ package ztype
 import (
 	"fmt"
 
-	zserio "github.com/woven-planet/go-zserio/interface"
+	zserio "github.com/woven-planet/go-zserio"
 )
 
 // writeDescriptor writes the descriptor of a packing context.

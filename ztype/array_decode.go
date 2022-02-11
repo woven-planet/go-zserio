@@ -3,7 +3,7 @@ package ztype
 import (
 	"fmt"
 
-	"github.com/woven-planet/go-zserio/interface"
+	"github.com/woven-planet/go-zserio"
 )
 
 // readDescriptor reads the descriptor of a packed array, and all of its children.

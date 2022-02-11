@@ -4,7 +4,7 @@ import (
 	"io"
 
 	"github.com/icza/bitio"
-	zserio "github.com/woven-planet/go-zserio/interface"
+	zserio "github.com/woven-planet/go-zserio"
 )
 
 var _ zserio.Writer = (*Writer)(nil)

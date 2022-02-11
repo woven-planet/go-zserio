@@ -25,8 +25,12 @@ buildifier(
 )
 
 go_library(
-    name = "go-zserio_lib",
-    srcs = ["doc.go"],
+    name = "zserio",
+    srcs = [
+        "doc.go",
+        "iface.go",
+        "packing_context_node.go",
+    ],
     importpath = "github.com/woven-planet/go-zserio",
-    visibility = ["//visibility:private"],
+    visibility = ["//visibility:public"],
 )
