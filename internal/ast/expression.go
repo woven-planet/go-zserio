@@ -120,7 +120,7 @@ func evaluateExpressionType(typeRef *TypeReference, scope *Package) (ExpressionT
 	return evaluateSymbolType(symbol.Symbol, scope)
 }
 
-func evaluateSymbolType(symbol interface{}, scope *Package) (ExpressionType, error) {
+func evaluateSymbolType(symbol any, scope *Package) (ExpressionType, error) {
 
 	switch n := symbol.(type) {
 	case *Enum:

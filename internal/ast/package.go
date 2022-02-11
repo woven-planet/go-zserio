@@ -61,8 +61,8 @@ func (p *Package) HasType(name string) bool {
 // scope
 func (p *Package) CollectSymbols() error {
 	p.LocalSymbols = &SymbolScope{
-		TypeScope:      make(map[string]interface{}),
-		OtherScope:     make(map[string]interface{}),
+		TypeScope:      make(map[string]any),
+		OtherScope:     make(map[string]any),
 		CompoundScopes: make(map[string]*CompoundScope),
 	}
 	for name, value := range p.Subtypes {
@@ -166,7 +166,7 @@ func (p *Package) GoArrayTraits(t *TypeReference) (string, error) {
 }
 
 type SymbolReference struct {
-	Symbol       interface{}
+	Symbol       any
 	Name         string
 	Package      string
 	CompoundName string

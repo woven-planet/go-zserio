@@ -14,7 +14,7 @@ var templates *template.Template
 
 func init() {
 	var err error
-	funcs := map[string]interface{}{
+	funcs := map[string]any{
 		"goType":           GoType,
 		"goPackageName":    GoPackageName,
 		"goGetAllImports":  GoGetAllImports,

@@ -20,7 +20,7 @@ type Visitor struct {
 	parser.BaseZserioParserVisitor
 }
 
-func (v *Visitor) Visit(tree antlr.ParseTree) interface{} {
+func (v *Visitor) Visit(tree antlr.ParseTree) any {
 	switch t := tree.(type) {
 	case *antlr.ErrorNodeImpl:
 		log.Printf("syntax error near '%s'", t.GetText())
@@ -31,8 +31,8 @@ func (v *Visitor) Visit(tree antlr.ParseTree) interface{} {
 	return errors.New("visit result not of a Node")
 }
 
-func (v *Visitor) VisitChildren(node antlr.RuleNode) interface{} {
-	var children []interface{}
+func (v *Visitor) VisitChildren(node antlr.RuleNode) any {
+	var children []any
 
 	for _, n := range node.GetChildren() {
 		cr := v.Visit(n.(antlr.ParseTree))
@@ -44,7 +44,7 @@ func (v *Visitor) VisitChildren(node antlr.RuleNode) interface{} {
 	return children
 }
 
-func (v *Visitor) VisitPackageDeclaration(ctx *parser.PackageDeclarationContext) interface{} {
+func (v *Visitor) VisitPackageDeclaration(ctx *parser.PackageDeclarationContext) any {
 	pkg := ast.NewPackage(v.Visit(ctx.PackageNameDefinition().(antlr.ParseTree)).(string))
 	pkg.Comment = getComment(ctx.GetParser(), ctx.GetStart())
 
@@ -79,7 +79,7 @@ func (v *Visitor) VisitPackageDeclaration(ctx *parser.PackageDeclarationContext)
 	return pkg
 }
 
-func (v *Visitor) VisitPackageNameDefinition(ctx *parser.PackageNameDefinitionContext) interface{} {
+func (v *Visitor) VisitPackageNameDefinition(ctx *parser.PackageNameDefinitionContext) any {
 	// It would be nice of the grammar just reused qualifiedName here, but for some
 	// reason they opted for "id (DOT id)*" again.
 	idNodes := ctx.AllId()
@@ -107,7 +107,7 @@ out:
 	return strings.Join(comments, "\n")
 }
 
-func (v *Visitor) VisitImportDeclaration(ctx *parser.ImportDeclarationContext) interface{} {
+func (v *Visitor) VisitImportDeclaration(ctx *parser.ImportDeclarationContext) any {
 	children := ctx.GetChildren()
 	parts := []string{}
 	for i := 1; i < len(children)-2; i++ {
@@ -124,22 +124,22 @@ func (v *Visitor) VisitImportDeclaration(ctx *parser.ImportDeclarationContext) i
 	}
 }
 
-func (v *Visitor) VisitLanguageDirective(ctx *parser.LanguageDirectiveContext) interface{} {
+func (v *Visitor) VisitLanguageDirective(ctx *parser.LanguageDirectiveContext) any {
 	// There can be only one child - return that directly.
-	return v.VisitChildren(ctx).([]interface{})[0]
+	return v.VisitChildren(ctx).([]any)[0]
 }
 
-func (v *Visitor) VisitTypeDeclaration(ctx *parser.TypeDeclarationContext) interface{} {
+func (v *Visitor) VisitTypeDeclaration(ctx *parser.TypeDeclarationContext) any {
 	// There can be only one child - return that directly.
-	return v.VisitChildren(ctx).([]interface{})[0]
+	return v.VisitChildren(ctx).([]any)[0]
 }
 
-func (v *Visitor) VisitSymbolDefinition(ctx *parser.SymbolDefinitionContext) interface{} {
+func (v *Visitor) VisitSymbolDefinition(ctx *parser.SymbolDefinitionContext) any {
 	// There can be only one child - return that directly.
-	return v.VisitChildren(ctx).([]interface{})[0]
+	return v.VisitChildren(ctx).([]any)[0]
 }
 
-func (v *Visitor) VisitConstDefinition(ctx *parser.ConstDefinitionContext) interface{} {
+func (v *Visitor) VisitConstDefinition(ctx *parser.ConstDefinitionContext) any {
 	return &ast.Const{
 		Name:            ctx.Id().GetText(),
 		Comment:         getComment(ctx.GetParser(), ctx.GetStart()),
@@ -148,7 +148,7 @@ func (v *Visitor) VisitConstDefinition(ctx *parser.ConstDefinitionContext) inter
 	}
 }
 
-func (v *Visitor) VisitSubtypeDeclaration(ctx *parser.SubtypeDeclarationContext) interface{} {
+func (v *Visitor) VisitSubtypeDeclaration(ctx *parser.SubtypeDeclarationContext) any {
 	return &ast.Subtype{
 		Name:    ctx.Id().GetText(),
 		Comment: getComment(ctx.GetParser(), ctx.GetStart()),
@@ -156,7 +156,7 @@ func (v *Visitor) VisitSubtypeDeclaration(ctx *parser.SubtypeDeclarationContext)
 	}
 }
 
-func (v *Visitor) VisitStructureDeclaration(ctx *parser.StructureDeclarationContext) interface{} {
+func (v *Visitor) VisitStructureDeclaration(ctx *parser.StructureDeclarationContext) any {
 	typ := &ast.Struct{
 		Name:    v.Visit(ctx.Id().(antlr.ParseTree)).(string),
 		Comment: getComment(ctx.GetParser(), ctx.GetStart()),
@@ -181,7 +181,7 @@ func (v *Visitor) VisitStructureDeclaration(ctx *parser.StructureDeclarationCont
 	return typ
 }
 
-func (v *Visitor) VisitStructureFieldDefinition(ctx *parser.StructureFieldDefinitionContext) interface{} {
+func (v *Visitor) VisitStructureFieldDefinition(ctx *parser.StructureFieldDefinitionContext) any {
 	field := v.Visit(ctx.FieldTypeId().(antlr.ParseTree)).(*ast.Field)
 	field.Comment = getComment(ctx.GetParser(), ctx.GetStart())
 	field.IsOptional = ctx.OPTIONAL() != nil
@@ -206,7 +206,7 @@ func (v *Visitor) VisitStructureFieldDefinition(ctx *parser.StructureFieldDefini
 	return field
 }
 
-func (v *Visitor) VisitFieldAlignment(ctx *parser.FieldAlignmentContext) interface{} {
+func (v *Visitor) VisitFieldAlignment(ctx *parser.FieldAlignmentContext) any {
 	r := v.Visit(ctx.Expression().(antlr.ParseTree))
 	expr, ok := r.(*ast.Expression)
 	if !ok {
@@ -225,30 +225,30 @@ func (v *Visitor) VisitFieldAlignment(ctx *parser.FieldAlignmentContext) interfa
 	return uint8(value)
 }
 
-func (v *Visitor) VisitFieldInitializer(ctx *parser.FieldInitializerContext) interface{} {
+func (v *Visitor) VisitFieldInitializer(ctx *parser.FieldInitializerContext) any {
 	return v.Visit(ctx.Expression()).(*ast.Expression)
 }
 
-func (v *Visitor) VisitFieldOptionalClause(ctx *parser.FieldOptionalClauseContext) interface{} {
+func (v *Visitor) VisitFieldOptionalClause(ctx *parser.FieldOptionalClauseContext) any {
 	return v.Visit(ctx.Expression()).(*ast.Expression)
 }
 
-func (v *Visitor) VisitFieldConstraint(ctx *parser.FieldConstraintContext) interface{} {
+func (v *Visitor) VisitFieldConstraint(ctx *parser.FieldConstraintContext) any {
 	return v.Visit(ctx.Expression()).(*ast.Expression)
 }
 
-func (v *Visitor) VisitParameterDefinition(ctx *parser.ParameterDefinitionContext) interface{} {
+func (v *Visitor) VisitParameterDefinition(ctx *parser.ParameterDefinitionContext) any {
 	return &ast.Parameter{
 		Name: ctx.Id().GetText(),
 		Type: v.VisitTypeReference(ctx.TypeReference().(*parser.TypeReferenceContext)).(*ast.TypeReference),
 	}
 }
 
-func (v *Visitor) VisitFunctionType(ctx *parser.FunctionTypeContext) interface{} {
+func (v *Visitor) VisitFunctionType(ctx *parser.FunctionTypeContext) any {
 	return v.VisitTypeReference(ctx.TypeReference().(*parser.TypeReferenceContext))
 }
 
-func (v *Visitor) VisitFunctionDefinition(ctx *parser.FunctionDefinitionContext) interface{} {
+func (v *Visitor) VisitFunctionDefinition(ctx *parser.FunctionDefinitionContext) any {
 	return &ast.Function{
 		Name:       ctx.FunctionName().GetText(),
 		Comment:    getComment(ctx.GetParser(), ctx.GetStart()),
@@ -257,7 +257,7 @@ func (v *Visitor) VisitFunctionDefinition(ctx *parser.FunctionDefinitionContext)
 	}
 }
 
-func (v *Visitor) VisitTypeParameters(ctx *parser.TypeParametersContext) interface{} {
+func (v *Visitor) VisitTypeParameters(ctx *parser.TypeParametersContext) any {
 	var typeParams []*ast.Parameter
 	for _, paramDefinition := range ctx.AllParameterDefinition() {
 		typeParams = append(typeParams, v.VisitParameterDefinition(paramDefinition.(*parser.ParameterDefinitionContext)).(*ast.Parameter))
@@ -265,14 +265,14 @@ func (v *Visitor) VisitTypeParameters(ctx *parser.TypeParametersContext) interfa
 	return typeParams
 }
 
-func (v *Visitor) VisitChoiceCase(ctx *parser.ChoiceCaseContext) interface{} {
+func (v *Visitor) VisitChoiceCase(ctx *parser.ChoiceCaseContext) any {
 	return &ast.ChoiceCaseExpression{
 		Condition: v.Visit(ctx.Expression()).(*ast.Expression),
 		Comment:   getComment(ctx.GetParser(), ctx.GetStart()),
 	}
 }
 
-func (v *Visitor) VisitChoiceCases(ctx *parser.ChoiceCasesContext) interface{} {
+func (v *Visitor) VisitChoiceCases(ctx *parser.ChoiceCasesContext) any {
 	typ := &ast.ChoiceCase{}
 
 	for _, choiceCaseContext := range ctx.AllChoiceCase() {
@@ -285,7 +285,7 @@ func (v *Visitor) VisitChoiceCases(ctx *parser.ChoiceCasesContext) interface{} {
 	return typ
 }
 
-func (v *Visitor) VisitChoiceDefault(ctx *parser.ChoiceDefaultContext) interface{} {
+func (v *Visitor) VisitChoiceDefault(ctx *parser.ChoiceDefaultContext) any {
 	typ := &ast.ChoiceCase{}
 	if tp := ctx.ChoiceFieldDefinition(); tp != nil {
 		typ.Field = v.VisitChoiceFieldDefinition(tp.(*parser.ChoiceFieldDefinitionContext)).(*ast.Field)
@@ -293,11 +293,11 @@ func (v *Visitor) VisitChoiceDefault(ctx *parser.ChoiceDefaultContext) interface
 	return typ
 }
 
-func (v *Visitor) VisitChoiceFieldDefinition(ctx *parser.ChoiceFieldDefinitionContext) interface{} {
+func (v *Visitor) VisitChoiceFieldDefinition(ctx *parser.ChoiceFieldDefinitionContext) any {
 	return v.VisitFieldTypeId(ctx.FieldTypeId().(*parser.FieldTypeIdContext)).(*ast.Field)
 }
 
-func (v *Visitor) VisitChoiceDeclaration(ctx *parser.ChoiceDeclarationContext) interface{} {
+func (v *Visitor) VisitChoiceDeclaration(ctx *parser.ChoiceDeclarationContext) any {
 	typ := &ast.Choice{
 		Name:       v.Visit(ctx.Id().(antlr.ParseTree)).(string),
 		Comment:    getComment(ctx.GetParser(), ctx.GetStart()),
@@ -329,7 +329,7 @@ func (v *Visitor) VisitChoiceDeclaration(ctx *parser.ChoiceDeclarationContext) i
 	return typ
 }
 
-func (v *Visitor) VisitUnionDeclaration(ctx *parser.UnionDeclarationContext) interface{} {
+func (v *Visitor) VisitUnionDeclaration(ctx *parser.UnionDeclarationContext) any {
 	typ := &ast.Union{
 		Name:    ctx.Id().GetText(),
 		Comment: getComment(ctx.GetParser(), ctx.GetStart()),
@@ -355,7 +355,7 @@ func (v *Visitor) VisitUnionDeclaration(ctx *parser.UnionDeclarationContext) int
 	return typ
 }
 
-func (v *Visitor) VisitEnumDeclaration(ctx *parser.EnumDeclarationContext) interface{} {
+func (v *Visitor) VisitEnumDeclaration(ctx *parser.EnumDeclarationContext) any {
 	typ := &ast.Enum{
 		Name:    ctx.Id().GetText(),
 		Comment: getComment(ctx.GetParser(), ctx.GetStart()),
@@ -367,7 +367,7 @@ func (v *Visitor) VisitEnumDeclaration(ctx *parser.EnumDeclarationContext) inter
 	return typ
 }
 
-func (v *Visitor) VisitEnumItem(ctx *parser.EnumItemContext) interface{} {
+func (v *Visitor) VisitEnumItem(ctx *parser.EnumItemContext) any {
 
 	typ := &ast.EnumItem{
 		Name:    ctx.Id().GetText(),
@@ -382,7 +382,7 @@ func (v *Visitor) VisitEnumItem(ctx *parser.EnumItemContext) interface{} {
 	return typ
 }
 
-func (v *Visitor) VisitInstantiateDeclaration(ctx *parser.InstantiateDeclarationContext) interface{} {
+func (v *Visitor) VisitInstantiateDeclaration(ctx *parser.InstantiateDeclarationContext) any {
 	return &ast.InstantiateType{
 		Name:    v.Visit(ctx.Id().(antlr.ParseTree)).(string),
 		Comment: getComment(ctx.GetParser(), ctx.GetStart()),
@@ -390,7 +390,7 @@ func (v *Visitor) VisitInstantiateDeclaration(ctx *parser.InstantiateDeclaration
 	}
 }
 
-func (v *Visitor) VisitBitmaskDeclaration(ctx *parser.BitmaskDeclarationContext) interface{} {
+func (v *Visitor) VisitBitmaskDeclaration(ctx *parser.BitmaskDeclarationContext) any {
 	typ := &ast.BitmaskType{
 		Name:    ctx.Id().GetText(),
 		Comment: getComment(ctx.GetParser(), ctx.GetStart()),
@@ -402,7 +402,7 @@ func (v *Visitor) VisitBitmaskDeclaration(ctx *parser.BitmaskDeclarationContext)
 	return typ
 }
 
-func (v *Visitor) VisitBitmaskValue(ctx *parser.BitmaskValueContext) interface{} {
+func (v *Visitor) VisitBitmaskValue(ctx *parser.BitmaskValueContext) any {
 	typ := &ast.BitmaskValue{
 		Name: ctx.Id().GetText(),
 	}
@@ -415,7 +415,7 @@ func (v *Visitor) VisitBitmaskValue(ctx *parser.BitmaskValueContext) interface{}
 	return typ
 }
 
-func (v *Visitor) VisitParenthesizedExpression(ctx *parser.ParenthesizedExpressionContext) interface{} {
+func (v *Visitor) VisitParenthesizedExpression(ctx *parser.ParenthesizedExpressionContext) any {
 	return &ast.Expression{
 		Operand1: v.Visit(ctx.Expression()).(*ast.Expression),
 		Type:     ctx.GetOperator().GetTokenType(),
@@ -423,7 +423,7 @@ func (v *Visitor) VisitParenthesizedExpression(ctx *parser.ParenthesizedExpressi
 	}
 }
 
-func (v *Visitor) VisitFunctionCallExpression(ctx *parser.FunctionCallExpressionContext) interface{} {
+func (v *Visitor) VisitFunctionCallExpression(ctx *parser.FunctionCallExpressionContext) any {
 	return &ast.Expression{
 		Operand1: v.Visit(ctx.Expression()).(*ast.Expression),
 		Type:     ctx.GetOperator().GetTokenType(),
@@ -431,7 +431,7 @@ func (v *Visitor) VisitFunctionCallExpression(ctx *parser.FunctionCallExpression
 	}
 }
 
-func (v *Visitor) VisitArrayExpression(ctx *parser.ArrayExpressionContext) interface{} {
+func (v *Visitor) VisitArrayExpression(ctx *parser.ArrayExpressionContext) any {
 	return &ast.Expression{
 		Operand1: v.Visit(ctx.Expression(0)).(*ast.Expression),
 		Operand2: v.Visit(ctx.Expression(1)).(*ast.Expression),
@@ -440,7 +440,7 @@ func (v *Visitor) VisitArrayExpression(ctx *parser.ArrayExpressionContext) inter
 	}
 }
 
-func (v *Visitor) VisitDotExpression(ctx *parser.DotExpressionContext) interface{} {
+func (v *Visitor) VisitDotExpression(ctx *parser.DotExpressionContext) any {
 	return &ast.Expression{
 		Operand1: v.Visit(ctx.Expression()).(*ast.Expression),
 		Operand2: &ast.Expression{
@@ -452,7 +452,7 @@ func (v *Visitor) VisitDotExpression(ctx *parser.DotExpressionContext) interface
 	}
 }
 
-func (v *Visitor) VisitLengthofExpression(ctx *parser.LengthofExpressionContext) interface{} {
+func (v *Visitor) VisitLengthofExpression(ctx *parser.LengthofExpressionContext) any {
 	return &ast.Expression{
 		Operand1: v.Visit(ctx.Expression()).(*ast.Expression),
 		Type:     ctx.GetOperator().GetTokenType(),
@@ -460,7 +460,7 @@ func (v *Visitor) VisitLengthofExpression(ctx *parser.LengthofExpressionContext)
 	}
 }
 
-func (v *Visitor) VisitValueofExpression(ctx *parser.ValueofExpressionContext) interface{} {
+func (v *Visitor) VisitValueofExpression(ctx *parser.ValueofExpressionContext) any {
 	return &ast.Expression{
 		Operand1: v.Visit(ctx.Expression()).(*ast.Expression),
 		Type:     ctx.GetOperator().GetTokenType(),
@@ -468,7 +468,7 @@ func (v *Visitor) VisitValueofExpression(ctx *parser.ValueofExpressionContext) i
 	}
 }
 
-func (v *Visitor) VisitNumbitsExpression(ctx *parser.NumbitsExpressionContext) interface{} {
+func (v *Visitor) VisitNumbitsExpression(ctx *parser.NumbitsExpressionContext) any {
 	return &ast.Expression{
 		Operand1: v.Visit(ctx.Expression()).(*ast.Expression),
 		Type:     ctx.GetOperator().GetTokenType(),
@@ -476,7 +476,7 @@ func (v *Visitor) VisitNumbitsExpression(ctx *parser.NumbitsExpressionContext) i
 	}
 }
 
-func (v *Visitor) VisitUnaryExpression(ctx *parser.UnaryExpressionContext) interface{} {
+func (v *Visitor) VisitUnaryExpression(ctx *parser.UnaryExpressionContext) any {
 	return &ast.Expression{
 		Operand1: v.Visit(ctx.Expression()).(*ast.Expression),
 		Type:     ctx.GetOperator().GetTokenType(),
@@ -484,7 +484,7 @@ func (v *Visitor) VisitUnaryExpression(ctx *parser.UnaryExpressionContext) inter
 	}
 }
 
-func (v *Visitor) VisitMultiplicativeExpression(ctx *parser.MultiplicativeExpressionContext) interface{} {
+func (v *Visitor) VisitMultiplicativeExpression(ctx *parser.MultiplicativeExpressionContext) any {
 	return &ast.Expression{
 		Operand1: v.Visit(ctx.Expression(0)).(*ast.Expression),
 		Operand2: v.Visit(ctx.Expression(1)).(*ast.Expression),
@@ -493,7 +493,7 @@ func (v *Visitor) VisitMultiplicativeExpression(ctx *parser.MultiplicativeExpres
 	}
 }
 
-func (v *Visitor) VisitAdditiveExpression(ctx *parser.AdditiveExpressionContext) interface{} {
+func (v *Visitor) VisitAdditiveExpression(ctx *parser.AdditiveExpressionContext) any {
 	return &ast.Expression{
 		Operand1: v.Visit(ctx.Expression(0)).(*ast.Expression),
 		Operand2: v.Visit(ctx.Expression(1)).(*ast.Expression),
@@ -502,7 +502,7 @@ func (v *Visitor) VisitAdditiveExpression(ctx *parser.AdditiveExpressionContext)
 	}
 }
 
-func (v *Visitor) VisitShiftExpression(ctx *parser.ShiftExpressionContext) interface{} {
+func (v *Visitor) VisitShiftExpression(ctx *parser.ShiftExpressionContext) any {
 	expr := &ast.Expression{
 		Operand1: v.Visit(ctx.Expression(0)).(*ast.Expression),
 		Operand2: v.Visit(ctx.Expression(1)).(*ast.Expression),
@@ -517,7 +517,7 @@ func (v *Visitor) VisitShiftExpression(ctx *parser.ShiftExpressionContext) inter
 	}
 	return expr
 }
-func (v *Visitor) VisitRelationalExpression(ctx *parser.RelationalExpressionContext) interface{} {
+func (v *Visitor) VisitRelationalExpression(ctx *parser.RelationalExpressionContext) any {
 	return &ast.Expression{
 		Operand1: v.Visit(ctx.Expression(0)).(*ast.Expression),
 		Operand2: v.Visit(ctx.Expression(1)).(*ast.Expression),
@@ -525,7 +525,7 @@ func (v *Visitor) VisitRelationalExpression(ctx *parser.RelationalExpressionCont
 		Text:     ctx.GetOperator().GetText(),
 	}
 }
-func (v *Visitor) VisitEqualityExpression(ctx *parser.EqualityExpressionContext) interface{} {
+func (v *Visitor) VisitEqualityExpression(ctx *parser.EqualityExpressionContext) any {
 	return &ast.Expression{
 		Operand1: v.Visit(ctx.Expression(0)).(*ast.Expression),
 		Operand2: v.Visit(ctx.Expression(1)).(*ast.Expression),
@@ -533,7 +533,7 @@ func (v *Visitor) VisitEqualityExpression(ctx *parser.EqualityExpressionContext)
 		Text:     ctx.GetOperator().GetText(),
 	}
 }
-func (v *Visitor) VisitBitwiseAndExpression(ctx *parser.BitwiseAndExpressionContext) interface{} {
+func (v *Visitor) VisitBitwiseAndExpression(ctx *parser.BitwiseAndExpressionContext) any {
 	return &ast.Expression{
 		Operand1: v.Visit(ctx.Expression(0)).(*ast.Expression),
 		Operand2: v.Visit(ctx.Expression(1)).(*ast.Expression),
@@ -541,7 +541,7 @@ func (v *Visitor) VisitBitwiseAndExpression(ctx *parser.BitwiseAndExpressionCont
 		Text:     ctx.GetOperator().GetText(),
 	}
 }
-func (v *Visitor) VisitBitwiseXorExpression(ctx *parser.BitwiseXorExpressionContext) interface{} {
+func (v *Visitor) VisitBitwiseXorExpression(ctx *parser.BitwiseXorExpressionContext) any {
 	return &ast.Expression{
 		Operand1: v.Visit(ctx.Expression(0)).(*ast.Expression),
 		Operand2: v.Visit(ctx.Expression(1)).(*ast.Expression),
@@ -549,7 +549,7 @@ func (v *Visitor) VisitBitwiseXorExpression(ctx *parser.BitwiseXorExpressionCont
 		Text:     ctx.GetOperator().GetText(),
 	}
 }
-func (v *Visitor) VisitBitwiseOrExpression(ctx *parser.BitwiseOrExpressionContext) interface{} {
+func (v *Visitor) VisitBitwiseOrExpression(ctx *parser.BitwiseOrExpressionContext) any {
 	return &ast.Expression{
 		Operand1: v.Visit(ctx.Expression(0)).(*ast.Expression),
 		Operand2: v.Visit(ctx.Expression(1)).(*ast.Expression),
@@ -557,7 +557,7 @@ func (v *Visitor) VisitBitwiseOrExpression(ctx *parser.BitwiseOrExpressionContex
 		Text:     ctx.GetOperator().GetText(),
 	}
 }
-func (v *Visitor) VisitLogicalAndExpression(ctx *parser.LogicalAndExpressionContext) interface{} {
+func (v *Visitor) VisitLogicalAndExpression(ctx *parser.LogicalAndExpressionContext) any {
 	return &ast.Expression{
 		Operand1: v.Visit(ctx.Expression(0)).(*ast.Expression),
 		Operand2: v.Visit(ctx.Expression(1)).(*ast.Expression),
@@ -565,7 +565,7 @@ func (v *Visitor) VisitLogicalAndExpression(ctx *parser.LogicalAndExpressionCont
 		Text:     ctx.GetOperator().GetText(),
 	}
 }
-func (v *Visitor) VisitLogicalOrExpression(ctx *parser.LogicalOrExpressionContext) interface{} {
+func (v *Visitor) VisitLogicalOrExpression(ctx *parser.LogicalOrExpressionContext) any {
 	return &ast.Expression{
 		Operand1: v.Visit(ctx.Expression(0)).(*ast.Expression),
 		Operand2: v.Visit(ctx.Expression(1)).(*ast.Expression),
@@ -574,7 +574,7 @@ func (v *Visitor) VisitLogicalOrExpression(ctx *parser.LogicalOrExpressionContex
 	}
 }
 
-func (v *Visitor) VisitTernaryExpression(ctx *parser.TernaryExpressionContext) interface{} {
+func (v *Visitor) VisitTernaryExpression(ctx *parser.TernaryExpressionContext) any {
 	return &ast.Expression{
 		Operand1: v.Visit(ctx.Expression(0)).(*ast.Expression),
 		Operand2: v.Visit(ctx.Expression(1)).(*ast.Expression),
@@ -584,7 +584,7 @@ func (v *Visitor) VisitTernaryExpression(ctx *parser.TernaryExpressionContext) i
 	}
 }
 
-func (v *Visitor) VisitLiteralExpression(ctx *parser.LiteralExpressionContext) interface{} {
+func (v *Visitor) VisitLiteralExpression(ctx *parser.LiteralExpressionContext) any {
 	token := ctx.Literal().GetStart()
 	return &ast.Expression{
 		Type: token.GetTokenType(),
@@ -592,21 +592,21 @@ func (v *Visitor) VisitLiteralExpression(ctx *parser.LiteralExpressionContext) i
 	}
 }
 
-func (v *Visitor) VisitIndexExpression(ctx *parser.IndexExpressionContext) interface{} {
+func (v *Visitor) VisitIndexExpression(ctx *parser.IndexExpressionContext) any {
 	return &ast.Expression{
 		Type: ctx.INDEX().GetSymbol().GetTokenType(),
 		Text: ctx.INDEX().GetText(),
 	}
 }
 
-func (v *Visitor) VisitIdentifierExpression(ctx *parser.IdentifierExpressionContext) interface{} {
+func (v *Visitor) VisitIdentifierExpression(ctx *parser.IdentifierExpressionContext) any {
 	return &ast.Expression{
 		Type: ctx.Id().GetStart().GetTokenType(),
 		Text: ctx.Id().GetText(),
 	}
 }
 
-func (v *Visitor) VisitFieldTypeId(ctx *parser.FieldTypeIdContext) interface{} {
+func (v *Visitor) VisitFieldTypeId(ctx *parser.FieldTypeIdContext) any {
 	field := &ast.Field{
 		Name: ctx.Id().GetText(),
 		Type: v.Visit(ctx.TypeInstantiation().(antlr.ParseTree)).(*ast.TypeReference),
@@ -629,7 +629,7 @@ func (v *Visitor) VisitFieldTypeId(ctx *parser.FieldTypeIdContext) interface{} {
 	return field
 }
 
-func (v *Visitor) VisitTypeReference(ctx *parser.TypeReferenceContext) interface{} {
+func (v *Visitor) VisitTypeReference(ctx *parser.TypeReferenceContext) any {
 	if t := ctx.BuiltinType(); t != nil {
 		typ := &ast.TypeReference{
 			IsBuiltin: true,
@@ -671,11 +671,11 @@ func (v *Visitor) VisitTypeReference(ctx *parser.TypeReferenceContext) interface
 	}
 }
 
-func (v *Visitor) VisitDynamicLengthArgument(ctx *parser.DynamicLengthArgumentContext) interface{} {
+func (v *Visitor) VisitDynamicLengthArgument(ctx *parser.DynamicLengthArgumentContext) any {
 	return v.Visit(ctx.Expression().(antlr.ParseTree)).(*ast.Expression)
 }
 
-func (v *Visitor) VisitTypeInstantiation(ctx *parser.TypeInstantiationContext) interface{} {
+func (v *Visitor) VisitTypeInstantiation(ctx *parser.TypeInstantiationContext) any {
 	typ := v.Visit(ctx.TypeReference().(antlr.ParseTree)).(*ast.TypeReference)
 	if ctx.TypeArguments() != nil {
 		typ.TypeArguments = v.VisitTypeArguments(ctx.TypeArguments().(*parser.TypeArgumentsContext)).([]*ast.Expression)
@@ -686,7 +686,7 @@ func (v *Visitor) VisitTypeInstantiation(ctx *parser.TypeInstantiationContext) i
 	return typ
 }
 
-func (v *Visitor) VisitTypeArguments(ctx *parser.TypeArgumentsContext) interface{} {
+func (v *Visitor) VisitTypeArguments(ctx *parser.TypeArgumentsContext) any {
 	var params []*ast.Expression
 	for _, ta := range ctx.AllTypeArgument() {
 		params = append(params, v.VisitTypeArgument(ta.(*parser.TypeArgumentContext)).(*ast.Expression))
@@ -694,7 +694,7 @@ func (v *Visitor) VisitTypeArguments(ctx *parser.TypeArgumentsContext) interface
 	return params
 }
 
-func (v *Visitor) VisitTypeArgument(ctx *parser.TypeArgumentContext) interface{} {
+func (v *Visitor) VisitTypeArgument(ctx *parser.TypeArgumentContext) any {
 	if ctx.EXPLICIT() != nil {
 		token := ctx.Id().GetStart()
 		return &ast.Expression{
@@ -706,7 +706,7 @@ func (v *Visitor) VisitTypeArgument(ctx *parser.TypeArgumentContext) interface{}
 	return v.Visit(ctx.Expression()).(*ast.Expression)
 }
 
-func (v *Visitor) VisitTemplateArguments(ctx *parser.TemplateArgumentsContext) interface{} {
+func (v *Visitor) VisitTemplateArguments(ctx *parser.TemplateArgumentsContext) any {
 	var arguments []*ast.TypeReference
 	for _, ta := range ctx.AllTemplateArgument() {
 		arguments = append(arguments, v.Visit(ta.(antlr.ParseTree)).(*ast.TypeReference))
@@ -714,11 +714,11 @@ func (v *Visitor) VisitTemplateArguments(ctx *parser.TemplateArgumentsContext) i
 	return arguments
 }
 
-func (v *Visitor) VisitTemplateArgument(ctx *parser.TemplateArgumentContext) interface{} {
+func (v *Visitor) VisitTemplateArgument(ctx *parser.TemplateArgumentContext) any {
 	return v.Visit(ctx.TypeReference().(antlr.ParseTree))
 }
 
-func (v *Visitor) VisitTemplateParameters(ctx *parser.TemplateParametersContext) interface{} {
+func (v *Visitor) VisitTemplateParameters(ctx *parser.TemplateParametersContext) any {
 	var ids []string
 	for _, id := range ctx.AllId() {
 		ids = append(ids, id.GetText())
@@ -726,19 +726,19 @@ func (v *Visitor) VisitTemplateParameters(ctx *parser.TemplateParametersContext)
 	return ids
 }
 
-func (v *Visitor) VisitId(ctx *parser.IdContext) interface{} {
+func (v *Visitor) VisitId(ctx *parser.IdContext) any {
 	idNode := ctx.GetChild(0)
 	return v.Visit(idNode.(antlr.ParseTree))
 }
 
-func (v *Visitor) VisitQualifiedName(ctx *parser.QualifiedNameContext) interface{} {
+func (v *Visitor) VisitQualifiedName(ctx *parser.QualifiedNameContext) any {
 	return ctx.GetText()
 }
 
-func (v *Visitor) VisitErrorNode(node antlr.ErrorNode) interface{} {
+func (v *Visitor) VisitErrorNode(node antlr.ErrorNode) any {
 	panic("Error!")
 }
 
-func (v *Visitor) VisitTerminal(node antlr.TerminalNode) interface{} {
+func (v *Visitor) VisitTerminal(node antlr.TerminalNode) any {
 	return node.GetText()
 }
