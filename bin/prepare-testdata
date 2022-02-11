@@ -1,0 +1,18 @@
+#!/bin/sh
+
+GO=${GO:-go1.18beta2}
+set -e
+
+# Prepare reference test data using zserio Pytho implementation
+python3 -m venv .venv
+source .venv/bin/activate
+pip install zserio
+
+zserio -src testdata reference_modules/all.zs -setTopLevelPackage testdata -python test/python
+python test/python/write_test_data.py
+
+# Generate Go code for schema
+$GO run ./cmd/zserio generate \
+    -r gen/github.com/woven-planet/go-zserio/test/go/reference_modules \
+    -o test/go \
+    testdata/reference_modules

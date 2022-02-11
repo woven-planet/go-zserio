@@ -3,3 +3,6 @@
 *.sw[op]
 .DS_Store
 .envrc.local
+/testdata/testdata.bin
+/test/go/reference_modules
+/test/python/testdata
