@@ -24,7 +24,7 @@ type Options struct {
 	outputToStdout bool
 }
 
-type data map[string]interface{}
+type data map[string]any
 
 func Generate(m *model.Model, rootPath string, options *Options) error {
 	options.outputToStdout = rootPath == "-"
@@ -129,7 +129,7 @@ func newOutput(name, template string, data data, withPreamble bool) output {
 	}
 }
 
-func newTypeOutput(astType interface{}, d data, withPreamble bool) output {
+func newTypeOutput(astType any, d data, withPreamble bool) output {
 	var name, typeName string
 	switch t := astType.(type) {
 	case *ast.Enum:

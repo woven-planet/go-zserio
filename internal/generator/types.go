@@ -29,5 +29,5 @@ var ZserioTypeToGoType = map[string]string{
 	"float32": "float32",
 	"float64": "float64",
 	// arbitrary type
-	"extern": "interface{}",
+	"extern": "any",
 }

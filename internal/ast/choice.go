@@ -26,7 +26,7 @@ func (choice *Choice) BuildScope(p *Package) error {
 	// create a compound scope
 	compoundScope := &CompoundScope{
 		Symbol: choice,
-		Scope:  make(map[string]interface{}),
+		Scope:  make(map[string]any),
 	}
 
 	for _, param := range choice.TypeParameters {

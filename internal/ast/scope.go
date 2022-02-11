@@ -187,17 +187,17 @@ func (s *RootScope) HasType(t string) bool {
 }
 
 type CompoundScope struct {
-	Symbol interface{}
-	Scope  map[string]interface{}
+	Symbol any
+	Scope  map[string]any
 }
 
 // SymbolScope keeps track of all symbols that are available in this scope
 type SymbolScope struct {
 	// TypeScope contains all types that are currently in the scope
-	TypeScope map[string]interface{}
+	TypeScope map[string]any
 
 	// OtherScope contains all symbols that are not Types (e.g. enum values)
-	OtherScope map[string]interface{}
+	OtherScope map[string]any
 
 	// CompoundScope contains all symbols that are restricted to the current
 	// evaluation scope (e.g. the struct parameters when evaluating a struct)
