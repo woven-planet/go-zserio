@@ -6,8 +6,15 @@ type Array struct {
 }
 
 type Field struct {
-	Name    string
+	Name string
+
+	// ZserioName is the original name of the field, as it appears in the
+	// zserio file.
+	ZserioName string
+
+	// Comment is the comment of the field in the zserio file.
 	Comment string
+
 	// Optional fields are always serialised as a boolean that indicates
 	// if the value field is set. If the field is not set no value is
 	// serialised.
