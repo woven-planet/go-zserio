@@ -1,6 +1,7 @@
 package ztype
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/icza/bitio"
@@ -76,5 +77,9 @@ func (w *Writer) Align(boundary uint8) (int64, error) {
 
 // Close flushes the buffer, but does not close the underlying writer.
 func (w *Writer) Close() error {
-	return w.writer.Close()
+	err := w.writer.Close()
+	if err != nil {
+		return fmt.Errorf("close: %w", err)
+	}
+	return nil
 }

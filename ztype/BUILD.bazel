@@ -59,12 +59,14 @@ go_test(
         "varint_encode_test.go",
         "varuint_decode_test.go",
         "varuint_encode_test.go",
+        "writer_test.go",
     ],
+    embed = [":ztype"],
     deps = [
-        ":ztype",
         "//:zserio",
         "@com_github_google_go_cmp//cmp",
         "@com_github_google_go_cmp//cmp/cmpopts",
         "@com_github_icza_bitio//:bitio",
+        "@com_github_stretchr_testify//assert",
     ],
 )
