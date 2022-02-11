@@ -2,8 +2,8 @@ package visitor
 
 import (
 	"errors"
-	"log"
 	"fmt"
+	"log"
 	"math"
 	"strconv"
 	"strings"
@@ -299,9 +299,9 @@ func (v *Visitor) VisitChoiceFieldDefinition(ctx *parser.ChoiceFieldDefinitionCo
 
 func (v *Visitor) VisitChoiceDeclaration(ctx *parser.ChoiceDeclarationContext) any {
 	typ := &ast.Choice{
-		Name:       v.Visit(ctx.Id().(antlr.ParseTree)).(string),
-		Comment:    getComment(ctx.GetParser(), ctx.GetStart()),
-		Expression: v.Visit(ctx.Expression().(antlr.ParseTree)).(*ast.Expression),
+		Name:               v.Visit(ctx.Id().(antlr.ParseTree)).(string),
+		Comment:            getComment(ctx.GetParser(), ctx.GetStart()),
+		SelectorExpression: v.Visit(ctx.Expression().(antlr.ParseTree)).(*ast.Expression),
 	}
 
 	if tp := ctx.TemplateParameters(); tp != nil {
