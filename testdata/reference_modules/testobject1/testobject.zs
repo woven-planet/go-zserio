@@ -16,4 +16,17 @@ struct TestObject
     packed InstantiatedTemplateStruct(parameter2) structArray[];
     align(5):
     CityAttributes bitmaskArray[100];
+
+    // Parameter for optional choices
+    int32 parameter3;
+
+    // The first optional choice, expected to not be present in the data
+    optional InstantiatedTemplateChoice(parameter3) optionChoice1;
+
+    // the second optional choice, expected to be present in the data
+    optional InstantiatedTemplateChoice(parameter3) optionChoice2;
+
+    // foo is just there to have something after an optional type
+    varint32 foo;
+    
 };

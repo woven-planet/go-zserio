@@ -6,6 +6,9 @@ import zserio
 from testdata.reference_modules.core.instantiations.instantiated_template_struct import (
     InstantiatedTemplateStruct,
 )
+from testdata.reference_modules.core.instantiations.instantiated_template_choice import (
+    InstantiatedTemplateChoice,
+)
 from testdata.reference_modules.testobject1.testobject.test_object import TestObject
 from testdata.reference_modules.core.types.value_wrapper import ValueWrapper
 from testdata.reference_modules.core.types.color import Color
@@ -43,6 +46,11 @@ def _new_test_object():
     for i in range(100):
         d.bitmask_array.append(CityAttributes.from_value(2))
 
+    # d.option_choice1 is deliberately not set
+    d.parameter3 = 12
+    d.option_choice2 = InstantiatedTemplateChoice(d.parameter3)
+    d.option_choice2.default_field = 707
+    d.foo = 42
     return d
 
 def main():
