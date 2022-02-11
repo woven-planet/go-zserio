@@ -19,7 +19,10 @@ go_library(
 
 go_test(
     name = "model_test",
-    srcs = ["model_test.go"],
+    srcs = [
+        "model_test.go",
+        "transform_test.go",
+    ],
     data = ["//testdata:examples"],
     embed = [":model"],
     env = {
@@ -27,6 +30,7 @@ go_test(
     },
     deps = [
         "//internal/ast",
+        "@com_github_google_go_cmp//cmp",
         "@com_github_stretchr_testify//assert",
         "@com_github_stretchr_testify//require",
     ],
