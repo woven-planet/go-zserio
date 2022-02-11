@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "generator",
@@ -48,5 +48,21 @@ go_library(
         "//internal/parser",
         "@com_github_iancoleman_strcase//:strcase",
         "@com_github_masterminds_sprig_v3//:sprig",
+    ],
+)
+
+go_test(
+    name = "generator_test",
+    srcs = ["gen_test.go"],
+    data = ["//testdata:examples"],
+    embed = [":generator"],
+    env = {
+        "TEST_ZSERIO_EXAMPLES": "$(rootpaths //testdata:examples)",
+    },
+    deps = [
+        "//internal/ast",
+        "//internal/model",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
     ],
 )
