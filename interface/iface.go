@@ -2,31 +2,38 @@ package zserio
 
 import "io"
 
-type Reader interface {
-	io.Reader
-	io.ByteReader
+// Aligner aligns the reader or writer with the byte boundary and returns the
+// total of number of bits that have been skipped and an error if ocurred
+// during skipping.
+type Aligner interface {
+	Align(boundary uint8) (int64, error)
+}
+
+type BitReader interface {
+	Aligner
 
 	ReadBits(n uint8) (uint64, error)
 	ReadBool() (bool, error)
+}
 
-	// Align aligns the reader and returns the total of number of bytes that
-	// have been read and an error if ocurred during skipping bytes when
-	// aligning.
-	Align(boundary uint8) (int64, error)
+type Reader interface {
+	io.Reader
+	io.ByteReader
+	BitReader
+}
+
+type BitWriter interface {
+	Aligner
+
+	WriteBits(r uint64, n uint8) error
+	WriteBool(bool) error
+	WriteBitsUnsafe(r uint64, n uint8) error
 }
 
 type Writer interface {
 	io.Writer
 	io.ByteWriter
-
-	WriteBits(r uint64, n uint8) error
-	WriteBool(bool) error
-	WriteBitsUnsafe(r uint64, n uint8) error
-
-	// Align aligns the writer and returns the total of number of bytes that
-	// have been read and an error if ocurred during skipping bytes when
-	// aligning.
-	Align(boundary uint8) (int64, error)
+	BitWriter
 }
 
 // Unmarshaler is the interface implemented by types that can be read from a
