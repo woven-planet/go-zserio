@@ -10,10 +10,11 @@ import (
 
 func main() {
 	writer := ztype.NewWriter(os.Stdout)
-	defer writer.Close()
-
 	address := contacts.Address{Street: "Mainstreet"}
 	if err := address.MarshalZserio(writer); err != nil {
 		panic(fmt.Sprintf("error serializing address: %v", err))
+	}
+	if err := writer.Close(); err != nil {
+		panic(fmt.Sprintf("error flushing buffer address: %v", err))
 	}
 }
