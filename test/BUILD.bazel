@@ -25,6 +25,7 @@ go_test(
     env = {
         "TESTDATA_BIN": "$(rootpath :testdata)",
     },
+    gotags = ["integration"],
     deps = [
         "//test/go:testobject",
         "@com_github_cucumber_godog//:godog",

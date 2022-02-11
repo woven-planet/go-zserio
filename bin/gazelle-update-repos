@@ -2,4 +2,4 @@
 set -euo pipefail
 
 bazel run @go_sdk//:bin/go -- mod tidy -v
-exec bazel run //:gazelle -- update-repos -from_file=go.mod -to_macro=deps.bzl%go_dependencies
+exec bazel run //:gazelle -- update-repos -from_file=go.mod -to_macro=deps.bzl%go_dependencies -build_tags integration

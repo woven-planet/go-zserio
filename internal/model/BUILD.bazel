@@ -28,6 +28,7 @@ go_test(
     env = {
         "TEST_ZSERIO_EXAMPLES": "$(rootpaths //testdata:examples)",
     },
+    gotags = ["integration"],
     deps = [
         "//internal/ast",
         "@com_github_google_go_cmp//cmp",

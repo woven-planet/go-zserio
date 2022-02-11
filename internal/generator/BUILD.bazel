@@ -58,6 +58,7 @@ go_test(
     env = {
         "TEST_ZSERIO_EXAMPLES": "$(rootpaths //testdata:examples)",
     },
+    gotags = ["integration"],
     deps = [
         "//internal/ast",
         "//internal/model",

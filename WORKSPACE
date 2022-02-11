@@ -66,6 +66,7 @@ load("//:deps.bzl", "go_dependencies")
 protobuf_deps()
 
 # gazelle:repository_macro deps.bzl%go_dependencies
+# gazelle:build_tags integration
 go_dependencies()
 
 rules_antlr_dependencies("4.8", GO)
