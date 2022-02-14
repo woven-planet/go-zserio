@@ -11,7 +11,7 @@ Installation
 
 You can use the normal go install method to install go-zserio:
 
-   go install github.com/woven-planet/go-zserio/zserio@latest
+   go install github.com/woven-planet/go-zserio/cmd/go-zserio@latest
 
 Code generation
 
@@ -34,7 +34,7 @@ example we only define an Addreses structure to store addres information.
 After saving this in schema/contacts.zs you can generate Go code for this
 schema with this command:
 
-  zserio generate --out contacts -r myprojects.home/zserio-example/addressbook ./schema
+  go-zserio generate --out contacts -r myprojects.home/zserio-example/addressbook ./schema
 
 This will create a number of code files in the "contacts" directory. The root
 package is set to "myprojects.home/zserio-example/addressbook", and must be
