@@ -1,6 +1,9 @@
+[![Go Reference](https://pkg.go.dev/badge/github.com/woven-planet/go-zserio.svg)](https://pkg.go.dev/github.com/woven-planet/go-zserio)
+[![Build Status](https://github.com/woven-planet/go-zserio/actions/workflows/test.yaml/badge.svg)](https://github.com/woven-planet/go-zserio/actions/workflows/test.yaml)
+
 # go-zserio
 
-[zserio] code generation in Go.
+[zserio](https://github.com/ndsev/zserio) code generation in Go.
 
 ## Usage
 
@@ -10,8 +13,9 @@ To generate the Go interface files to read/write zserio, a zserio scheme can be 
 zserio generate <zserio_directory> --rootpackage <root_package> --out <output_directory>
 ```
 
-This command compiles the zserio files, and generates Go files to read and write zserio encoded data.
-`zserio_directory` is the directory where the zserio definitions are stored. Supported file extensions are `*.zs` and `*.zserio`.
+This command compiles the zserio files, and generates Go files to read and write
+zserio encoded data. `zserio_directory` is the directory where the zserio
+definitions are stored. Supported file extensions are `.zs` and `.zserio`.
 `rootpackage` specifies the root package name of the generated Go files.
 `output_directory` specifies the path where the Go files will be generated.
 
@@ -22,38 +26,7 @@ This command compiles the zserio files, and generates Go files to read and write
 - Offsets and indexed offsets are not implemented yet.
 - Constraints are not implemented yet.
 
-## Developement
+## Links
 
-### Direnv
-
-Install `direnv` tool to setup your PATH automatically to include the `bin`
-directory to be able to use the extra helper scripts for managing go
-dependencies, otherwise, add it manually to your shell.
-
-### Bazel
-
-Update `BUILD.bazel` files:
-
-```shell
-gazelle
-```
-
-Run all tests:
-
-```shell
-bazel test --test_output=all //...
-```
-
-Run command:
-
-```shell
-bazel run //cmd:hello
-```
-
-Update modules:
-
-```shell
-gazelle-update-repos
-```
-
-[zserio]: https://github.com/ndsev/zserio
+- [zserio](https://github.com/ndsev/zserio)
+- [Woven Planet](https://www.woven-planet.global/en)
