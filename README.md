@@ -7,10 +7,16 @@
 
 ## Usage
 
-To generate the Go interface files to read/write zserio, a zserio scheme can be compiled by running:
+First you need to install the ``go-zserio`` command:
 
 ```shell
-zserio generate <zserio_directory> --rootpackage <root_package> --out <output_directory>
+go install github.com/woven-planet/go-zserio/cmd/go-zserio@latest
+```
+
+With this command you can generate the Go interface files to read/write zserio:
+
+```shell
+go-zserio generate <zserio_directory> --rootpackage <root_package> --out <output_directory>
 ```
 
 This command compiles the zserio files, and generates Go files to read and write
