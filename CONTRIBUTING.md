@@ -20,7 +20,7 @@ bazel test --test_output=all //...
 To run the go-zserio command:
 
 ```shell
-bazel run //cmd/zserio
+bazel run //cmd/go-zserio
 ```
 
 To update the go dependencies for bazel using `go.mod`:

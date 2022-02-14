@@ -8,7 +8,7 @@ import (
 	"myproject.home/zserio-example/contacts"
 )
 
-//go:generate go run github.com/woven-planet/go-zserio/cmd/zserio generate --rootpackage myproject.home/zserio-example --out . ./schema
+//go:generate go run github.com/woven-planet/go-zserio/cmd/go-zserio generate --rootpackage myproject.home/zserio-example --out . ./schema
 
 func main() {
 	address := contacts.Address{Street: "Mainstreet"}

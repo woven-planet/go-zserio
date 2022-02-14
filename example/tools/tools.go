@@ -4,5 +4,5 @@
 package tools
 
 import (
-	_ "github.com/woven-planet/go-zserio/cmd/zserio"
+	_ "github.com/woven-planet/go-zserio/cmd/go-zserio"
 )

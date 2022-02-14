@@ -22,7 +22,7 @@ with the following:
 package tools
 
 import (
-	_ "github.com/woven-planet/go-zserio/cmd/zserio"
+	_ "github.com/woven-planet/go-zserio/cmd/go-zserio"
 )
 ```
 
@@ -30,7 +30,7 @@ This will ensure, that `go mod tidy` will pull in the dependencies for
 `go-zserio` code generator. To use id, one just needs to add:
 
 ```go
-//go:generate go run github.com/woven-planet/go-zserio/cmd/zserio generate --rootpackage myproject.home/zserio-example --out . ./schema
+//go:generate go run github.com/woven-planet/go-zserio/cmd/go-zserio generate --rootpackage myproject.home/zserio-example --out . ./schema
 ```
 
 And create a `./contacts/dummy.go` file in order to ensure that `go mod` works
