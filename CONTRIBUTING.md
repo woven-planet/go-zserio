@@ -15,7 +15,7 @@ managing go dependencies, otherwise, add it manually to your shell.
 
 ## Bazel
 
-You will need to use  [bazel](http://bazel.build) if you want to build go-zserio
+You will need to use [bazel](http://bazel.build) if you want to build go-zserio
 or run its tests. We use bazel to install required build tools, generate test data,
 compile go-zserio itself and run the tests.
 
@@ -60,20 +60,45 @@ pre-commit installed at .git/hooks/pre-commit
 
 ## Visual Studio Code
 
-In order for [VS Code](https://code.visualstudio.com) to find generated files
-you will need to create a virtual GOPATH and point VS Code to it. First run this
-command:
-
-```shell
-bazel build :gopath
-```
-
-This will create a new gopath folder in `bazel-out/gopath` with symlinks
-pointing to your real GOPATH and any generated files. To point VSCode to it open
-up `settings.json` for the workspace and set `go.path`.
+In order for [VS Code](https://code.visualstudio.com) you will need to configure
+it to use a bazel-aware _gopackagesdriver_ with the gopls language server. To do
+that use the following for `.vscode/settings.json`, replacing
+`/Users/wichert/Code/go-zserio` with the correct location on your machine.
 
 ```json
 {
-    "go.gopath": "/Users/wichert.akkerman/Code/go-zserio/bazel-out/gopath",
+  "go.goroot": "/Users/wichert/Code/go-zserio/bazel-go-zserio/external/go_sdk",
+  "go.toolsEnvVars": {
+    "GOPACKAGESDRIVER": "/Users/wichert/Code/go-zserio/bin/gopackagesdriver.sh"
+  },
+  "go.enableCodeLens": {
+    "references": false,
+    "runtest": false
+  },
+  "gopls": {
+    "build.directoryFilters": [
+      "-bazel-bin",
+      "-bazel-out",
+      "-bazel-testlogs",
+      "-bazel-go-zserio",
+    ],
+    "formatting.gofumpt": true,
+    "formatting.local": "github.com/woven-planet/go-zserio",
+    "ui.completion.usePlaceholders": true,
+    "ui.semanticTokens": true,
+    "ui.codelenses": {
+      "gc_details": false,
+      "regenerate_cgo": false,
+      "generate": false,
+      "test": false,
+      "tidy": false,
+      "upgrade_dependency": false,
+      "vendor": false
+    },
+  },
+  "go.useLanguageServer": true,
+  "go.buildOnSave": "off",
+  "go.lintOnSave": "off",
+  "go.vetOnSave": "off",
 }
 ```
