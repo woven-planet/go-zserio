@@ -1,2 +1,3 @@
-deps.bzl    linguist-generated=true
-go.mod      linguist-generated=true
+deps.bzl                    linguist-generated=true
+go.mod                      linguist-generated=true
+internal/parser/zserio*.go  linguist-generated=true
