@@ -58,6 +58,12 @@ Now let's generate the code:
 $ go generate . -v
 ```
 
+Then run again in order to ensure that we have all of the right dependencies for the generated code:
+
+```bash
+$ go mod tidy -v
+```
+
 And build:
 
 ```bash
