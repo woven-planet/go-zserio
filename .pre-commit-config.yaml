@@ -13,6 +13,7 @@ repos:
   - id: check-yaml
     args: [--allow-multiple-documents]
   - id: end-of-file-fixer
+    exclude: "internal/parser/(.*.(tokens|inter)|zserio.*.go)"
   #- id: trailing-whitespace
   #- id: requirements-txt-fixer
 - repo: local

@@ -56,19 +56,30 @@ http_archive(
     url = "https://github.com/ndsev/zserio/releases/download/v2.4.2/zserio-2.4.2-bin.zip",
 )
 
+http_archive(
+    name = "bazel_skylib",
+    sha256 = "af87959afe497dc8dfd4c6cb66e1279cb98ccc84284619ebfec27d9c09a903de",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.2.0/bazel-skylib-1.2.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.2.0/bazel-skylib-1.2.0.tar.gz",
+    ],
+)
+
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
-load("@rules_antlr//antlr:lang.bzl", "GO")
 load("@rules_antlr//antlr:repositories.bzl", "rules_antlr_dependencies")
 load("//:deps.bzl", "go_dependencies")
+
+bazel_skylib_workspace()
 
 protobuf_deps()
 
 # gazelle:repository_macro deps.bzl%go_dependencies
 go_dependencies()
 
-rules_antlr_dependencies("4.8", GO)
+rules_antlr_dependencies("4.8")
 
 go_rules_dependencies()
 
