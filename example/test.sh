@@ -6,4 +6,4 @@ cd $dir
 
 git grep -h '^\$' ./README.md |
   sed -e 's/^\$ //g' -e 's/"/\\"/g' |
-  xargs -I {} -L 1 bash -exc "{}"
+  xargs -I {} bash -exc "{}"
