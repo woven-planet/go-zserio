@@ -37,6 +37,27 @@ To update the go dependencies for bazel using `go.mod`:
 gazelle-update-repos
 ```
 
+## pre-commit
+
+It is strongly recommended to run tests locally before you commit or a push a
+change. The simplest way to do that is to use
+[pre-commit](https://pre-commit.com/). This will automatically run all linters
+and tests as a git pre-commit hook.
+
+```shell
+$ pre-commit install --install-hook
+pre-commit installed at .git/hooks/pre-commit
+[INFO] Initializing environment for https://github.com/executablebooks/mdformat.
+[INFO] Initializing environment for https://github.com/executablebooks/mdformat:mdformat-black,mdformat-gfm.
+[INFO] Initializing environment for https://github.com/pre-commit/pre-commit-hooks.
+[INFO] Installing environment for https://github.com/executablebooks/mdformat.
+[INFO] Once installed this environment will be reused.
+[INFO] This may take a few minutes...
+[INFO] Installing environment for https://github.com/pre-commit/pre-commit-hooks.
+[INFO] Once installed this environment will be reused.
+[INFO] This may take a few minutes...
+```
+
 ## Visual Studio Code
 
 In order for [VS Code](https://code.visualstudio.com) to find generated files
