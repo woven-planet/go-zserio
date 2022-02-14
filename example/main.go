@@ -5,8 +5,10 @@ import (
 	"os"
 
 	"github.com/icza/bitio"
-	"myprojects.home/zserio-example/contacts"
+	"myproject.home/zserio-example/contacts"
 )
+
+//go:generate go run github.com/woven-planet/go-zserio/cmd/zserio generate --rootpackage myproject.home/zserio-example --out . ./schema
 
 func main() {
 	address := contacts.Address{Street: "Mainstreet"}
