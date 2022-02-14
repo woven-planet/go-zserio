@@ -3,3 +3,4 @@
 *.sw[op]
 .DS_Store
 .envrc.local
+.vscode

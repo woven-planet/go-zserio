@@ -1,6 +1,6 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
 load("@com_github_bazelbuild_buildtools//buildifier:def.bzl", "buildifier")
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_path")
 
 # gazelle:prefix github.com/woven-planet/go-zserio
 # gazelle:exclude example/**
@@ -28,4 +28,12 @@ go_library(
     srcs = ["doc.go"],
     importpath = "github.com/woven-planet/go-zserio",
     visibility = ["//visibility:private"],
+)
+
+go_path(
+    name = "gopath",
+    mode = "link",
+    deps = [
+        "//cmd/zserio",
+    ],
 )
