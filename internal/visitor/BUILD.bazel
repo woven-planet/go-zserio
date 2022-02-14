@@ -8,6 +8,6 @@ go_library(
     deps = [
         "//internal/ast",
         "//internal/parser",
-        "@antlr4_runtimes//:go",
+        "@com_github_antlr_antlr4_runtime_go_antlr//:antlr",
     ],
 )

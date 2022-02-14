@@ -1,26 +1,66 @@
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@io_bazel_rules_go//go:def.bzl", "go_library")
 load("@rules_antlr//antlr:antlr4.bzl", "antlr")
 
+go_library(
+    name = "parser",
+    srcs = [
+        "constants.go",
+        "zserio_lexer.go",
+        "zserio_parser.go",
+        "zserioparser_base_visitor.go",
+        "zserioparser_listener.go",
+        "zserioparser_visitor.go",
+    ],
+    importpath = "github.com/woven-planet/go-zserio/internal/parser",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "@com_github_antlr_antlr4_runtime_go_antlr//:antlr",
+    ],
+)
+
+# FIXME @aignas 2022-02-14: Currently the antlr rules does not allow us to do a
+# diff_test easily and the only way to test that the output files are fresh is
+# to have an ensure_unchanged check in our github actions.
 antlr(
     name = "generated",
     srcs = [
         "ZserioLexer.g4",
         "ZserioParser.g4",
     ],
+    error = True,
     language = "Go",
     listener = False,
+    package = "parser",
     visitor = True,
 )
 
-go_library(
-    name = "parser",
-    srcs = [
-        "constants.go",
-        ":generated",  # keep
+prefix = "internal/parser"
+
+write_file(
+    name = "gen_update",
+    out = "update.sh",
+    content = [
+        "#!/usr/bin/env bash",
+        "_cp() {",
+        "  cp -fv \"bazel-bin/{prefix}/$1\" \"{prefix}/$2\"".format(prefix = prefix),
+        "  chmod -x \"{prefix}/$2\"".format(prefix = prefix),
+        "}",
+        "cd $BUILD_WORKSPACE_DIRECTORY",
+    ] + [
+        "_cp generated.go/parser/{0} {0}".format(file)
+        for file in [
+            "zserio_lexer.go",
+            "zserio_parser.go",
+            "zserioparser_base_visitor.go",
+            "zserioparser_listener.go",
+            "zserioparser_visitor.go",
+        ]
     ],
-    importpath = "github.com/woven-planet/go-zserio/internal/parser",
-    visibility = ["//:__subpackages__"],
-    deps = [
-        "@antlr4_runtimes//:go",  # keep
-    ],
+)
+
+sh_binary(
+    name = "update",
+    srcs = ["update.sh"],
+    data = [":generated"],
 )
