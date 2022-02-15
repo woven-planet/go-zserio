@@ -5,6 +5,12 @@
 
 [zserio](https://github.com/ndsev/zserio) code generation in Go.
 
+## Versioning
+
+go-zserio is still in active development, and not completely stable yet. Until
+the first stable release all versions will have a major version number of `0`.
+The minor version number will be updated for (API) breaking changes.
+
 ## Usage
 
 First you need to install the `go-zserio` command:
