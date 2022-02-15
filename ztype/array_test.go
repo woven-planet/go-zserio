@@ -1,7 +1,7 @@
 package ztype_test
 
 import (
-	"github.com/woven-planet/go-zserio/interface"
+	"github.com/woven-planet/go-zserio"
 	"github.com/woven-planet/go-zserio/ztype"
 )
 
