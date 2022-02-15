@@ -7,7 +7,7 @@
 
 ## Usage
 
-First you need to install the ``go-zserio`` command:
+First you need to install the `go-zserio` command:
 
 ```shell
 go install github.com/woven-planet/go-zserio/cmd/go-zserio@latest
