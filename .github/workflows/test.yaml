@@ -3,6 +3,16 @@ name: Run tests
 on: push
 
 jobs:
+  lint:
+    name: Run linters
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - uses: pre-commit/action@v2.0.3
+
   test:
     strategy:
       matrix:
@@ -21,8 +31,6 @@ jobs:
         with:
           path: "~/.cache/bazel"
           key: bazel
-
-      - uses: pre-commit/action@v2.0.3
 
       - name: gazelle
         run: |
