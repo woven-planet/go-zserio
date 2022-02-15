@@ -2,7 +2,7 @@ package ztype
 
 import (
 	"github.com/icza/bitio"
-	zserio "github.com/woven-planet/go-zserio/interface"
+	zserio "github.com/woven-planet/go-zserio"
 )
 
 // IPackedArrayTraits is the interface for array traits that are packed.

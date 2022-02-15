@@ -70,7 +70,7 @@ def go_zserio_library(name, srcs, rootpackage, pkg, **kwargs):
         srcs = [name + "_gen"],
         importpath = "{}/{}".format(rootpackage, pkg.replace(".", "/")),
         deps = [
-            "//interface",
+            "//:lib",
             "//ztype",
             "@com_github_icza_bitio//:bitio",
         ] + kwargs.pop("deps", []),

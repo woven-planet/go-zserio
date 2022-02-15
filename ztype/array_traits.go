@@ -4,7 +4,7 @@ import (
 	"constraints"
 
 	"github.com/icza/bitio"
-	zserio "github.com/woven-planet/go-zserio/interface"
+	zserio "github.com/woven-planet/go-zserio"
 )
 
 // IArrayTraits is the interface used by all array traits.

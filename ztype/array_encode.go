@@ -2,7 +2,7 @@ package ztype
 
 import (
 	"github.com/icza/bitio"
-	"github.com/woven-planet/go-zserio/interface"
+	"github.com/woven-planet/go-zserio"
 )
 
 // writeDescriptor writes the descriptor of a packing context.

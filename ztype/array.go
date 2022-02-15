@@ -1,7 +1,7 @@
 package ztype
 
 import (
-	"github.com/woven-planet/go-zserio/interface"
+	"github.com/woven-planet/go-zserio"
 )
 
 // BitSizeOfDescriptor returns the bit size of a descriptor.
