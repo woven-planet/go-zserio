@@ -20,7 +20,7 @@ a zserio schema, and then generate code to define the data structures and
 serialization code.
 
 As an example let's look at a zserio schema for a contact list. In a minimal
-example we only define an Addreses structure to store addres information.
+example we only define an Addresses structure to store address information.
 
     package contacts;
 
@@ -34,34 +34,39 @@ example we only define an Addreses structure to store addres information.
 After saving this in schema/contacts.zs you can generate Go code for this
 schema with this command:
 
-  go-zserio generate --out contacts -r myprojects.home/zserio-example/addressbook ./schema
+  go-zserio generate --out . -r myprojects.home/zserio-example ./schema
 
 This will create a number of code files in the "contacts" directory. The root
-package is set to "myprojects.home/zserio-example/addressbook", and must be
+package is set to "myprojects.home/zserio-example", and must be
 defined to import statements can be generated.
 
-Can you now import the generated code, and serialize Address records using zserio:
+You can now import the generated code, and serialize Address records using zserio:
 
     package main
 
     import (
         "fmt"
-        "os"
+        "log"
 
-        "github.com/icza/bitio"
-        "myprojects.home/zserio-example/contacts"
+        zserio "github.com/woven-planet/go-zserio"
+        "myproject.home/zserio-example/contacts"
     )
+
+    //go:generate go run github.com/woven-planet/go-zserio/cmd/go-zserio generate --rootpackage myproject.home/zserio-example --out . ./schema
 
     func main() {
         address := contacts.Address{Street: "Mainstreet"}
-        writer := bitio.NewCountWriter(os.Stdout)
-        if err := address.MarshalZserio(writer); err != nil {
-            panic(fmt.Sprintf("error serializing address: %v", err))
+        bytes, err := zserio.Marshal(&address)
+        if err != nil {
+            log.Fatalf("error serializing address: %w", err)
         }
-        if err := writer.Close(); err != nil {
-            panic(fmt.Sprintf("error closing writer: %v", err))
-        }
+
+        fmt.Print(bytes)
    }
+
+For subsequent code generation you can use:
+
+  go generate ./...
 
 See also
 
