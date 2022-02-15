@@ -8,7 +8,7 @@ filegroup(
     srcs = glob(["**/*.zs"]),
 )
 
-rootpkg = "gen/github.com/woven-planet/go-zserio/test/go"
+rootpkg = "gen/github.com/woven-planet/go-zserio/testdata"
 
 go_zserio_library(
     name = "go_core_types",

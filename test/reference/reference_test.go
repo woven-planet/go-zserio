@@ -5,12 +5,12 @@ import (
 	"path"
 	"testing"
 
-	"gen/github.com/woven-planet/go-zserio/test/go/reference_modules/core/instantiations"
-	"gen/github.com/woven-planet/go-zserio/test/go/reference_modules/core/types"
-	"gen/github.com/woven-planet/go-zserio/test/go/reference_modules/testobject1/testobject"
-	zserio "github.com/woven-planet/go-zserio"
+	"gen/github.com/woven-planet/go-zserio/testdata/reference_modules/core/instantiations"
+	"gen/github.com/woven-planet/go-zserio/testdata/reference_modules/core/types"
+	"gen/github.com/woven-planet/go-zserio/testdata/reference_modules/testobject1/testobject"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	zserio "github.com/woven-planet/go-zserio"
 )
 
 func testWorkspace(filePath string) string {
@@ -47,7 +47,7 @@ func TestEqualValues(t *testing.T) {
 	require.NoError(t, zserio.Unmarshal(bytes, &got))
 
 	// Then
-	assert.Equal(t, want(), testObject)
+	assert.Equal(t, want(), got)
 }
 
 func want() testobject.TestObject {

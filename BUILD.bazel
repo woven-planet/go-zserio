@@ -7,7 +7,9 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 # gazelle:exclude **/*_gen.zs.go
 #
 # For generated zserio libraries:
-# gazelle:resolve go gen/github.com/woven-planet/go-zserio/test/go/reference_modules/testobject1/testobject //testdata/reference_modules:go_testobject
+# gazelle:resolve go gen/github.com/woven-planet/go-zserio/testdata/reference_modules/core/instantiations //testdata/reference_modules:go_core_instantiations
+# gazelle:resolve go gen/github.com/woven-planet/go-zserio/testdata/reference_modules/core/types //testdata/reference_modules:go_core_types
+# gazelle:resolve go gen/github.com/woven-planet/go-zserio/testdata/reference_modules/testobject1/testobject //testdata/reference_modules:go_testobject
 gazelle(name = "gazelle")
 
 gazelle(

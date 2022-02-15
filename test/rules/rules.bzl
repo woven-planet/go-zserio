@@ -115,6 +115,9 @@ def zs_payload(name, srcs, out, **kwargs):
         out: The output filename.
         **kwargs: Any extra arguments to be passed to the py_binary rule.
     """
+    if "data.py" not in srcs:
+        fail("'srcs' must include a file named 'data.py'")
+
     gen = name + "_gen"
     py_binary(
         name = gen,
