@@ -4,9 +4,13 @@ on: push
 
 jobs:
   test:
-    name: Run tests
+    strategy:
+      matrix:
+        os: ["ubuntu-latest", "windows-latest"]
 
-    runs-on: ubuntu-latest
+    name: Run tests on ${{ matrix.os }}
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v2
@@ -30,9 +34,13 @@ jobs:
       - run: bazel test //...
 
   integration_test:
-    name: Example tests
+    strategy:
+      matrix:
+        os: ["ubuntu-latest", "windows-latest"]
 
-    runs-on: ubuntu-latest
+    name: Test example on ${{ matrix.os }}
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v2
