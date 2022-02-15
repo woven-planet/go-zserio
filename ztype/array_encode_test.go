@@ -41,14 +41,7 @@ func TestVarintArrayEncoding(t *testing.T) {
 				IsPacked:    test.isPacked,
 			}
 
-			got, err := zserio.Marshal(&arrayInstance)
-			if err != nil {
-				t.Fatalf("error writing array: %v", err)
-			}
-
-			if diff := cmp.Diff(test.want, got); diff != "" {
-				t.Errorf("incorrect encoding: %s", diff)
-			}
+			assertEqualAfterMarshalling(t, test.want, &arrayInstance)
 		})
 	}
 }
@@ -114,14 +107,7 @@ func TestBitfieldArrayEncoding(t *testing.T) {
 				IsPacked:    test.isPacked,
 			}
 
-			got, err := zserio.Marshal(&arrayInstance)
-			if err != nil {
-				t.Fatalf("error writing array: %v", err)
-			}
-
-			if diff := cmp.Diff(test.want, got); diff != "" {
-				t.Errorf("incorrect encoding: %s", diff)
-			}
+			assertEqualAfterMarshalling(t, test.want, &arrayInstance)
 		})
 	}
 }
@@ -173,14 +159,7 @@ func TestVarInt32ArrayEncoding(t *testing.T) {
 				IsPacked:    test.isPacked,
 			}
 
-			got, err := zserio.Marshal(&arrayInstance)
-			if err != nil {
-				t.Fatalf("error writing array: %v", err)
-			}
-
-			if diff := cmp.Diff(test.want, got); diff != "" {
-				t.Errorf("incorrect encoding: %s", diff)
-			}
+			assertEqualAfterMarshalling(t, test.want, &arrayInstance)
 		})
 	}
 }
@@ -207,14 +186,7 @@ func TestFloat16ArrayEncoding(t *testing.T) {
 				IsAuto:      test.isAuto,
 			}
 
-			got, err := zserio.Marshal(&arrayInstance)
-			if err != nil {
-				t.Fatalf("error writing array: %v", err)
-			}
-
-			if diff := cmp.Diff(test.want, got); diff != "" {
-				t.Errorf("incorrect encoding: %s", diff)
-			}
+			assertEqualAfterMarshalling(t, test.want, &arrayInstance)
 		})
 	}
 }
@@ -241,14 +213,7 @@ func TestFloat32ArrayEncoding(t *testing.T) {
 				IsAuto:      test.isAuto,
 			}
 
-			got, err := zserio.Marshal(&arrayInstance)
-			if err != nil {
-				t.Fatalf("error writing array: %v", err)
-			}
-
-			if diff := cmp.Diff(test.want, got); diff != "" {
-				t.Errorf("incorrect encoding: %s", diff)
-			}
+			assertEqualAfterMarshalling(t, test.want, &arrayInstance)
 		})
 	}
 }
@@ -279,14 +244,7 @@ func TestFloat64ArrayEncoding(t *testing.T) {
 				IsAuto:      test.isAuto,
 			}
 
-			got, err := zserio.Marshal(&arrayInstance)
-			if err != nil {
-				t.Fatalf("error writing array: %v", err)
-			}
-
-			if diff := cmp.Diff(test.want, got); diff != "" {
-				t.Errorf("incorrect encoding: %s", diff)
-			}
+			assertEqualAfterMarshalling(t, test.want, &arrayInstance)
 		})
 	}
 }
@@ -338,14 +296,18 @@ func TestStringArrayEncoding(t *testing.T) {
 				IsAuto:      test.isAuto,
 			}
 
-			got, err := zserio.Marshal(&arrayInstance)
-			if err != nil {
-				t.Fatalf("error writing array: %v", err)
-			}
-
-			if diff := cmp.Diff(test.want, got); diff != "" {
-				t.Errorf("incorrect encoding: %s", diff)
-			}
+			assertEqualAfterMarshalling(t, test.want, &arrayInstance)
 		})
+	}
+}
+
+func assertEqualAfterMarshalling(t *testing.T, want []byte, input zserio.Marshaler) {
+	got, err := zserio.Marshal(input)
+	if err != nil {
+		t.Fatalf("error writing array: %v", err)
+	}
+
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("incorrect encoding: %s", diff)
 	}
 }
