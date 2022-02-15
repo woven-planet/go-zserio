@@ -1,8 +1,3 @@
-import os
-import sys
-
-import zserio
-
 from testdata.reference_modules.core.instantiations.instantiated_template_struct import (
     InstantiatedTemplateStruct,
 )
@@ -16,7 +11,7 @@ from testdata.reference_modules.core.types.color import Color
 from testdata.reference_modules.core.types.city_attributes import CityAttributes
 from testdata.reference_modules.core.types.some_enum import SomeEnum
 
-def _new_test_object():
+def new():
     """Create a dummy object with some random values.
     """
     d = TestObject()
@@ -61,13 +56,3 @@ def _new_test_object():
 
     d.foo = 42
     return d
-
-def main():
-    out = sys.argv[1]
-    # write the testdata
-    byte_data = zserio.serialize_to_bytes(_new_test_object())
-    with open(out, "wb") as f:
-        f.write(byte_data)
-
-if __name__ == "__main__":
-    main()
