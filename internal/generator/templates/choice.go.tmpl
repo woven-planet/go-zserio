@@ -1,5 +1,6 @@
 {{ $scope := .pkg }} 
 {{ $choice := .choice }}
+{{- $expr := $choice.SelectorExpression }}
 
 {{ $choice.Comment }}
 type {{ $choice.Name }} struct {
@@ -41,7 +42,6 @@ func (v *{{ $choice.Name}}) LoadDefaultValues() error {
 // MarshalZserio implements the zserio.Marshaler interface.
 func (v *{{ $choice.Name}}) MarshalZserio(w *bitio.CountWriter) error {
   var err error
-{{- $expr := $choice.Expression }}
   switch (v.{{ $expr.ResultSymbol.Symbol.Name }}) {
 {{- range $case := $choice.Cases }}
   {{- if .Field }}
@@ -63,7 +63,6 @@ func (v *{{ $choice.Name}}) MarshalZserio(w *bitio.CountWriter) error {
 // UnmarshalZserio implements the zserio.Unmarshaler interface.
 func (v *{{ $choice.Name}}) UnmarshalZserio(r *bitio.CountReader) error {
     var err error
-{{- $expr := $choice.Expression }}
   switch (v.{{ $expr.ResultSymbol.Symbol.Name }}) {
 {{- range $case := $choice.Cases }}
   {{- if .Field }}
@@ -85,7 +84,6 @@ func (v *{{ $choice.Name}}) UnmarshalZserio(r *bitio.CountReader) error {
 // ZserioBitSize implements the zserio.Marshaler interface.
 func (v *{{ $choice.Name}}) ZserioBitSize(bitPosition int) (int, error) {
   endBitPosition := bitPosition
-{{- $expr := $choice.Expression }}
   switch (v.{{ $expr.ResultSymbol.Symbol.Name }}) {
 {{- range $case := $choice.Cases }}
   {{- if .Field }}

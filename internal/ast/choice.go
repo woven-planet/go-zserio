@@ -1,5 +1,11 @@
 package ast
 
+import (
+	"errors"
+
+	"github.com/woven-planet/go-zserio/internal/parser"
+)
+
 type ChoiceCaseExpression struct {
 	Condition *Expression
 	Comment   string
@@ -16,7 +22,7 @@ type Choice struct {
 	Comment            string
 	TemplateParameters []string
 	TypeParameters     []*Parameter
-	Expression         *Expression
+	SelectorExpression *Expression
 	Cases              []*ChoiceCase
 	DefaultCase        *ChoiceCase
 	Functions          []*Function
@@ -41,12 +47,54 @@ func (choice *Choice) BuildScope(p *Package) error {
 	return nil
 }
 
+// fullySpecifyChoiceConditions fully specifies a choice condition in case the
+// choice case is given as a text, but not a fully determined symbol.
+func (choice *Choice) fullySpecifyChoiceConditions() error {
+	for _, choiceCase := range choice.Cases {
+		for _, condition := range choiceCase.Conditions {
+			// in case the choice case is just a text string, replace that
+			//  by a dot expression with the choice selector type, so that the
+			// symbol is unique. If this is not done, the text value might be
+			// ambiguous, for example if the value  is defined in more than one enum.
+			// e.g. VALUE -> EnumType.VALUE
+			if condition.Condition.Type == parser.ZserioParserID {
+				// convert the selector from the parameter type to the underlying
+				// actual type (e.g. enum, bitfield)
+				parameterType, ok := choice.SelectorExpression.ResultSymbol.Symbol.(*Parameter)
+				if !ok {
+					return errors.New("choice selector type is not a parameter")
+				}
+				dotExpression := &Expression{
+					Type: parser.ZserioParserDOT,
+					Operand1: &Expression{
+						Type: parser.ZserioParserID,
+						Text: parameterType.Type.Name,
+					},
+					Operand2: condition.Condition,
+				}
+				condition.Condition = dotExpression
+			}
+		}
+	}
+	return nil
+}
 func (choice *Choice) Evaluate(p *Package) error {
 	// Ignore templates
 	if len(choice.TemplateParameters) > 0 {
 		return nil
 	}
 	p.LocalSymbols.CurrentCompoundScope = &choice.Name
+
+	// The selector expression needs to be evaluated first, because the choice
+	// cases depend on the symbol refered to by the selector expression
+	if err := choice.SelectorExpression.Evaluate(p); err != nil {
+		return err
+	}
+
+	// Fully specify the choice condition symbols
+	if err := choice.fullySpecifyChoiceConditions(); err != nil {
+		return err
+	}
 
 	for _, param := range choice.TypeParameters {
 		if err := param.Type.Evaluate(p); err != nil {
@@ -62,10 +110,15 @@ func (choice *Choice) Evaluate(p *Package) error {
 	}
 	for _, choiceCase := range choice.Cases {
 		for _, condition := range choiceCase.Conditions {
+
 			if err := condition.Condition.Evaluate(p); err != nil {
 				return err
 			}
 		}
 	}
-	return choice.Expression.Evaluate(p)
+
+	if choice.DefaultCase == nil || choice.DefaultCase.Field == nil {
+		return nil
+	}
+	return choice.DefaultCase.Field.Evaluate(p)
 }

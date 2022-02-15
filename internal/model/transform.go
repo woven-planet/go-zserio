@@ -424,9 +424,9 @@ func (m *Model) instantiateChoice(
 		return newType, nil
 	}
 	choice := &ast.Choice{
-		Name:       newType.Name,
-		Comment:    templChoice.Comment,
-		Expression: templChoice.Expression,
+		Name:               newType.Name,
+		Comment:            templChoice.Comment,
+		SelectorExpression: templChoice.SelectorExpression,
 	}
 
 	// resolve the templates for the choices
