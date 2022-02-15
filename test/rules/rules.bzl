@@ -1,21 +1,21 @@
 """Generate Zserio Python library and facilitate generation of test data.
 """
 
+load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@pip//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary", "py_library")
 
-def _dirname(f):
-    return "/".join(f.dirname.split("/")[:-1])
-
 def _impl(ctx):
-    root = _dirname(ctx.files.proto[0])
+    root = paths.dirname(ctx.files.proto[0].short_path)
     if root == None:
         fail("TODO")
 
     for s in ctx.files.deps:
-        candidate = _dirname(s)
+        candidate = paths.dirname(s.short_path)
         if len(root) > len(candidate):
             root = candidate
+
+    root = paths.dirname(root)
 
     args = ctx.actions.args()
     dir_name = ctx.label.name
@@ -24,14 +24,14 @@ def _impl(ctx):
     out = ctx.actions.declare_directory(dir_name)
 
     if prefix:
-        dir_name = "{}/{}".format(dir_name, prefix)
+        dir_name = paths.join(dir_name, prefix)
         args.add("-setTopLevelPackage", prefix.replace("/", "."))
 
     args.add("-src", root)
     args.add("-python", out.path)
-    args.add(ctx.files.proto[0].short_path.replace(root + "/", ""))
+    args.add(paths.relativize(ctx.files.proto[0].short_path, root))
 
-    outs = [out] + [ctx.actions.declare_file(dir_name + "/" + o) for o in ctx.attr.outs]
+    outs = [out] + [ctx.actions.declare_file(paths.join(dir_name, o)) for o in ctx.attr.outs]
 
     ctx.actions.run(
         executable = ctx.executable._tool,
