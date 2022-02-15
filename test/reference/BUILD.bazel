@@ -26,7 +26,6 @@ go_test(
     deps = [
         "//:lib",
         "//testdata/reference_modules:go_testobject",
-        "@com_github_icza_bitio//:bitio",
         "@com_github_stretchr_testify//assert",
         "@com_github_stretchr_testify//require",
     ],

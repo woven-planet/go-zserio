@@ -17,6 +17,7 @@ go_zserio_library(
     ],
     pkg = "reference_modules.core.types",
     rootpackage = rootpkg,
+    visibility = ["//visibility:public"],
 )
 
 go_zserio_library(
@@ -26,6 +27,7 @@ go_zserio_library(
     ],
     pkg = "reference_modules.core.instantiations",
     rootpackage = rootpkg,
+    visibility = ["//visibility:public"],
     deps = [
         ":go_core_types",
     ],
