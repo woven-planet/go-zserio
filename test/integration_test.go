@@ -3,15 +3,15 @@ package go_test
 import (
 	"bytes"
 	"context"
-	"path"
-	"os"
 	"errors"
 	"fmt"
+	"os"
+	"path"
 	"testing"
 
-	"github.com/cucumber/godog"
-	"github.com/icza/bitio"
 	"gen/github.com/woven-planet/go-zserio/test/go/reference_modules/testobject1/testobject"
+	"github.com/cucumber/godog"
+	zserio "github.com/woven-planet/go-zserio"
 )
 
 func testWorkspace(filePath string) string {
@@ -31,7 +31,6 @@ var (
 	// ReferenceBinaryContent is used to store binary content from the reference file.
 	ReferenceBinaryContent []byte
 )
-
 
 func TestIntegration(t *testing.T) {
 	suite := godog.TestSuite{
@@ -66,32 +65,25 @@ func readReferenceZserioFile() error {
 	if err != nil {
 		return fmt.Errorf("read reference binary: %w", err)
 	}
-	
+
 	return nil
 }
 
 func reencodeZserioTestBinary() error {
 	// read the binary file...
 	var testObject testobject.TestObject
-	r := bitio.NewCountReader(bytes.NewBuffer(ReferenceBinaryContent))
-
-	if err := testObject.UnmarshalZserio(r); err != nil {
+	if err := zserio.Unmarshal(ReferenceBinaryContent, &testObject); err != nil {
 		return fmt.Errorf("unmarshal reference: %w", err)
 	}
 
-	f, err := os.OpenFile(ReencodedFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0664)
+	got, err := zserio.Marshal(&testObject)
 	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	w := bitio.NewCountWriter(f)
-	defer w.Close()
-
-	if err := testObject.MarshalZserio(w); err != nil {
-		return fmt.Errorf("marshal: %w", err)
+		return fmt.Errorf("re-encode: %w", err)
 	}
 
+	if err := os.WriteFile(ReencodedFilePath, got, 0664); err != nil {
+		return fmt.Errorf("write file: %w")
+	}
 	return nil
 }
 
