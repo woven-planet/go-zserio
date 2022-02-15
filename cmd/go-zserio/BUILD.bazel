@@ -1,15 +1,15 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 
 go_library(
-    name = "zserio_lib",
+    name = "go-zserio_lib",
     srcs = ["main.go"],
-    importpath = "github.com/woven-planet/go-zserio/cmd/zserio",
+    importpath = "github.com/woven-planet/go-zserio/cmd/go-zserio",
     visibility = ["//visibility:private"],
     deps = ["//internal/cli"],
 )
 
 go_binary(
-    name = "zserio",
-    embed = [":zserio_lib"],
+    name = "go-zserio",
+    embed = [":go-zserio_lib"],
     visibility = ["//visibility:public"],
 )

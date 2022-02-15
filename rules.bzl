@@ -22,7 +22,7 @@ def go_zserio_srcs(name, srcs, rootpackage, pkg = None, format = True):
         "  {noformat} \\",
         "  {srcs} 2>/dev/null",
     ]).format(
-        bin = "$(execpath //cmd/zserio)",
+        bin = "$(execpath //cmd/go-zserio)",
         rootpackage = rootpackage,
         pkg = pkg,
         noformat = "" if format else "--noformat",
@@ -35,7 +35,7 @@ def go_zserio_srcs(name, srcs, rootpackage, pkg = None, format = True):
         outs = [name + "_gen.sh"],
         cmd = "echo -e '{}' >$@".format(script),
         tools = [
-            "//cmd/zserio",
+            "//cmd/go-zserio",
         ],
         executable = True,
     )
@@ -50,7 +50,7 @@ def go_zserio_srcs(name, srcs, rootpackage, pkg = None, format = True):
         ),
         tools = [
             name + ".script",
-            "//cmd/zserio",
+            "//cmd/go-zserio",
         ],
     )
 
