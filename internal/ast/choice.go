@@ -47,31 +47,9 @@ func (choice *Choice) BuildScope(p *Package) error {
 	return nil
 }
 
-func (choice *Choice) Evaluate(p *Package) error {
-	// Ignore templates
-	if len(choice.TemplateParameters) > 0 {
-		return nil
-	}
-	p.LocalSymbols.CurrentCompoundScope = &choice.Name
-
-	// The selector expression needs to be evaluated first, because the choice
-	// cases depend on the symbol refered to by the selector expression
-	if err := choice.SelectorExpression.Evaluate(p); err != nil {
-		return err
-	}
-
-	for _, param := range choice.TypeParameters {
-		if err := param.Type.Evaluate(p); err != nil {
-			return err
-		}
-	}
-	for _, choiceCase := range choice.Cases {
-		if choiceCase.Field != nil {
-			if err := choiceCase.Field.Evaluate(p); err != nil {
-				return err
-			}
-		}
-	}
+// fullySpecifyChoiceConditions fully specifies a choice condition in case the
+// choice case is given as a text, but not a fully determined symbol.
+func (choice *Choice) fullySpecifyChoiceConditions() error {
 	for _, choiceCase := range choice.Cases {
 		for _, condition := range choiceCase.Conditions {
 			// in case the choice case is just a text string, replace that
@@ -96,6 +74,42 @@ func (choice *Choice) Evaluate(p *Package) error {
 				}
 				condition.Condition = dotExpression
 			}
+		}
+	}
+	return nil
+}
+func (choice *Choice) Evaluate(p *Package) error {
+	// Ignore templates
+	if len(choice.TemplateParameters) > 0 {
+		return nil
+	}
+	p.LocalSymbols.CurrentCompoundScope = &choice.Name
+
+	// The selector expression needs to be evaluated first, because the choice
+	// cases depend on the symbol refered to by the selector expression
+	if err := choice.SelectorExpression.Evaluate(p); err != nil {
+		return err
+	}
+
+	// Fully specify the choice condition symbols
+	if err := choice.fullySpecifyChoiceConditions(); err != nil {
+		return err
+	}
+
+	for _, param := range choice.TypeParameters {
+		if err := param.Type.Evaluate(p); err != nil {
+			return err
+		}
+	}
+	for _, choiceCase := range choice.Cases {
+		if choiceCase.Field != nil {
+			if err := choiceCase.Field.Evaluate(p); err != nil {
+				return err
+			}
+		}
+	}
+	for _, choiceCase := range choice.Cases {
+		for _, condition := range choiceCase.Conditions {
 
 			if err := condition.Condition.Evaluate(p); err != nil {
 				return err
@@ -103,12 +117,8 @@ func (choice *Choice) Evaluate(p *Package) error {
 		}
 	}
 
-	if choice.DefaultCase != nil {
-		if choice.DefaultCase.Field != nil {
-			if err := choice.DefaultCase.Field.Evaluate(p); err != nil {
-				return err
-			}
-		}
+	if choice.DefaultCase == nil || choice.DefaultCase.Field == nil {
+		return nil
 	}
-	return nil
+	return choice.DefaultCase.Field.Evaluate(p)
 }
