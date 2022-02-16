@@ -90,7 +90,7 @@ gazelle_dependencies()
 load("@rules_python//python:pip.bzl", "pip_install")
 
 pip_install(
-    requirements = "//test/python:requirements.txt",
+    requirements = "//test/rules:requirements.txt",
 )
 
 RULES_JVM_EXTERNAL_TAG = "4.2"

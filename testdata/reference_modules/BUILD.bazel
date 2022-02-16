@@ -1,0 +1,67 @@
+load("//:rules.bzl", "go_zserio_library")
+load("//test/rules:rules.bzl", "py_zserio_library")
+
+exports_files(["testobject1/testobject.zs"])
+
+filegroup(
+    name = "schema",
+    srcs = glob(["**/*.zs"]),
+)
+
+rootpkg = "gen/github.com/woven-planet/go-zserio/testdata"
+
+go_zserio_library(
+    name = "go_core_types",
+    srcs = [
+        ":schema",
+    ],
+    pkg = "reference_modules.core.types",
+    rootpackage = rootpkg,
+    visibility = ["//visibility:public"],
+)
+
+go_zserio_library(
+    name = "go_core_instantiations",
+    srcs = [
+        ":schema",
+    ],
+    pkg = "reference_modules.core.instantiations",
+    rootpackage = rootpkg,
+    visibility = ["//visibility:public"],
+    deps = [
+        ":go_core_types",
+    ],
+)
+
+go_zserio_library(
+    name = "go_testobject",
+    srcs = [
+        ":schema",
+    ],
+    pkg = "reference_modules.testobject1.testobject",
+    rootpackage = rootpkg,
+    visibility = ["//visibility:public"],
+    deps = [
+        ":go_core_instantiations",
+        ":go_core_types",
+    ],
+)
+
+py_zserio_library(
+    name = "py_testobject",
+    outs = [
+        "reference_modules/core/instantiations/instantiated_template_choice.py",
+        "reference_modules/core/instantiations/instantiated_template_struct.py",
+        "reference_modules/core/types/basic_choice.py",
+        "reference_modules/core/types/city_attributes.py",
+        "reference_modules/core/types/color.py",
+        "reference_modules/core/types/some_enum.py",
+        "reference_modules/core/types/some_other_enum.py",
+        "reference_modules/core/types/value_wrapper.py",
+        "reference_modules/testobject1/testobject/test_object.py",
+    ],
+    prefix = "testdata",
+    proto = ":testobject1/testobject.zs",
+    proto_deps = [":schema"],
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,34 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_test")
+load("//test/rules:rules.bzl", "zs_payload")
+
+filegroup(
+    name = "specs",
+    srcs = glob(["*.feature"]),
+)
+
+zs_payload(
+    name = "testdata",
+    srcs = ["data.py"],
+    out = "testdata.bin",
+    deps = ["//testdata/reference_modules:py_testobject"],
+)
+
+go_test(
+    name = "reference_test",
+    srcs = ["reference_test.go"],
+    data = [
+        ":specs",
+        ":testdata",
+    ],
+    env = {
+        "TESTDATA_BIN": "$(rootpath :testdata)",
+    },
+    deps = [
+        "//:lib",
+        "//testdata/reference_modules:go_core_instantiations",
+        "//testdata/reference_modules:go_core_types",
+        "//testdata/reference_modules:go_testobject",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+    ],
+)

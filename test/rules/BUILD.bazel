@@ -1,0 +1,15 @@
+load("@rules_java//java:defs.bzl", "java_binary")
+
+exports_files(
+    srcs = ["write_data.py"],
+    visibility = ["//visibility:public"],
+)
+
+java_binary(
+    name = "zserio_compiler",
+    main_class = "zserio.tools.ZserioToolPython",
+    visibility = ["//visibility:public"],
+    runtime_deps = [
+        "@maven//:io_github_ndsev_zserio",
+    ],
+)
