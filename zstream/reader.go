@@ -1,4 +1,4 @@
-package zserio
+package zstream
 
 import (
 	"fmt"
@@ -7,9 +7,11 @@ import (
 	"github.com/icza/bitio"
 )
 
-var (
-	_ Reader = (*BitReader)(nil)
-)
+// Reader is the input to our BitReader.
+type Reader interface {
+	io.Reader
+	io.ByteReader
+}
 
 // BitReader implements a Reader required to deserialize types in the ztype
 // package. It also implements io.ByteReader and io.Reader interfaces.
@@ -18,7 +20,7 @@ type BitReader struct {
 }
 
 // NewReader creates a new instance of the reader.
-func NewReader(r io.Reader) *BitReader {
+func NewReader(r Reader) *BitReader {
 	return &BitReader{
 		reader: bitio.NewCountReader(r),
 	}

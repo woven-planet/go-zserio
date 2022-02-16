@@ -1,6 +1,6 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
 load("@com_github_bazelbuild_buildtools//buildifier:def.bzl", "buildifier")
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 # gazelle:prefix github.com/woven-planet/go-zserio
 # gazelle:exclude example/**
@@ -35,20 +35,8 @@ go_library(
         "iface.go",
         "marshal.go",
         "packing_context_node.go",
-        "reader.go",
-        "writer.go",
     ],
     importpath = "github.com/woven-planet/go-zserio",
     visibility = ["//visibility:public"],
-    deps = ["@com_github_icza_bitio//:bitio"],
-)
-
-go_test(
-    name = "go-zserio_test",
-    srcs = [
-        "reader_test.go",
-        "writer_test.go",
-    ],
-    embed = [":go-zserio"],
-    deps = ["@com_github_stretchr_testify//assert"],
+    deps = ["//zstream"],
 )

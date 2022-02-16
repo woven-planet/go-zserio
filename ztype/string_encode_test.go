@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	zserio "github.com/woven-planet/go-zserio"
+	"github.com/woven-planet/go-zserio/zstream"
 	"github.com/woven-planet/go-zserio/ztype"
 )
 
@@ -30,7 +30,7 @@ func TestWriteString(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			var buf bytes.Buffer
-			w := zserio.NewWriter(&buf)
+			w := zstream.NewWriter(&buf)
 			var err error
 			for _, n := range test.input {
 				err = ztype.WriteString(w, n)

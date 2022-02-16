@@ -3,6 +3,8 @@ package zserio
 import (
 	"bytes"
 	"fmt"
+
+	"github.com/woven-planet/go-zserio/zstream"
 )
 
 // Marshal accepts a pointer to an instance of a zserio object and returns a
@@ -10,7 +12,7 @@ import (
 // empty slice.
 func Marshal(m Marshaler) ([]byte, error) {
 	var buf bytes.Buffer
-	w := NewWriter(&buf)
+	w := zstream.NewWriter(&buf)
 
 	if err := m.MarshalZserio(w); err != nil {
 		return nil, fmt.Errorf("marshal: %w", err)
@@ -27,7 +29,7 @@ func Marshal(m Marshaler) ([]byte, error) {
 // zserio object type, which is going to be populate with values deserialized
 // from the bytes and returns a deserialization error.
 func Unmarshal(b []byte, m Unmarshaler) error {
-	r := NewReader(bytes.NewReader(b))
+	r := zstream.NewReader(bytes.NewReader(b))
 	if err := m.UnmarshalZserio(r); err != nil {
 		return fmt.Errorf("unmarshal: %w", err)
 	}

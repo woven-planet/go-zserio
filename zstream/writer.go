@@ -1,4 +1,4 @@
-package zserio
+package zstream
 
 import (
 	"fmt"
@@ -7,8 +7,13 @@ import (
 	"github.com/icza/bitio"
 )
 
+// Writer is the interface to our BitWriter.
+type Writer interface {
+	io.Writer
+	io.ByteWriter
+}
+
 var (
-	_ Writer    = (*BitWriter)(nil)
 	_ io.Closer = (*BitWriter)(nil)
 )
 
@@ -21,7 +26,12 @@ type BitWriter struct {
 }
 
 // NewWriter creates a new instance of the writer.
-func NewWriter(r io.Writer) *BitWriter {
+func NewWriter(r Writer) *BitWriter {
+	// implementation note: accepting io.ByteWriter ensures that we are not
+	// creating bufio.NewWriter in bitio.NewWriter in NewWriter. If we don't
+	// have this method, then the writing is buffered and the buffer might be
+	// flushed during a writer.Close() method and the errors from the
+	// underlying writer would only be propagated at that time.
 	return &BitWriter{
 		writer: bitio.NewCountWriter(r),
 	}
