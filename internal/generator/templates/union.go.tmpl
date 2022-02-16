@@ -38,7 +38,7 @@ func (v *{{ $union.Name}}) LoadDefaultValues() error {
 }
 
 // MarshalZserio implements the zserio.Marshaler interface.
-func (v *{{ $union.Name}}) MarshalZserio(w *zserio.Writer) error {
+func (v *{{ $union.Name}}) MarshalZserio(w zserio.Writer) error {
   err := ztype.WriteVarsize(w, uint64(v.UnionChoice))
   if err != nil {
     return err
@@ -52,7 +52,7 @@ func (v *{{ $union.Name}}) MarshalZserio(w *zserio.Writer) error {
 }
 
 // UnmarshalZserio implements the zserio.Unmarshaler interface.
-func (v *{{ $union.Name}}) UnmarshalZserio(r *zserio.Reader) error {
+func (v *{{ $union.Name}}) UnmarshalZserio(r zserio.Reader) error {
     unionChoice, err := ztype.ReadVarsize(r)
     if err != nil {
        return err
@@ -102,12 +102,12 @@ func (v *{{ $union.Name}}) ZserioInitPackingContext(contextNode *zserio.PackingC
   return nil
 }
 
-func (v *{{ $union.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingContextNode, r *zserio.Reader) error {
+func (v *{{ $union.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingContextNode, r zserio.Reader) error {
   return nil
 }
 
 
-func (v *{{ $union.Name}}) MarshalZserioPacked(contextNode *zserio.PackingContextNode, r *zserio.Writer) error {
+func (v *{{ $union.Name}}) MarshalZserioPacked(contextNode *zserio.PackingContextNode, r zserio.Writer) error {
   return nil
 }
 

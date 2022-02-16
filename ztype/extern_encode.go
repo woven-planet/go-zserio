@@ -3,7 +3,7 @@ package ztype
 import zserio "github.com/woven-planet/go-zserio"
 
 // WriteExtern writes an zserio extern type (variable size bitbuffer) from a reader.
-func WriteExtern(w *zserio.Writer, e *ExternType) error {
+func WriteExtern(w zserio.Writer, e *ExternType) error {
 	if err := WriteVarsize(w, e.BitSize); err != nil {
 		return err
 	}

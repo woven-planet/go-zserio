@@ -5,7 +5,7 @@ import (
 )
 
 // writeDescriptor writes the descriptor of a packing context.
-func writeDescriptor(packingNode *zserio.PackingContextNode, writer *zserio.Writer) error {
+func writeDescriptor(packingNode *zserio.PackingContextNode, writer zserio.Writer) error {
 	if packingNode.HasContext() {
 		return packingNode.WriteDescriptor(writer)
 	}
@@ -18,7 +18,7 @@ func writeDescriptor(packingNode *zserio.PackingContextNode, writer *zserio.Writ
 }
 
 // MarshalZserio writes an array to a bit writer.
-func (array *Array[T, Y]) MarshalZserio(writer *zserio.Writer) error {
+func (array *Array[T, Y]) MarshalZserio(writer zserio.Writer) error {
 	size := array.Size()
 	if array.IsAuto {
 		err := WriteVarsize(writer, uint64(size))

@@ -40,7 +40,7 @@ func (v *{{ $choice.Name}}) LoadDefaultValues() error {
 }
 
 // MarshalZserio implements the zserio.Marshaler interface.
-func (v *{{ $choice.Name}}) MarshalZserio(w *zserio.Writer) error {
+func (v *{{ $choice.Name}}) MarshalZserio(w zserio.Writer) error {
   var err error
   switch (v.{{ $expr.ResultSymbol.Symbol.Name }}) {
 {{- range $case := $choice.Cases }}
@@ -61,7 +61,7 @@ func (v *{{ $choice.Name}}) MarshalZserio(w *zserio.Writer) error {
 }
 
 // UnmarshalZserio implements the zserio.Unmarshaler interface.
-func (v *{{ $choice.Name}}) UnmarshalZserio(r *zserio.Reader) error {
+func (v *{{ $choice.Name}}) UnmarshalZserio(r zserio.Reader) error {
     var err error
   switch (v.{{ $expr.ResultSymbol.Symbol.Name }}) {
 {{- range $case := $choice.Cases }}
@@ -133,7 +133,7 @@ func (v *{{ $choice.Name}}) ZserioInitPackingContext(contextNode *zserio.Packing
   return nil
 }
 
-func (v *{{ $choice.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingContextNode, r *zserio.Reader) error {
+func (v *{{ $choice.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingContextNode, r zserio.Reader) error {
 {{- if $choice.Cases }}
     var err error
     childrenNodes := contextNode.GetChildren()
@@ -157,7 +157,7 @@ func (v *{{ $choice.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingCon
     return nil
 }
 
-func (v *{{ $choice.Name}}) MarshalZserioPacked(contextNode *zserio.PackingContextNode, w *zserio.Writer) error {
+func (v *{{ $choice.Name}}) MarshalZserioPacked(contextNode *zserio.PackingContextNode, w zserio.Writer) error {
 {{- if $choice.Cases }}
     var err error
     childrenNodes := contextNode.GetChildren()

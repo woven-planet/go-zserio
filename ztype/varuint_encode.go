@@ -13,42 +13,42 @@ var ErrOutOfBounds = errors.New("value too large or too small for type")
 // WriteVaruint16 writes a zserio varuint16 value to the bitstream.
 // If you pass in a value that is outside to allowed range of
 // (MinVaruint16, MaxVaruint16) ErrOutOfBounds will be returned.
-func WriteVaruint16(w *zserio.Writer, v uint16) error {
+func WriteVaruint16(w zserio.Writer, v uint16) error {
 	return writeVarUint(w, uint64(v), 2)
 }
 
 // WriteVaruint32 writes a zserio varuint32 value to the bitstream.
 // If you pass in a value that is outside to allowed range of
 // (MinVaruint32, MaxVaruint32) ErrOutOfBounds will be returned.
-func WriteVaruint32(w *zserio.Writer, v uint32) error {
+func WriteVaruint32(w zserio.Writer, v uint32) error {
 	return writeVarUint(w, uint64(v), 4)
 }
 
 // WriteVaruint64 writes a zserio varuint64 value to the bitstream.
 // If you pass in a value that is outside to allowed range of
 // (MinVaruint64, MaxVaruint64) ErrOutOfBounds will be returned.
-func WriteVaruint64(w *zserio.Writer, v uint64) error {
+func WriteVaruint64(w zserio.Writer, v uint64) error {
 	return writeVarUint(w, uint64(v), 8)
 }
 
 // WriteVaruint writes a zserio varuint value to the bitstream.
 // If you pass in a value that is outside to allowed range of
 // (MinVaruint, MaxVaruint) ErrOutOfBounds will be returned.
-func WriteVaruint(w *zserio.Writer, v uint64) error {
+func WriteVaruint(w zserio.Writer, v uint64) error {
 	return writeVarUint(w, uint64(v), 9)
 }
 
 // WriteVarsize writes a zserio varsize value to the bitstream.
 // If you pass in a value that is outside to allowed range of
 // (MinVarsize, MaxVarsize) ErrOutOfBounds will be returned.
-func WriteVarsize(w *zserio.Writer, v uint64) error {
+func WriteVarsize(w zserio.Writer, v uint64) error {
 	if v > MaxVarsize {
 		return ErrOutOfBounds
 	}
 	return writeVarUint(w, uint64(v), 5)
 }
 
-func writeVarUint(w *zserio.Writer, v uint64, maxBytes int) error {
+func writeVarUint(w zserio.Writer, v uint64, maxBytes int) error {
 	neededBytes, err := UnsignedBitSize(v, maxBytes)
 	if err != nil {
 		return err

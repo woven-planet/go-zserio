@@ -8,33 +8,32 @@ import (
 )
 
 var (
-	_ io.ByteWriter = (*Writer)(nil)
-	_ io.Closer     = (*Writer)(nil)
-	_ io.Writer     = (*Writer)(nil)
+	_ Writer    = (*BitWriter)(nil)
+	_ io.Closer = (*BitWriter)(nil)
 )
 
-// Writer implements a writer required to serialize types in the ztype package.
+// BitWriter implements a Writer required to serialize types in the ztype package.
 // It also implements io.ByteWriter, io.Writer and io.Closer interfaces. The
 // user is responsible for closing the writer in order to flush the byte stream
 // to the underlying writer.
-type Writer struct {
+type BitWriter struct {
 	writer *bitio.CountWriter
 }
 
 // NewWriter creates a new instance of the writer.
-func NewWriter(r io.Writer) *Writer {
-	return &Writer{
+func NewWriter(r io.Writer) *BitWriter {
+	return &BitWriter{
 		writer: bitio.NewCountWriter(r),
 	}
 }
 
 // WriteBits writes out the n lowest bits of r.
-func (w *Writer) Write(b []byte) (int, error) {
+func (w *BitWriter) Write(b []byte) (int, error) {
 	return w.writer.Write(b)
 }
 
 // WriteBits writes out the n lowest bits of r.
-func (w *Writer) WriteBits(r uint64, n uint8) error {
+func (w *BitWriter) WriteBits(r uint64, n uint8) error {
 	return w.writer.WriteBits(r, n)
 }
 
@@ -43,22 +42,22 @@ func (w *Writer) WriteBits(r uint64, n uint8) error {
 // WriteBitsUnsafe() offers slightly better performance than WriteBits() because
 // the input r is not masked. Calling WriteBitsUnsafe() with an r that does
 // not satisfy this is undefined behavior (might corrupt previously written bits).
-func (w *Writer) WriteBitsUnsafe(r uint64, n uint8) error {
+func (w *BitWriter) WriteBitsUnsafe(r uint64, n uint8) error {
 	return w.writer.WriteBitsUnsafe(r, n)
 }
 
 // WriteBool writes one bit: 1 if param is true, 0 otherwise.
-func (w *Writer) WriteBool(b bool) error {
+func (w *BitWriter) WriteBool(b bool) error {
 	return w.writer.WriteBool(b)
 }
 
 // WriteByte writes 8 bits.
-func (w *Writer) WriteByte(b byte) error {
+func (w *BitWriter) WriteByte(b byte) error {
 	return w.writer.WriteByte(b)
 }
 
 // Align a writer to a bit boundary.
-func (w *Writer) Align(boundary uint8) (int64, error) {
+func (w *BitWriter) Align(boundary uint8) (int64, error) {
 	d := discard(w.writer.BitsCount, boundary)
 	if d == 0 {
 		return w.writer.BitsCount, nil
@@ -73,6 +72,6 @@ func (w *Writer) Align(boundary uint8) (int64, error) {
 }
 
 // Close flushes the internal buffer, but does not close the underlying writer implementation.
-func (w *Writer) Close() error {
+func (w *BitWriter) Close() error {
 	return w.writer.Close()
 }
