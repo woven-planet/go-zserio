@@ -4,10 +4,7 @@ go 1.18
 
 replace github.com/woven-planet/go-zserio => ../
 
-require (
-	github.com/icza/bitio v1.1.0
-	github.com/woven-planet/go-zserio v0.0.0-00010101000000-000000000000
-)
+require github.com/woven-planet/go-zserio v0.0.0-00010101000000-000000000000
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
@@ -17,6 +14,7 @@ require (
 	github.com/google/uuid v1.1.2 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect
+	github.com/icza/bitio v1.1.0 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
