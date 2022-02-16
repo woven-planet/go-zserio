@@ -4,11 +4,11 @@ import (
 	"io"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/bazelbuild/rules_go/go/tools/bazel"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/woven-planet/go-zserio/internal/ast"
@@ -16,7 +16,8 @@ import (
 )
 
 func testWorkspace(filePath string) string {
-	return path.Join(os.Getenv("TEST_SRCDIR"), os.Getenv("TEST_WORKSPACE"), filePath)
+	actualPath, _ := bazel.Runfile(filePath)
+	return actualPath
 }
 
 func TestStableOutputOrder(t *testing.T) {

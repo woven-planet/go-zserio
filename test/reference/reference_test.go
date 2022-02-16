@@ -2,20 +2,20 @@ package reference
 
 import (
 	"os"
-	"path"
 	"testing"
 
 	"gen/github.com/woven-planet/go-zserio/testdata/reference_modules/core/instantiations"
 	"gen/github.com/woven-planet/go-zserio/testdata/reference_modules/core/types"
 	"gen/github.com/woven-planet/go-zserio/testdata/reference_modules/testobject1/testobject"
-
+	"github.com/bazelbuild/rules_go/go/tools/bazel"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	zserio "github.com/woven-planet/go-zserio"
 )
 
 func testWorkspace(filePath string) string {
-	return path.Join(os.Getenv("TEST_SRCDIR"), os.Getenv("TEST_WORKSPACE"), filePath)
+	actualPath, _ := bazel.Runfile(filePath)
+	return actualPath
 }
 
 var (

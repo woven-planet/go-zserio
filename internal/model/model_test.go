@@ -2,7 +2,6 @@ package model
 
 import (
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -14,8 +13,7 @@ import (
 )
 
 func testWorkspace(filePath string) string {
-	workspacePath := path.Join(os.Getenv("TEST_SRCDIR"), os.Getenv("TEST_WORKSPACE"), filePath)
-	actualPath, _ := bazel.Runfile(workspacePath)
+	actualPath, _ := bazel.Runfile(filePath)
 	return actualPath
 }
 
