@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"os"
+	"log"
 
-	"github.com/icza/bitio"
+	zserio "github.com/woven-planet/go-zserio"
 	"myproject.home/zserio-example/contacts"
 )
 
@@ -12,11 +12,10 @@ import (
 
 func main() {
 	address := contacts.Address{Street: "Mainstreet"}
-	writer := bitio.NewCountWriter(os.Stdout)
-	if err := address.MarshalZserio(writer); err != nil {
-		panic(fmt.Sprintf("error serializing address: %v", err))
+	bytes, err := zserio.Marshal(&address)
+	if err != nil {
+		log.Fatalf("error serializing address: %w", err)
 	}
-	if err := writer.Close(); err != nil {
-		panic(fmt.Sprintf("error closing writer: %v", err))
-	}
+
+	fmt.Print(bytes)
 }

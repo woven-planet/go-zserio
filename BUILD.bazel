@@ -28,6 +28,7 @@ go_library(
     srcs = [
         "doc.go",
         "iface.go",
+        "marshal.go",
         "packing_context_node.go",
     ],
     importpath = "github.com/woven-planet/go-zserio",

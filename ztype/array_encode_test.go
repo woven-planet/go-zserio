@@ -1,11 +1,10 @@
 package ztype_test
 
 import (
-	"bytes"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/icza/bitio"
+	"github.com/woven-planet/go-zserio"
 	"github.com/woven-planet/go-zserio/ztype"
 )
 
@@ -41,18 +40,8 @@ func TestVarintArrayEncoding(t *testing.T) {
 				IsAuto:      test.isAuto,
 				IsPacked:    test.isPacked,
 			}
-			// convert to binary buffer
-			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
-			err := arrayInstance.MarshalZserio(w)
-			w.Close()
-			if err != nil {
-				t.Fatalf("error writing array: %v", err)
-			}
 
-			if diff := cmp.Diff(test.want, buf.Bytes()); diff != "" {
-				t.Errorf("incorrect encoding: %s", diff)
-			}
+			assertEqualAfterMarshaling(t, test.want, &arrayInstance)
 		})
 	}
 }
@@ -117,18 +106,8 @@ func TestBitfieldArrayEncoding(t *testing.T) {
 				IsAuto:      test.isAuto,
 				IsPacked:    test.isPacked,
 			}
-			// convert to binary buffer
-			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
-			err := arrayInstance.MarshalZserio(w)
-			w.Close()
-			if err != nil {
-				t.Fatalf("error writing array: %v", err)
-			}
 
-			if diff := cmp.Diff(test.want, buf.Bytes()); diff != "" {
-				t.Errorf("incorrect encoding: %s", diff)
-			}
+			assertEqualAfterMarshaling(t, test.want, &arrayInstance)
 		})
 	}
 }
@@ -179,18 +158,8 @@ func TestVarInt32ArrayEncoding(t *testing.T) {
 				IsAuto:      test.isAuto,
 				IsPacked:    test.isPacked,
 			}
-			// convert to binary buffer
-			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
-			err := arrayInstance.MarshalZserio(w)
-			w.Close()
-			if err != nil {
-				t.Fatalf("error writing array: %v", err)
-			}
 
-			if diff := cmp.Diff(test.want, buf.Bytes()); diff != "" {
-				t.Errorf("incorrect encoding: %s", diff)
-			}
+			assertEqualAfterMarshaling(t, test.want, &arrayInstance)
 		})
 	}
 }
@@ -216,18 +185,8 @@ func TestFloat16ArrayEncoding(t *testing.T) {
 				RawArray:    test.arrayData,
 				IsAuto:      test.isAuto,
 			}
-			// convert to binary buffer
-			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
-			err := arrayInstance.MarshalZserio(w)
-			w.Close()
-			if err != nil {
-				t.Fatalf("error writing array: %v", err)
-			}
 
-			if diff := cmp.Diff(test.want, buf.Bytes()); diff != "" {
-				t.Errorf("incorrect encoding: %s", diff)
-			}
+			assertEqualAfterMarshaling(t, test.want, &arrayInstance)
 		})
 	}
 }
@@ -253,18 +212,8 @@ func TestFloat32ArrayEncoding(t *testing.T) {
 				RawArray:    test.arrayData,
 				IsAuto:      test.isAuto,
 			}
-			// convert to binary buffer
-			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
-			err := arrayInstance.MarshalZserio(w)
-			w.Close()
-			if err != nil {
-				t.Fatalf("error writing array: %v", err)
-			}
 
-			if diff := cmp.Diff(test.want, buf.Bytes()); diff != "" {
-				t.Errorf("incorrect encoding: %s", diff)
-			}
+			assertEqualAfterMarshaling(t, test.want, &arrayInstance)
 		})
 	}
 }
@@ -294,18 +243,8 @@ func TestFloat64ArrayEncoding(t *testing.T) {
 				RawArray:    test.arrayData,
 				IsAuto:      test.isAuto,
 			}
-			// convert to binary buffer
-			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
-			err := arrayInstance.MarshalZserio(w)
-			w.Close()
-			if err != nil {
-				t.Fatalf("error writing array: %v", err)
-			}
 
-			if diff := cmp.Diff(test.want, buf.Bytes()); diff != "" {
-				t.Errorf("incorrect encoding: %s", diff)
-			}
+			assertEqualAfterMarshaling(t, test.want, &arrayInstance)
 		})
 	}
 }
@@ -356,18 +295,19 @@ func TestStringArrayEncoding(t *testing.T) {
 				RawArray:    test.arrayData,
 				IsAuto:      test.isAuto,
 			}
-			// convert to binary buffer
-			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
-			err := arrayInstance.MarshalZserio(w)
-			w.Close()
-			if err != nil {
-				t.Fatalf("error writing array: %v", err)
-			}
 
-			if diff := cmp.Diff(test.want, buf.Bytes()); diff != "" {
-				t.Errorf("incorrect encoding: %s", diff)
-			}
+			assertEqualAfterMarshaling(t, test.want, &arrayInstance)
 		})
+	}
+}
+
+func assertEqualAfterMarshaling(t *testing.T, want []byte, input zserio.Marshaler) {
+	got, err := zserio.Marshal(input)
+	if err != nil {
+		t.Fatalf("error writing array: %v", err)
+	}
+
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("incorrect encoding: %s", diff)
 	}
 }
