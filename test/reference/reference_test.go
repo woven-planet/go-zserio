@@ -106,3 +106,43 @@ func want() testobject.TestObject {
 	d.Foo = 42
 	return d
 }
+
+func BenchmarkUnmarshalZserio(b *testing.B) {
+	bin, err := os.ReadFile(ReferenceFilePath)
+	if err != nil {
+		b.Errorf("read reference binary: %w", err)
+		return
+	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		var testObject testobject.TestObject
+		if err := zserio.Unmarshal(bin, &testObject); err != nil {
+			b.Errorf("unmarshal reference: %w", err)
+			return
+		}
+		_ = testObject
+	}
+	b.StopTimer()
+}
+
+func BenchmarkMarshalZserio(b *testing.B) {
+	testObject := want()
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		got, err := zserio.Marshal(&testObject)
+		if err != nil {
+			b.Errorf("marshal: %w", err)
+			return
+		}
+
+		if len(got) == 0 {
+			b.Errorf("got empty buffer")
+			return
+		}
+	}
+	b.StopTimer()
+}
