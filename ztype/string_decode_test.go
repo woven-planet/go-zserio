@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/icza/bitio"
+	zserio "github.com/woven-planet/go-zserio"
 	"github.com/woven-planet/go-zserio/ztype"
 )
 
@@ -29,7 +29,7 @@ func TestReadString(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
+			r := zserio.NewReader(bytes.NewBuffer(test.input))
 			got, err := ztype.ReadString(r)
 			if err != nil {
 				t.Fatalf("error reading string: %v", err)

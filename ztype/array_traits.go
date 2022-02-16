@@ -3,7 +3,6 @@ package ztype
 import (
 	"constraints"
 
-	"github.com/icza/bitio"
 	zserio "github.com/woven-planet/go-zserio"
 )
 
@@ -33,10 +32,10 @@ type IArrayTraits[T any] interface {
 	InitializeOffsets(bitPosition int, value T) int
 
 	// Read reads an array element from a byte stream.
-	Read(reader *bitio.CountReader, endBitPosition int) (T, error)
+	Read(reader *zserio.Reader, endBitPosition int) (T, error)
 
 	// Write writes an array element to a byte stream.
-	Write(writer *bitio.CountWriter, value T) error
+	Write(writer *zserio.Writer, value T) error
 
 	// AsUint64 returns the array element as a uint64. This is only needed if the
 	// underlying data type supports delta encoding, such as int32, etc.
@@ -78,11 +77,11 @@ func (trait Float16ArrayTraits) InitializeOffsets(bitPosition int, value float32
 	return bitPosition + trait.BitSizeOf(value, 0)
 }
 
-func (trait Float16ArrayTraits) Read(reader *bitio.CountReader, endBitPosition int) (float32, error) {
+func (trait Float16ArrayTraits) Read(reader *zserio.Reader, endBitPosition int) (float32, error) {
 	return ReadFloat16(reader)
 }
 
-func (trait Float16ArrayTraits) Write(writer *bitio.CountWriter, value float32) error {
+func (trait Float16ArrayTraits) Write(writer *zserio.Writer, value float32) error {
 	return WriteFloat16(writer, value)
 }
 
@@ -123,11 +122,11 @@ func (trait Float32ArrayTraits) InitializeOffsets(bitPosition int, value float32
 	return bitPosition + trait.BitSizeOf(value, 0) // endBitPosition is ignored
 }
 
-func (trait Float32ArrayTraits) Read(reader *bitio.CountReader, endBitPosition int) (float32, error) {
+func (trait Float32ArrayTraits) Read(reader *zserio.Reader, endBitPosition int) (float32, error) {
 	return ReadFloat32(reader)
 }
 
-func (trait Float32ArrayTraits) Write(writer *bitio.CountWriter, value float32) error {
+func (trait Float32ArrayTraits) Write(writer *zserio.Writer, value float32) error {
 	return WriteFloat32(writer, value)
 }
 
@@ -168,11 +167,11 @@ func (trait Float64ArrayTraits) InitializeOffsets(bitPosition int, value float64
 	return bitPosition + trait.BitSizeOf(value, 0)
 }
 
-func (trait Float64ArrayTraits) Read(reader *bitio.CountReader, endBitPosition int) (float64, error) {
+func (trait Float64ArrayTraits) Read(reader *zserio.Reader, endBitPosition int) (float64, error) {
 	return ReadFloat64(reader)
 }
 
-func (trait Float64ArrayTraits) Write(writer *bitio.CountWriter, value float64) error {
+func (trait Float64ArrayTraits) Write(writer *zserio.Writer, value float64) error {
 	return WriteFloat64(writer, value)
 }
 
@@ -219,11 +218,11 @@ func (trait VarIntArrayTraits) InitializeOffsets(bitPosition int, value int64) i
 	return bitPosition + trait.BitSizeOf(value, 0)
 }
 
-func (trait VarIntArrayTraits) Read(reader *bitio.CountReader, endBitPosition int) (int64, error) {
+func (trait VarIntArrayTraits) Read(reader *zserio.Reader, endBitPosition int) (int64, error) {
 	return ReadVarint(reader)
 }
 
-func (trait VarIntArrayTraits) Write(writer *bitio.CountWriter, value int64) error {
+func (trait VarIntArrayTraits) Write(writer *zserio.Writer, value int64) error {
 	return WriteVarint(writer, value)
 }
 
@@ -266,11 +265,11 @@ func (trait VarInt16ArrayTraits) InitializeOffsets(bitPosition int, value int16)
 	return bitPosition + trait.BitSizeOf(value, 0) // endBitPosition is ignored
 }
 
-func (trait VarInt16ArrayTraits) Read(reader *bitio.CountReader, endBitPosition int) (int16, error) {
+func (trait VarInt16ArrayTraits) Read(reader *zserio.Reader, endBitPosition int) (int16, error) {
 	return ReadVarint16(reader)
 }
 
-func (trait VarInt16ArrayTraits) Write(writer *bitio.CountWriter, value int16) error {
+func (trait VarInt16ArrayTraits) Write(writer *zserio.Writer, value int16) error {
 	return WriteVarint16(writer, value)
 }
 
@@ -313,11 +312,11 @@ func (trait VarInt32ArrayTraits) InitializeOffsets(bitPosition int, value int32)
 	return bitPosition + trait.BitSizeOf(value, 0) // endBitPosition is ignored
 }
 
-func (trait VarInt32ArrayTraits) Read(reader *bitio.CountReader, endBitPosition int) (int32, error) {
+func (trait VarInt32ArrayTraits) Read(reader *zserio.Reader, endBitPosition int) (int32, error) {
 	return ReadVarint32(reader)
 }
 
-func (trait VarInt32ArrayTraits) Write(writer *bitio.CountWriter, value int32) error {
+func (trait VarInt32ArrayTraits) Write(writer *zserio.Writer, value int32) error {
 	return WriteVarint32(writer, value)
 }
 
@@ -360,11 +359,11 @@ func (trait VarInt64ArrayTraits) InitializeOffsets(bitPosition int, value int64)
 	return bitPosition + trait.BitSizeOf(value, 0) // endBitPosition is ignored
 }
 
-func (trait VarInt64ArrayTraits) Read(reader *bitio.CountReader, endBitPosition int) (int64, error) {
+func (trait VarInt64ArrayTraits) Read(reader *zserio.Reader, endBitPosition int) (int64, error) {
 	return ReadVarint64(reader)
 }
 
-func (trait VarInt64ArrayTraits) Write(writer *bitio.CountWriter, value int64) error {
+func (trait VarInt64ArrayTraits) Write(writer *zserio.Writer, value int64) error {
 	return WriteVarint64(writer, value)
 }
 
@@ -407,11 +406,11 @@ func (trait VarUInt16ArrayTraits) InitializeOffsets(bitPosition int, value uint1
 	return bitPosition + trait.BitSizeOf(value, 0) // endBitPosition is ignored
 }
 
-func (trait VarUInt16ArrayTraits) Read(reader *bitio.CountReader, endBitPosition int) (uint16, error) {
+func (trait VarUInt16ArrayTraits) Read(reader *zserio.Reader, endBitPosition int) (uint16, error) {
 	return ReadVaruint16(reader)
 }
 
-func (trait VarUInt16ArrayTraits) Write(writer *bitio.CountWriter, value uint16) error {
+func (trait VarUInt16ArrayTraits) Write(writer *zserio.Writer, value uint16) error {
 	return WriteVaruint16(writer, value)
 }
 
@@ -453,11 +452,11 @@ func (trait VarUInt32ArrayTraits) InitializeOffsets(bitPosition int, value uint3
 	return bitPosition + trait.BitSizeOf(value, 0) // endBitPosition is ignored
 }
 
-func (trait VarUInt32ArrayTraits) Read(reader *bitio.CountReader, endBitPosition int) (uint32, error) {
+func (trait VarUInt32ArrayTraits) Read(reader *zserio.Reader, endBitPosition int) (uint32, error) {
 	return ReadVaruint32(reader)
 }
 
-func (trait VarUInt32ArrayTraits) Write(writer *bitio.CountWriter, value uint32) error {
+func (trait VarUInt32ArrayTraits) Write(writer *zserio.Writer, value uint32) error {
 	return WriteVaruint32(writer, value)
 }
 
@@ -499,11 +498,11 @@ func (trait VarUInt64ArrayTraits) InitializeOffsets(bitPosition int, value uint6
 	return bitPosition + trait.BitSizeOf(value, 0) // endBitPosition is ignored
 }
 
-func (trait VarUInt64ArrayTraits) Read(reader *bitio.CountReader, endBitPosition int) (uint64, error) {
+func (trait VarUInt64ArrayTraits) Read(reader *zserio.Reader, endBitPosition int) (uint64, error) {
 	return ReadVaruint64(reader)
 }
 
-func (trait VarUInt64ArrayTraits) Write(writer *bitio.CountWriter, value uint64) error {
+func (trait VarUInt64ArrayTraits) Write(writer *zserio.Writer, value uint64) error {
 	return WriteVaruint64(writer, value)
 }
 
@@ -544,11 +543,11 @@ func (trait VarUIntArrayTraits) InitializeOffsets(bitPosition int, value uint64)
 	return bitPosition + trait.BitSizeOf(value, 0) // endBitPosition is ignored
 }
 
-func (trait VarUIntArrayTraits) Read(reader *bitio.CountReader, endBitPosition int) (uint64, error) {
+func (trait VarUIntArrayTraits) Read(reader *zserio.Reader, endBitPosition int) (uint64, error) {
 	return ReadVaruint(reader)
 }
 
-func (trait VarUIntArrayTraits) Write(writer *bitio.CountWriter, value uint64) error {
+func (trait VarUIntArrayTraits) Write(writer *zserio.Writer, value uint64) error {
 	return WriteVaruint(writer, value)
 }
 
@@ -589,11 +588,11 @@ func (trait VarSizeArrayTraits) InitializeOffsets(bitPosition int, value uint64)
 	return bitPosition + trait.BitSizeOf(value, 0) // endBitPosition is ignored
 }
 
-func (trait VarSizeArrayTraits) Read(reader *bitio.CountReader, endBitPosition int) (uint64, error) {
+func (trait VarSizeArrayTraits) Read(reader *zserio.Reader, endBitPosition int) (uint64, error) {
 	return ReadVarsize(reader)
 }
 
-func (trait VarSizeArrayTraits) Write(writer *bitio.CountWriter, value uint64) error {
+func (trait VarSizeArrayTraits) Write(writer *zserio.Writer, value uint64) error {
 	return WriteVarsize(writer, value)
 }
 
@@ -635,12 +634,12 @@ func (trait BitFieldArrayTraits[T]) InitializeOffsets(bitPosition int, value T) 
 	return bitPosition + trait.BitSizeOf(value, 0) // endBitPosition is ignored
 }
 
-func (trait BitFieldArrayTraits[T]) Read(reader *bitio.CountReader, endBitPosition int) (T, error) {
+func (trait BitFieldArrayTraits[T]) Read(reader *zserio.Reader, endBitPosition int) (T, error) {
 	value, err := reader.ReadBits(uint8(trait.NumBits))
 	return T(value), err
 }
 
-func (trait BitFieldArrayTraits[T]) Write(writer *bitio.CountWriter, value T) error {
+func (trait BitFieldArrayTraits[T]) Write(writer *zserio.Writer, value T) error {
 	return writer.WriteBits(uint64(value), trait.NumBits)
 }
 
@@ -688,11 +687,11 @@ func (trait StringArrayTraits) InitializeOffsets(bitPosition int, value string) 
 	return bitPosition + trait.BitSizeOf(value, 0) // endBitPosition is ignored
 }
 
-func (trait StringArrayTraits) Read(reader *bitio.CountReader, endBitPosition int) (string, error) {
+func (trait StringArrayTraits) Read(reader *zserio.Reader, endBitPosition int) (string, error) {
 	return ReadString(reader)
 }
 
-func (trait StringArrayTraits) Write(writer *bitio.CountWriter, value string) error {
+func (trait StringArrayTraits) Write(writer *zserio.Writer, value string) error {
 	return WriteString(writer, value)
 }
 
@@ -738,13 +737,13 @@ func (trait ObjectArrayTraits[T]) InitializeOffsets(bitPosition int, value T) in
 	return offset
 }
 
-func (trait ObjectArrayTraits[T]) Read(reader *bitio.CountReader, endBitPosition int) (T, error) {
+func (trait ObjectArrayTraits[T]) Read(reader *zserio.Reader, endBitPosition int) (T, error) {
 	value := trait.DefaultObject.Clone().(T)
 	err := value.UnmarshalZserio(reader)
 	return value, err
 }
 
-func (trait ObjectArrayTraits[T]) Write(writer *bitio.CountWriter, value T) error {
+func (trait ObjectArrayTraits[T]) Write(writer *zserio.Writer, value T) error {
 	return value.MarshalZserio(writer)
 }
 

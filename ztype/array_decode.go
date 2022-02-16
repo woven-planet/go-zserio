@@ -1,12 +1,11 @@
 package ztype
 
 import (
-	"github.com/icza/bitio"
-	"github.com/woven-planet/go-zserio"
+	zserio "github.com/woven-planet/go-zserio"
 )
 
 // readDescriptor reads the descriptor of a packed array, and all of its children.
-func readDescriptor(packingNode *zserio.PackingContextNode, reader *bitio.CountReader) error {
+func readDescriptor(packingNode *zserio.PackingContextNode, reader *zserio.Reader) error {
 	if packingNode.HasContext() {
 		return packingNode.ReadDescriptor(reader)
 	}
@@ -19,7 +18,7 @@ func readDescriptor(packingNode *zserio.PackingContextNode, reader *bitio.CountR
 }
 
 // UnmarshalZserio reads an array from a bit reader, in either packed or unpacked configuration.
-func (array *Array[T, Y]) UnmarshalZserio(reader *bitio.CountReader) error {
+func (array *Array[T, Y]) UnmarshalZserio(reader *zserio.Reader) error {
 	arraySize := array.FixedSize
 	if array.IsAuto {
 		// The array size is passed as a varsize inside the byte stream
@@ -46,8 +45,11 @@ func (array *Array[T, Y]) UnmarshalZserio(reader *bitio.CountReader) error {
 		}
 		for index := 0; index < arraySize; index++ {
 			if array.checkOffsetMethod != nil {
-				reader.Align()
-				array.checkOffsetMethod(index, reader.BitsCount)
+				count, err := reader.Align(8)
+				if err != nil {
+					return err
+				}
+				array.checkOffsetMethod(index, count)
 			}
 			var err error
 			var element T
@@ -66,7 +68,7 @@ func (array *Array[T, Y]) UnmarshalZserio(reader *bitio.CountReader) error {
 }
 
 // ArrayFromReader is a helper function to read an array as a one-liner.
-func ArrayFromReader[T any, Y IArrayTraits[T]](reader *bitio.CountReader, arrayTraits Y, size int, isPacked, isAuto bool, options ...ArrayOption[T, Y]) (*Array[T, Y], error) {
+func ArrayFromReader[T any, Y IArrayTraits[T]](reader *zserio.Reader, arrayTraits Y, size int, isPacked, isAuto bool, options ...ArrayOption[T, Y]) (*Array[T, Y], error) {
 	arrayInstance := Array[T, Y]{
 		ArrayTraits: arrayTraits,
 		RawArray:    make([]T, 0),

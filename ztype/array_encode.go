@@ -1,12 +1,11 @@
 package ztype
 
 import (
-	"github.com/icza/bitio"
-	"github.com/woven-planet/go-zserio"
+	zserio "github.com/woven-planet/go-zserio"
 )
 
 // writeDescriptor writes the descriptor of a packing context.
-func writeDescriptor(packingNode *zserio.PackingContextNode, writer *bitio.CountWriter) error {
+func writeDescriptor(packingNode *zserio.PackingContextNode, writer *zserio.Writer) error {
 	if packingNode.HasContext() {
 		return packingNode.WriteDescriptor(writer)
 	}
@@ -19,7 +18,7 @@ func writeDescriptor(packingNode *zserio.PackingContextNode, writer *bitio.Count
 }
 
 // MarshalZserio writes an array to a bit writer.
-func (array *Array[T, Y]) MarshalZserio(writer *bitio.CountWriter) error {
+func (array *Array[T, Y]) MarshalZserio(writer *zserio.Writer) error {
 	size := array.Size()
 	if array.IsAuto {
 		err := WriteVarsize(writer, uint64(size))
@@ -45,8 +44,11 @@ func (array *Array[T, Y]) MarshalZserio(writer *bitio.CountWriter) error {
 		}
 		for index, element := range array.RawArray {
 			if array.checkOffsetMethod != nil {
-				writer.Align()
-				array.checkOffsetMethod(index, writer.BitsCount)
+				count, err := writer.Align(8)
+				if err != nil {
+					return err
+				}
+				array.checkOffsetMethod(index, count)
 			}
 			if array.IsPacked {
 				packedTraits.Write(array.PackedContext, writer, element)
