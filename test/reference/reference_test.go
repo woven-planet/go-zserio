@@ -8,6 +8,7 @@ import (
 	"gen/github.com/woven-planet/go-zserio/testdata/reference_modules/core/instantiations"
 	"gen/github.com/woven-planet/go-zserio/testdata/reference_modules/core/types"
 	"gen/github.com/woven-planet/go-zserio/testdata/reference_modules/testobject1/testobject"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	zserio "github.com/woven-planet/go-zserio"
@@ -74,7 +75,10 @@ func want() testobject.TestObject {
 				Value:       int32(i + 100),
 				OtherValue:  int8(i),
 				Description: "some dummy description",
-				// FIXME @aignas 2022-02-15: is this a bug? How can we reserialize this back to the correct binary but not have this field set?
+				// the field "EnumValue" does not need to be set, because it
+				// is configured with a condition in zserio:
+				// Color enumValue if parameter == 7;
+				// since parameter = d2.Parameter2 = 12, this field is not used.
 				// EnumValue:   types.ColorBLACK,
 			},
 		})
