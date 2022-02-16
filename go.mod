@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/Masterminds/sprig/v3 v3.2.2
 	github.com/antlr/antlr4/runtime/Go/antlr v0.0.0-20211101200231-0802afb9c160
+	github.com/bazelbuild/rules_go v0.30.0
 	github.com/google/go-cmp v0.5.6
 	github.com/iancoleman/strcase v0.2.0
 	github.com/icza/bitio v1.1.0
@@ -24,7 +25,6 @@ replace (
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.1.1 // indirect
-	github.com/bazelbuild/rules_go v0.30.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/google/uuid v1.1.2 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
