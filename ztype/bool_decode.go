@@ -1,8 +1,8 @@
 package ztype
 
-import "github.com/icza/bitio"
+import zserio "github.com/woven-planet/go-zserio"
 
 // ReadBool reads a boolean value from the bitstream
-func ReadBool(r *bitio.CountReader) (bool, error) {
+func ReadBool(r *zserio.Reader) (bool, error) {
 	return r.ReadBool()
 }

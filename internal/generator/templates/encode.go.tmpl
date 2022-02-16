@@ -25,7 +25,7 @@
     if {{ goExpression $scope $field.OptionalClause }} {
 {{- end }}
 {{- if not (eq $field.Alignment 0) }}
-    if err := ztype.AlignWriter(w, {{ $field.Alignment }}); err != nil {
+    if _, err := w.Align({{ $field.Alignment }}); err != nil {
         return err
     }
 {{- end }}

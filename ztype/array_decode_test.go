@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/icza/bitio"
+	zserio "github.com/woven-planet/go-zserio"
 	"github.com/woven-planet/go-zserio/ztype"
 )
 
@@ -35,7 +35,7 @@ func TestVarintArrayDecoding(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
+			r := zserio.NewReader(bytes.NewBuffer(test.input))
 			array, err := ztype.ArrayFromReader[int64](
 				r, &ztype.VarIntArrayTraits{}, test.arraySize,
 				test.isPacked, test.isAuto)
@@ -95,7 +95,7 @@ func TestUint32ArrayDecoding(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
+			r := zserio.NewReader(bytes.NewBuffer(test.input))
 			array, err := ztype.ArrayFromReader[uint32](
 				r, &ztype.BitFieldArrayTraits[uint32]{
 					NumBits: 32,
@@ -151,7 +151,7 @@ func TestVarInt32ArrayDecoding(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
+			r := zserio.NewReader(bytes.NewBuffer(test.input))
 			array, err := ztype.ArrayFromReader[int32](
 				r, &ztype.VarInt32ArrayTraits{},
 				test.arraySize, test.isPacked, test.isAuto)
@@ -181,7 +181,7 @@ func TestFloat16ArrayDecoding(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
+			r := zserio.NewReader(bytes.NewBuffer(test.input))
 			array, err := ztype.ArrayFromReader[float32](
 				r, &ztype.Float16ArrayTraits{},
 				test.arraySize, false, test.isAuto)
@@ -211,7 +211,7 @@ func TestFloat32ArrayDecoding(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
+			r := zserio.NewReader(bytes.NewBuffer(test.input))
 			array, err := ztype.ArrayFromReader[float32](
 				r, &ztype.Float32ArrayTraits{},
 				test.arraySize, false, test.isAuto)
@@ -245,7 +245,7 @@ func TestFloat64ArrayDecoding(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
+			r := zserio.NewReader(bytes.NewBuffer(test.input))
 			array, err := ztype.ArrayFromReader[float64](
 				r, &ztype.Float64ArrayTraits{},
 				test.arraySize, false, test.isAuto)
@@ -301,7 +301,7 @@ func TestStringArrayDecoding(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := bitio.NewCountReader(bytes.NewBuffer(test.input))
+			r := zserio.NewReader(bytes.NewBuffer(test.input))
 			array, err := ztype.ArrayFromReader[string](
 				r, &ztype.StringArrayTraits{},
 				test.arraySize, false, test.isAuto)

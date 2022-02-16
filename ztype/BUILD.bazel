@@ -32,8 +32,7 @@ go_library(
     importpath = "github.com/woven-planet/go-zserio/ztype",
     visibility = ["//visibility:public"],
     deps = [
-        "//:lib",
-        "@com_github_icza_bitio//:bitio",
+        "//:go-zserio",
         "@com_github_x448_float16//:float16",
     ],
 )
@@ -59,9 +58,8 @@ go_test(
     ],
     deps = [
         ":ztype",
-        "//:lib",
+        "//:go-zserio",
         "@com_github_google_go_cmp//cmp",
         "@com_github_google_go_cmp//cmp/cmpopts",
-        "@com_github_icza_bitio//:bitio",
     ],
 )

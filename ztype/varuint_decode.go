@@ -1,9 +1,9 @@
 package ztype
 
-import "github.com/icza/bitio"
+import zserio "github.com/woven-planet/go-zserio"
 
 // ReadVaruint16 reads a zserio varuint16 value from the bitstream
-func ReadVaruint16(r *bitio.CountReader) (uint16, error) {
+func ReadVaruint16(r *zserio.Reader) (uint16, error) {
 	b, err := r.ReadByte()
 	if err != nil {
 		return 0, err
@@ -19,7 +19,7 @@ func ReadVaruint16(r *bitio.CountReader) (uint16, error) {
 }
 
 // ReadVaruint32 reads a zserio varuint32 value from the bitstream
-func ReadVaruint32(r *bitio.CountReader) (uint32, error) {
+func ReadVaruint32(r *zserio.Reader) (uint32, error) {
 	b, err := r.ReadByte()
 	if err != nil {
 		return 0, err
@@ -48,7 +48,7 @@ func ReadVaruint32(r *bitio.CountReader) (uint32, error) {
 }
 
 // ReadVaruint64 reads a zserio varuint64 value from the bitstream
-func ReadVaruint64(r *bitio.CountReader) (uint64, error) {
+func ReadVaruint64(r *zserio.Reader) (uint64, error) {
 	b, err := r.ReadByte()
 	if err != nil {
 		return 0, err
@@ -82,7 +82,7 @@ func ReadVaruint64(r *bitio.CountReader) (uint64, error) {
 }
 
 // ReadVaruint reads a zserio varuint value from the bitstream
-func ReadVaruint(r *bitio.CountReader) (uint64, error) {
+func ReadVaruint(r *zserio.Reader) (uint64, error) {
 	b, err := r.ReadByte()
 	if err != nil {
 		return 0, err
@@ -116,7 +116,7 @@ func ReadVaruint(r *bitio.CountReader) (uint64, error) {
 }
 
 // ReadVarsize reads a zserio varsize value from the bitstream
-func ReadVarsize(r *bitio.CountReader) (uint64, error) {
+func ReadVarsize(r *zserio.Reader) (uint64, error) {
 	b, err := r.ReadByte()
 	if err != nil {
 		return 0, err

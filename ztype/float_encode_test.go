@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/icza/bitio"
+	zserio "github.com/woven-planet/go-zserio"
 	"github.com/woven-planet/go-zserio/ztype"
 )
 
@@ -31,7 +31,7 @@ func TestWriteFloat16(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
+			w := zserio.NewWriter(&buf)
 			if err := ztype.WriteFloat16(w, test.input); err != nil {
 				t.Fatalf("error writing float16: %v", err)
 			}
@@ -64,7 +64,7 @@ func TestWriteFloat32(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
+			w := zserio.NewWriter(&buf)
 			if err := ztype.WriteFloat32(w, test.input); err != nil {
 				t.Fatalf("error writing float32: %v", err)
 			}
@@ -97,7 +97,7 @@ func TestWriteFloat64(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
+			w := zserio.NewWriter(&buf)
 			if err := ztype.WriteFloat64(w, test.input); err != nil {
 				t.Fatalf("error writing float64: %v", err)
 			}

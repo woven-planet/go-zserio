@@ -1,9 +1,9 @@
 package ztype
 
-import "github.com/icza/bitio"
+import zserio "github.com/woven-planet/go-zserio"
 
 // ReadString reads a string from the bitstream.
-func ReadString(r *bitio.CountReader) (string, error) {
+func ReadString(r *zserio.Reader) (string, error) {
 	size, err := ReadVarsize(r)
 	if err != nil {
 		return "", err

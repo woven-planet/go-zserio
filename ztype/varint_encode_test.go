@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/icza/bitio"
+	zserio "github.com/woven-planet/go-zserio"
 	"github.com/woven-planet/go-zserio/ztype"
 )
 
@@ -56,7 +56,7 @@ func TestWriteVarint16(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
+			w := zserio.NewWriter(&buf)
 			var err error
 			for _, n := range test.input {
 				err = ztype.WriteVarint16(w, n)
@@ -121,7 +121,7 @@ func TestWriteVarint32(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
+			w := zserio.NewWriter(&buf)
 			var err error
 			for _, n := range test.input {
 				err = ztype.WriteVarint32(w, n)
@@ -186,7 +186,7 @@ func TestWriteVarint64(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
+			w := zserio.NewWriter(&buf)
 			var err error
 			for _, n := range test.input {
 				err = ztype.WriteVarint64(w, n)
@@ -250,7 +250,7 @@ func TestWriteVarint(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			var buf bytes.Buffer
-			w := bitio.NewCountWriter(&buf)
+			w := zserio.NewWriter(&buf)
 			var err error
 			for _, n := range test.input {
 				err = ztype.WriteVarint(w, n)

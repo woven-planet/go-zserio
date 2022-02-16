@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/icza/bitio"
+	zserio "github.com/woven-planet/go-zserio"
 	"github.com/woven-planet/go-zserio/ztype"
 )
 
@@ -40,7 +40,7 @@ func TestWriteSignedBits(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Run(name, func(t *testing.T) {
 				var buf bytes.Buffer
-				w := bitio.NewCountWriter(&buf)
+				w := zserio.NewWriter(&buf)
 				var err error
 				for ix := range test.input {
 					err = ztype.WriteSignedBits(w, test.input[ix], test.bits[ix])
