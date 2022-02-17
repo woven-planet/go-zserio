@@ -15,8 +15,9 @@ import (
 	"github.com/woven-planet/go-zserio/internal/model"
 )
 
-func testWorkspace(filePath string) string {
-	actualPath, _ := bazel.Runfile(filePath)
+func testWorkspace(filePath string, t require.TestingT) string {
+	actualPath, err := bazel.Runfile(filePath)
+	require.NoError(t, err)
 	return actualPath
 }
 
@@ -30,7 +31,7 @@ func TestStableOutputOrder(t *testing.T) {
 			withPreamble := withPreamble
 			t.Run(filepath.Base(path), func(t *testing.T) {
 				t.Parallel()
-				m, err := model.FromFiles(testWorkspace(path))
+				m, err := model.FromFiles(testWorkspace(path, t))
 				require.NoError(t, err)
 				require.Len(t, m.Packages, 1, "should have only a single package")
 
