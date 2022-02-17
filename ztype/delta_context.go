@@ -91,7 +91,7 @@ func (context *DeltaContext[T]) BitSizeOf(arrayTraits IArrayTraits[T], bitPositi
 }
 
 // ReadDescriptor reads the descriptor of a delta context array.
-func (context *DeltaContext[T]) ReadDescriptor(reader *zserio.Reader) error {
+func (context *DeltaContext[T]) ReadDescriptor(reader zserio.Reader) error {
 	var err error
 	context.isPacked, err = reader.ReadBool()
 	if err != nil {
@@ -106,7 +106,7 @@ func (context *DeltaContext[T]) ReadDescriptor(reader *zserio.Reader) error {
 }
 
 // Read reads the next element of an array encoded using delta contexts.
-func (context *DeltaContext[T]) Read(arrayTraits IArrayTraits[T], reader *zserio.Reader) (T, error) {
+func (context *DeltaContext[T]) Read(arrayTraits IArrayTraits[T], reader zserio.Reader) (T, error) {
 	if !context.processingStarted || !context.isPacked {
 		context.processingStarted = true
 		element, err := arrayTraits.Read(reader, 0)
@@ -125,7 +125,7 @@ func (context *DeltaContext[T]) Read(arrayTraits IArrayTraits[T], reader *zserio
 	return value, nil
 }
 
-func (context *DeltaContext[T]) WriteDescriptor(writer *zserio.Writer) error {
+func (context *DeltaContext[T]) WriteDescriptor(writer zserio.Writer) error {
 	context.finishInit()
 	err := writer.WriteBool(context.isPacked)
 	if err != nil {
@@ -138,7 +138,7 @@ func (context *DeltaContext[T]) WriteDescriptor(writer *zserio.Writer) error {
 }
 
 // Write writes an element of an delta context array.
-func (context *DeltaContext[T]) Write(arrayTraits IArrayTraits[T], writer *zserio.Writer, element T) error {
+func (context *DeltaContext[T]) Write(arrayTraits IArrayTraits[T], writer zserio.Writer, element T) error {
 	if !context.processingStarted || !context.isPacked {
 		context.processingStarted = true
 		context.previousElement = new(uint64)

@@ -1,4 +1,4 @@
-package zserio
+package zstream
 
 import (
 	"strings"

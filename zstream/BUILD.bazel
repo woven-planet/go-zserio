@@ -1,0 +1,22 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "zstream",
+    srcs = [
+        "reader.go",
+        "writer.go",
+    ],
+    importpath = "github.com/woven-planet/go-zserio/zstream",
+    visibility = ["//visibility:public"],
+    deps = ["@com_github_icza_bitio//:bitio"],
+)
+
+go_test(
+    name = "zstream_test",
+    srcs = [
+        "reader_test.go",
+        "writer_test.go",
+    ],
+    embed = [":zstream"],
+    deps = ["@com_github_stretchr_testify//assert"],
+)

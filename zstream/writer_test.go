@@ -1,6 +1,7 @@
-package zserio
+package zstream
 
 import (
+	"bufio"
 	"bytes"
 	"io"
 	"testing"
@@ -16,18 +17,13 @@ func (w *errWriter) Write([]byte) (int, error) {
 	return 0, w.err
 }
 
-// WriteByte ensures that we are not creating bufio.NewWriter in
-// bitio.NewWriter in NewWriter. If we don't have this method, then the writing
-// is buffered and the buffer might be flushed during a writer.Close() method
-// and the errors from the underlying writer would only be propagated at that
-// time.
 func (w *errWriter) WriteByte(c byte) error {
 	return w.err
 }
 
 func TestWriter_Write(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
-		w := NewWriter(io.Discard)
+		w := NewWriter(bufio.NewWriter(io.Discard))
 		n, err := w.Write([]byte("foo"))
 		assert.NoError(t, w.Close())
 		assert.Equal(t, 3, n)

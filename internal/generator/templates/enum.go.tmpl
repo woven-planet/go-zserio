@@ -26,7 +26,7 @@ func (v *{{ $enum.Name}}) LoadDefaultValues() error {
 }
 
 // MarshalZserio implements the zserio.Marshaler interface.
-func (v *{{ $enum.Name}}) MarshalZserio(w *zserio.Writer) error {
+func (v *{{ $enum.Name}}) MarshalZserio(w zserio.Writer) error {
     {{- if not $native.Type.IsBuiltin }}
       panic("only builtin types supported")
     {{- else if eq $native.Type.Bits 0 }}
@@ -41,7 +41,7 @@ func (v *{{ $enum.Name}}) MarshalZserio(w *zserio.Writer) error {
 }
 
 // UnmarshalZserio implements the zserio.Unmarshaler interface.
-func (v *{{ $enum.Name }}) UnmarshalZserio(r *zserio.Reader) error {
+func (v *{{ $enum.Name }}) UnmarshalZserio(r zserio.Reader) error {
     {{- if not $native.Type.IsBuiltin }}
       panic("only builtin types supported")
     {{- else }}
@@ -92,7 +92,7 @@ func (v *{{ $enum.Name}}) ZserioInitPackingContext(contextNode *zserio.PackingCo
 }
 
 
-func (v *{{ $enum.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingContextNode, r *zserio.Reader) error {
+func (v *{{ $enum.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingContextNode, r zserio.Reader) error {
   context, ok := contextNode.Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}])
   if !ok {
     return errors.New("unsupported packing context type")
@@ -107,7 +107,7 @@ func (v *{{ $enum.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingConte
   }
 }
 
-func (v *{{ $enum.Name}}) MarshalZserioPacked(contextNode *zserio.PackingContextNode, w *zserio.Writer) error {
+func (v *{{ $enum.Name}}) MarshalZserioPacked(contextNode *zserio.PackingContextNode, w zserio.Writer) error {
   context, ok := contextNode.Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}])
   if !ok {
     return errors.New("unsupported packing context type")

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	zserio "github.com/woven-planet/go-zserio"
+	"github.com/woven-planet/go-zserio/zstream"
 	"github.com/woven-planet/go-zserio/ztype"
 )
 
@@ -38,7 +38,7 @@ func TestReadSignedBits(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := zserio.NewReader(bytes.NewBuffer(test.input))
+			r := zstream.NewReader(bytes.NewBuffer(test.input))
 			got := make([]int64, 0, len(test.input))
 			for ix := range test.want {
 				v, err := ztype.ReadSignedBits(r, test.bits[ix])

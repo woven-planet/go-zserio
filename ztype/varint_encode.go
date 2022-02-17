@@ -5,35 +5,35 @@ import zserio "github.com/woven-planet/go-zserio"
 // WriteVarint16 writes a zserio varint16 value to the bitstream.
 // If you pass in a value that is outside to allowed range of
 // (MinVarint16, MaxVarint16) ErrOutOfBounds will be returned.
-func WriteVarint16(w *zserio.Writer, v int16) error {
+func WriteVarint16(w zserio.Writer, v int16) error {
 	return writeVarInt(w, int64(v), 2)
 }
 
 // WriteVarint32 writes a zserio varint32 value to the bitstream.
 // If you pass in a value that is outside to allowed range of
 // (MinVarint32, MaxVarint32) ErrOutOfBounds will be returned.
-func WriteVarint32(w *zserio.Writer, v int32) error {
+func WriteVarint32(w zserio.Writer, v int32) error {
 	return writeVarInt(w, int64(v), 4)
 }
 
 // WriteVarint64 writes a zserio varint64 value to the bitstream.
 // If you pass in a value that is outside to allowed range of
 // (MinVarint64, MaxVarint64) ErrOutOfBounds will be returned.
-func WriteVarint64(w *zserio.Writer, v int64) error {
+func WriteVarint64(w zserio.Writer, v int64) error {
 	return writeVarInt(w, int64(v), 8)
 }
 
 // WriteVarint writes a zserio varint value to the bitstream.
 // If you pass in a value that is outside to allowed range of
 // (MinVarint, MaxVarint) ErrOutOfBounds will be returned.
-func WriteVarint(w *zserio.Writer, v int64) error {
+func WriteVarint(w zserio.Writer, v int64) error {
 	if v == MinInt64 {
 		return w.WriteByte(0x80)
 	}
 	return writeVarInt(w, int64(v), 9)
 }
 
-func writeVarInt(w *zserio.Writer, v int64, maxBytes int) error {
+func writeVarInt(w zserio.Writer, v int64, maxBytes int) error {
 	var absValue uint64
 	if v < 0 {
 		absValue = uint64(-v)

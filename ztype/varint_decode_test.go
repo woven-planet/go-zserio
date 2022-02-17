@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	zserio "github.com/woven-planet/go-zserio"
+	"github.com/woven-planet/go-zserio/zstream"
 	"github.com/woven-planet/go-zserio/ztype"
 )
 
@@ -29,7 +29,7 @@ func TestReadVarint16(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := zserio.NewReader(bytes.NewBuffer(test.input))
+			r := zstream.NewReader(bytes.NewBuffer(test.input))
 			v, err := ztype.ReadVarint16(r)
 			if err != nil {
 				t.Fatalf("unexpected error: %s", err)
@@ -61,7 +61,7 @@ func TestReadVarint32(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := zserio.NewReader(bytes.NewBuffer(test.input))
+			r := zstream.NewReader(bytes.NewBuffer(test.input))
 			v, err := ztype.ReadVarint32(r)
 			if err != nil {
 				t.Fatalf("unexpected error: %s", err)
@@ -93,7 +93,7 @@ func TestReadVarint64(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := zserio.NewReader(bytes.NewBuffer(test.input))
+			r := zstream.NewReader(bytes.NewBuffer(test.input))
 			v, err := ztype.ReadVarint64(r)
 			if err != nil {
 				t.Fatalf("unexpected error: %s", err)
@@ -129,7 +129,7 @@ func TestReadVarint(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := zserio.NewReader(bytes.NewBuffer(test.input))
+			r := zstream.NewReader(bytes.NewBuffer(test.input))
 			v, err := ztype.ReadVarint(r)
 			if err != nil {
 				t.Fatalf("unexpected error: %s", err)
@@ -149,7 +149,7 @@ func BenchmarkReadVarint64(b *testing.B) {
 		0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 	}
 	for n := 0; n < b.N; n++ {
-		r := zserio.NewReader(bytes.NewBuffer(input))
+		r := zstream.NewReader(bytes.NewBuffer(input))
 		_, _ = ztype.ReadVarint64(r)
 		_, _ = ztype.ReadVarint64(r)
 		_, _ = ztype.ReadVarint64(r)
