@@ -12,7 +12,7 @@ import (
 	"github.com/woven-planet/go-zserio/internal/ast"
 )
 
-func testWorkspace(filePath string, t require.TestingT) string {
+func testWorkspace(t require.TestingT, filePath string) string {
 	actualPath, err := bazel.Runfile(filePath)
 	require.NoError(t, err)
 	return actualPath
@@ -24,14 +24,14 @@ func TestCanLoadEachExample(t *testing.T) {
 		path := path
 		t.Run(filepath.Base(path), func(t *testing.T) {
 			t.Parallel()
-			_, err := FromFiles(testWorkspace(path, t))
+			_, err := FromFiles(testWorkspace(t, path))
 			assert.NoError(t, err)
 		})
 	}
 }
 
 func TestEnumResultTypes(t *testing.T) {
-	m, err := FromFiles(testWorkspace("testdata/enum_expressions.zs", t))
+	m, err := FromFiles(testWorkspace(t, "testdata/enum_expressions.zs"))
 	require.NoError(t, err)
 
 	for _, pkg := range m.Packages {

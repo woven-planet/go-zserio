@@ -14,7 +14,7 @@ import (
 	zserio "github.com/woven-planet/go-zserio"
 )
 
-func testWorkspace(filePath string, t require.TestingT) string {
+func testWorkspace(t require.TestingT, filePath string) string {
 	actualPath, err := bazel.Runfile(filePath)
 	require.NoError(t, err)
 	return actualPath
@@ -27,7 +27,7 @@ var (
 
 func TestRoundtripFromZserio(t *testing.T) {
 	// Given
-	want, err := os.ReadFile(testWorkspace(ReferenceFilePath, t))
+	want, err := os.ReadFile(testWorkspace(t, ReferenceFilePath))
 	require.NoError(t, err)
 
 	// When
@@ -42,7 +42,7 @@ func TestRoundtripFromZserio(t *testing.T) {
 
 func TestEqualValues(t *testing.T) {
 	// Given
-	bytes, err := os.ReadFile(testWorkspace(ReferenceFilePath, t))
+	bytes, err := os.ReadFile(testWorkspace(t, ReferenceFilePath))
 	require.NoError(t, err)
 
 	// When
@@ -110,7 +110,7 @@ func want() testobject.TestObject {
 }
 
 func BenchmarkUnmarshalZserio(b *testing.B) {
-	bin, err := os.ReadFile(testWorkspace(ReferenceFilePath, b))
+	bin, err := os.ReadFile(testWorkspace(b, ReferenceFilePath))
 	if err != nil {
 		b.Errorf("read reference binary: %w", err)
 		return
