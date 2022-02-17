@@ -12,6 +12,7 @@ require (
 	github.com/spf13/cobra v1.2.1
 	github.com/stretchr/testify v1.7.0
 	github.com/x448/float16 v0.8.4
+	golang.org/x/exp v0.0.0-20220217172124-1812c5b45e43
 )
 
 replace (

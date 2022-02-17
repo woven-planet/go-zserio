@@ -34,6 +34,7 @@ go_library(
     deps = [
         "//:go-zserio",
         "@com_github_x448_float16//:float16",
+        "@org_golang_x_exp//constraints",
     ],
 )
 
