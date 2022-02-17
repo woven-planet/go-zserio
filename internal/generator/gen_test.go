@@ -4,19 +4,21 @@ import (
 	"io"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/bazelbuild/rules_go/go/tools/bazel"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/woven-planet/go-zserio/internal/ast"
 	"github.com/woven-planet/go-zserio/internal/model"
 )
 
-func testWorkspace(filePath string) string {
-	return path.Join(os.Getenv("TEST_SRCDIR"), os.Getenv("TEST_WORKSPACE"), filePath)
+func testWorkspace(t require.TestingT, filePath string) string {
+	actualPath, err := bazel.Runfile(filePath)
+	require.NoError(t, err)
+	return actualPath
 }
 
 func TestStableOutputOrder(t *testing.T) {
@@ -29,7 +31,7 @@ func TestStableOutputOrder(t *testing.T) {
 			withPreamble := withPreamble
 			t.Run(filepath.Base(path), func(t *testing.T) {
 				t.Parallel()
-				m, err := model.FromFiles(testWorkspace(path))
+				m, err := model.FromFiles(testWorkspace(t, path))
 				require.NoError(t, err)
 				require.Len(t, m.Packages, 1, "should have only a single package")
 

@@ -3,10 +3,37 @@ name: Run tests
 on: push
 
 jobs:
-  test:
-    name: Run tests
+  lint:
+    name: Run linters
 
     runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - uses: pre-commit/action@v2.0.3
+
+      - name: Mount bazel cache
+        uses: actions/cache@v2
+        with:
+          path: "~/.cache/bazel"
+          key: bazel
+
+      - name: Check for uncommited changes
+        run: |
+          ./bin/ensure-unchanged bazel run //:buildifier
+          ./bin/ensure-unchanged bazel run //internal/parser:update
+          ./bin/ensure-unchanged ./bin/gazelle
+          ./bin/ensure-unchanged ./bin/gazelle-update-repos
+
+  test:
+    strategy:
+      matrix:
+        os: ["ubuntu-latest", "windows-latest"]
+
+    name: Run tests on ${{ matrix.os }}
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v2
@@ -18,21 +45,16 @@ jobs:
           path: "~/.cache/bazel"
           key: bazel
 
-      - uses: pre-commit/action@v2.0.3
-
-      - name: gazelle
-        run: |
-          ./bin/ensure-unchanged bazel run //:buildifier
-          ./bin/ensure-unchanged bazel run //internal/parser:update
-          ./bin/ensure-unchanged ./bin/gazelle
-          ./bin/ensure-unchanged ./bin/gazelle-update-repos
-
       - run: bazel test //...
 
   integration_test:
-    name: Example tests
+    strategy:
+      matrix:
+        os: ["ubuntu-latest", "windows-latest"]
 
-    runs-on: ubuntu-latest
+    name: Test example on ${{ matrix.os }}
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v2

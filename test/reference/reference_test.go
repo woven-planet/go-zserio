@@ -2,30 +2,32 @@ package reference
 
 import (
 	"os"
-	"path"
 	"testing"
 
 	"gen/github.com/woven-planet/go-zserio/testdata/reference_modules/core/instantiations"
 	"gen/github.com/woven-planet/go-zserio/testdata/reference_modules/core/types"
 	"gen/github.com/woven-planet/go-zserio/testdata/reference_modules/testobject1/testobject"
 
+	"github.com/bazelbuild/rules_go/go/tools/bazel"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	zserio "github.com/woven-planet/go-zserio"
 )
 
-func testWorkspace(filePath string) string {
-	return path.Join(os.Getenv("TEST_SRCDIR"), os.Getenv("TEST_WORKSPACE"), filePath)
+func testWorkspace(t require.TestingT, filePath string) string {
+	actualPath, err := bazel.Runfile(filePath)
+	require.NoError(t, err)
+	return actualPath
 }
 
 var (
 	// ReferenceFilePath is the path to the input data.
-	ReferenceFilePath string = testWorkspace(os.Getenv("TESTDATA_BIN"))
+	ReferenceFilePath string = os.Getenv("TESTDATA_BIN")
 )
 
 func TestRoundtripFromZserio(t *testing.T) {
 	// Given
-	want, err := os.ReadFile(ReferenceFilePath)
+	want, err := os.ReadFile(testWorkspace(t, ReferenceFilePath))
 	require.NoError(t, err)
 
 	// When
@@ -40,7 +42,7 @@ func TestRoundtripFromZserio(t *testing.T) {
 
 func TestEqualValues(t *testing.T) {
 	// Given
-	bytes, err := os.ReadFile(ReferenceFilePath)
+	bytes, err := os.ReadFile(testWorkspace(t, ReferenceFilePath))
 	require.NoError(t, err)
 
 	// When
@@ -108,7 +110,7 @@ func want() testobject.TestObject {
 }
 
 func BenchmarkUnmarshalZserio(b *testing.B) {
-	bin, err := os.ReadFile(ReferenceFilePath)
+	bin, err := os.ReadFile(testWorkspace(b, ReferenceFilePath))
 	if err != nil {
 		b.Errorf("read reference binary: %w", err)
 		return

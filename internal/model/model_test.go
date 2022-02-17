@@ -2,18 +2,20 @@ package model
 
 import (
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/bazelbuild/rules_go/go/tools/bazel"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/woven-planet/go-zserio/internal/ast"
 )
 
-func testWorkspace(filePath string) string {
-	return path.Join(os.Getenv("TEST_SRCDIR"), os.Getenv("TEST_WORKSPACE"), filePath)
+func testWorkspace(t require.TestingT, filePath string) string {
+	actualPath, err := bazel.Runfile(filePath)
+	require.NoError(t, err)
+	return actualPath
 }
 
 func TestCanLoadEachExample(t *testing.T) {
@@ -22,14 +24,14 @@ func TestCanLoadEachExample(t *testing.T) {
 		path := path
 		t.Run(filepath.Base(path), func(t *testing.T) {
 			t.Parallel()
-			_, err := FromFiles(testWorkspace(path))
+			_, err := FromFiles(testWorkspace(t, path))
 			assert.NoError(t, err)
 		})
 	}
 }
 
 func TestEnumResultTypes(t *testing.T) {
-	m, err := FromFiles(testWorkspace("testdata/enum_expressions.zs"))
+	m, err := FromFiles(testWorkspace(t, "testdata/enum_expressions.zs"))
 	require.NoError(t, err)
 
 	for _, pkg := range m.Packages {
