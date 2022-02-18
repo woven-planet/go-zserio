@@ -83,7 +83,7 @@ rules_antlr_dependencies("4.8")
 
 go_rules_dependencies()
 
-go_register_toolchains(version = "1.18beta2")
+go_register_toolchains(version = "1.18rc1")
 
 gazelle_dependencies()
 

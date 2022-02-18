@@ -1,7 +1,7 @@
 package ztype
 
 import (
-	"constraints"
+	"golang.org/x/exp/constraints"
 
 	zserio "github.com/woven-planet/go-zserio"
 )
