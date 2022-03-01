@@ -1,4 +1,4 @@
-// Code generated from /private/var/tmp/_bazel_ignas.anikevicius/c3129ead79ca509099c649d74caf832e/sandbox/darwin-sandbox/2595/execroot/__main__/internal/parser/ZserioParser.g4 by ANTLR 4.8. DO NOT EDIT.
+// Code generated from /home/yusaku-mandai/.cache/bazel/_bazel_yusaku-mandai/57e37abf5721ebf7b47dbd3d1c44a3b4/sandbox/linux-sandbox/95/execroot/__main__/internal/parser/ZserioParser.g4 by ANTLR 4.8. DO NOT EDIT.
 
 package parser // ZserioParser
 import "github.com/antlr/antlr4/runtime/Go/antlr"
