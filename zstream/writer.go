@@ -85,3 +85,8 @@ func (w *BitWriter) Align(boundary uint8) (int64, error) {
 func (w *BitWriter) Close() error {
 	return w.writer.Close()
 }
+
+// BitPosition returns the number of bits written
+func (w *BitWriter) BitPosition() int64 {
+	return w.writer.BitsCount
+}
