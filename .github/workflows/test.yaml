@@ -22,7 +22,6 @@ jobs:
       - name: Check for uncommited changes
         run: |
           ./bin/ensure-unchanged bazel run //:buildifier
-          ./bin/ensure-unchanged bazel run //internal/parser:update
           ./bin/ensure-unchanged ./bin/gazelle
           ./bin/ensure-unchanged ./bin/gazelle-update-repos
 
