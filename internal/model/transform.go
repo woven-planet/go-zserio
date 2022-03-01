@@ -192,6 +192,27 @@ func (m *Model) InstantiateTemplates() error {
 			}
 		}
 
+		// instantiate all templates that were created by using the "subtype", e.g.
+		// subtype TemplateType<int> InstantiatedSubtype;
+		for _, subtype := range pkg.Subtypes {
+			if subtype.Type, err = m.instantiateType(
+				pkg,
+				subtype.Type,
+				subtype.Type.TemplateArguments,
+				""); // auto-generate a new name
+			err != nil {
+				return TypeError{
+					TypeReference: ast.TypeReference{
+						IsBuiltin: false,
+						Package:   pkg.Name,
+						Name:      subtype.Name,
+					},
+					Field: subtype.Name,
+					Err:   err,
+				}
+			}
+		}
+
 		// Instantiate all structs that have template fields
 		for _, structure := range pkg.Structs {
 			// don't instantiate template structs
