@@ -57,11 +57,7 @@ func dotOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
 }
 
 func numBitsOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
-	// TODO this is a very weak way of getting the bitsize, but fixing this
-	// properly needs a major refactoring in expression handling (need to find
-	// out the type (signed/unsigned) of the expression result, and perhaps
-	// even the maximum/minimum bit size.
-	return fmt.Sprintf("ztype.TryUnsignedBitSize(uint64(%s))", ExpressionToGoString(scope, expression.Operand1))
+	return fmt.Sprintf("ztype.NumBits(uint64(%s))", ExpressionToGoString(scope, expression.Operand1))
 }
 
 func getSymbolType(scope ast.Scope, symbol *ast.SymbolReference) (*ast.TypeReference, error) {

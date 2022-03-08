@@ -400,3 +400,23 @@ func BenchmarkBitsize(b *testing.B) {
 		_, _ = ztype.UnsignedBitSize((1<<28)-1, 8)
 	}
 }
+
+func TestNumBits(t *testing.T) {
+
+	tests := map[string]struct {
+		expected int
+		value    uint64
+	}{
+		"empty":  {0, 0},
+		"one":    {1, 1},
+		"random": {9, 264},
+	}
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			got := ztype.NumBits(test.value)
+			if got != test.expected {
+				t.Errorf("incorrect number of bits for %d: got %d, want %d", test.value, got, test.expected)
+			}
+		})
+	}
+}
