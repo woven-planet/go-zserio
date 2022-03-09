@@ -2,6 +2,7 @@ package ztype
 
 import (
 	"errors"
+	"math/bits"
 
 	zserio "github.com/woven-planet/go-zserio"
 )
@@ -77,14 +78,6 @@ func writeVarUint(w zserio.Writer, v uint64, maxBytes int) error {
 	return err
 }
 
-// TryUnsignedBitSize is a simplified version of UnsignedBitSize(), that is
-// needed for use within expressions. Within an expression, there is no possibility
-// for error checking or branching.
-func TryUnsignedBitSize(v uint64) int {
-	value, _ := UnsignedBitSize(v, 64)
-	return value
-}
-
 // UnsignedBitSize returns the size in bits of the zserio encoding of an unsigned
 // value.
 func UnsignedBitSize(v uint64, maxBytes int) (int, error) {
@@ -115,4 +108,9 @@ func UnsignedBitSize(v uint64, maxBytes int) (int, error) {
 			max = (max << 7) | 0xff
 		}
 	}
+}
+
+// NumBits returns the exact number of bits of an unsigned integer.
+func NumBits(v uint64) int {
+	return bits.Len64(v)
 }
