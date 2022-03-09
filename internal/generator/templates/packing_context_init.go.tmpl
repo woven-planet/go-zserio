@@ -18,10 +18,14 @@
 {{- end }}
 
 
-{{- if and (not $field.Array) (not $field.IsOptional) (not (eq $native.Type.Name "bool")) (not (eq $native.Type.Name "string")) (not (eq $native.Type.Name "extern")) }}
+{{- if and (not $field.Array) (not (eq $native.Type.Name "bool")) (not (eq $native.Type.Name "string")) (not (eq $native.Type.Name "extern")) }}
     {{- if $field.OptionalClause }}
         if {{ goExpression $scope $field.OptionalClause }} {
     {{- end }}
+    {{- if $field.IsOptional}}
+        if v.{{ $field.Name }} != nil {
+    {{- end }}
+
     {{- template "decode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field "field_name" $field_name }}
     {{- if $native.IsMarshaler }}
         if err := {{ $field_name }}.ZserioInitPackingContext(childrenNodes[{{ $index }}]); err != nil {
@@ -35,6 +39,10 @@
 
             traits := {{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
             field{{ $field.Name }}Context.Init(&traits, {{ goType $scope $native.Type }}({{ $field_name }}))
+        }
+    {{- end }}
+
+    {{- if $field.IsOptional}}
         }
     {{- end }}
     {{- if $field.OptionalClause }}

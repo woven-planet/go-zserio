@@ -21,80 +21,86 @@
     {{- end }}
 {{- end }}
 
+{{- if $field.OptionalClause }}
+    if {{ goExpression $scope $field.OptionalClause }} {
+{{- end }}
 
 {{- if $field.IsOptional}}
-    // this field is optional, and therefore uses the standard mershaling
-    {{- template "encode.go.tmpl" dict "pkg" $scope "field" $field }}
-{{- else }}
-    {{- if $field.OptionalClause }}
-        if {{ goExpression $scope $field.OptionalClause }} {
-    {{- end }}
-    {{- if not (eq $field.Alignment 0) }}
-        if _, err := w.Align({{ $field.Alignment }}); err != nil {
-            return err
-        }
-    {{- end }}
+    if err = ztype.WriteBool(w, v.{{ $field.Name }} != nil); err != nil {
+        return err
+    }
+    if v.{{ $field.Name }} != nil {
+{{- end }}
 
-    {{- if $field.Array }}
-        {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $field_name "field" $field "native" $native }}
-        {{- if $field.Array.Length }}
-            if len({{ $field_name }}) != int({{ goExpression $scope $field.Array.Length }}) {
-                return errors.New("array size does not match!")
-            }
-        {{- end }}
-    {{- end }}
-    
-    {{- template "encode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field "field_name" $field_name }}
-    {{- if $field.Array }}
-        {{- if not $field.Array.IsPacked }}
-            // This array is implicitly packed, because its parent object is packed
-            {{ $field.Name }}ArrayProperties.IsPacked = true
-        {{- end }}
-        {{- if $native.IsMarshaler }}
-        for index, _ := range {{ $field_name }} {
-            {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{if $native.RequiresCast }}(*{{ goType $scope $native.Type }})(&{{ $field_name }}[index]){{ else }}&{{ $field_name }}[index]{{ end }})
-        }
-        {{- else if $native.RequiresCast }}
-        for _, element := range {{ $field_name }} {
-            {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{ goType $scope $native.Type }}(element))
-        }
-        {{- end }}
-        if err = {{ $field.Name }}ArrayProperties.MarshalZserio(w); err != nil {
-            return err
-        }
+{{- if not (eq $field.Alignment 0) }}
+    if _, err := w.Align({{ $field.Alignment }}); err != nil {
+        return err
+    }
+{{- end }}
 
-    {{- else if eq $native.Type.Name "bool" }}
-        if err := ztype.WriteBool(w, {{ if $native.RequiresCast }}bool({{end}}{{ $field_name }}{{ if $native.RequiresCast }}){{end}}); err != nil {
-            return err
-        } 
-
-    {{- else if eq $native.Type.Name "extern" }}
-        if err := ztype.WriteExtern(w, {{ $field_name }}); err != nil {
-            return err
-        }
-
-    {{- else if eq $native.Type.Name "string" }}
-        if err := ztype.WriteString(w, {{ $field_name }}); err != nil {
-            return err
-        }
-
-    {{- else if $native.IsMarshaler }}
-        if err := {{ $field_name }}.MarshalZserioPacked(childrenNodes[{{ $index }}], w); err != nil {
-            return err
-        }
-
-
-    {{- else}}
-        if field{{ $field.Name }}Context, ok := childrenNodes[{{ $index }}].Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}]); !ok {
-            return errors.New("unknown context type")
-        } else {
-            if err := field{{ $field.Name }}Context.Write(&{{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}, w, {{ goType $scope $native.Type }}({{ $field_name }})); err != nil {
-                return err
-            }
-        }
-    {{- end}}
-    
-    {{- if $field.OptionalClause}}
+{{- if $field.Array }}
+    {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $field_name "field" $field "native" $native }}
+    {{- if $field.Array.Length }}
+        if len({{ $field_name }}) != int({{ goExpression $scope $field.Array.Length }}) {
+            return errors.New("array size does not match!")
         }
     {{- end }}
-{{- end }}{{/* $field.IsOptional */}}
+{{- end }}
+
+{{- template "encode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field "field_name" $field_name }}
+{{- if $field.Array }}
+    {{- if not $field.Array.IsPacked }}
+        // This array is implicitly packed, because its parent object is packed
+        {{ $field.Name }}ArrayProperties.IsPacked = true
+    {{- end }}
+    {{- if $native.IsMarshaler }}
+    for index, _ := range {{ $field_name }} {
+        {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{if $native.RequiresCast }}(*{{ goType $scope $native.Type }})(&{{ $field_name }}[index]){{ else }}&{{ $field_name }}[index]{{ end }})
+    }
+    {{- else if $native.RequiresCast }}
+    for _, element := range {{ $field_name }} {
+        {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{ goType $scope $native.Type }}(element))
+    }
+    {{- end }}
+    if err = {{ $field.Name }}ArrayProperties.MarshalZserio(w); err != nil {
+        return err
+    }
+
+{{- else if eq $native.Type.Name "bool" }}
+    if err := ztype.WriteBool(w, {{ if $native.RequiresCast }}bool({{end}}{{ $field_name }}{{ if $native.RequiresCast }}){{end}}); err != nil {
+        return err
+    } 
+
+{{- else if eq $native.Type.Name "extern" }}
+    if err := ztype.WriteExtern(w, {{ $field_name }}); err != nil {
+        return err
+    }
+
+{{- else if eq $native.Type.Name "string" }}
+    if err := ztype.WriteString(w, {{ $field_name }}); err != nil {
+        return err
+    }
+
+{{- else if $native.IsMarshaler }}
+    if err := {{ $field_name }}.MarshalZserioPacked(childrenNodes[{{ $index }}], w); err != nil {
+        return err
+    }
+
+
+{{- else}}
+    if field{{ $field.Name }}Context, ok := childrenNodes[{{ $index }}].Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}]); !ok {
+        return errors.New("unknown context type")
+    } else {
+        if err := field{{ $field.Name }}Context.Write(&{{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}, w, {{ goType $scope $native.Type }}({{ $field_name }})); err != nil {
+            return err
+        }
+    }
+{{- end}}
+
+{{- if $field.IsOptional}}
+    }
+{{- end }}
+
+{{- if $field.OptionalClause}}
+    }
+{{- end }}
