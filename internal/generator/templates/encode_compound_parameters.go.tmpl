@@ -5,8 +5,8 @@
 
 {{- if $field.Type.TypeArguments }}
     {{- if $field.Array }}
-        for _, element := range {{ $field_name }} {
-        {{- $field_name = "element" }}
+        for index, _ := range {{ $field_name }} {
+        {{- $field_name = printf "%s[index]" $field_name }}
     {{- end }}
     {{- $type_parameter := getTypeParameter $scope $field.Type }}
     {{- range $i, $argument := $field.Type.TypeArguments }}
