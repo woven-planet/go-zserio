@@ -407,9 +407,11 @@ func TestNumBits(t *testing.T) {
 		expected int
 		value    uint64
 	}{
-		"empty":  {0, 0},
-		"one":    {1, 1},
-		"random": {9, 264},
+		"empty":         {0, 0},
+		"one":           {1, 1},
+		"two":           {1, 2},
+		"random":        {9, 264},
+		"byte-boundary": {7, 128},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
