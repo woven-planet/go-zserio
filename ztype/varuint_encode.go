@@ -110,7 +110,16 @@ func UnsignedBitSize(v uint64, maxBytes int) (int, error) {
 	}
 }
 
-// NumBits returns the exact number of bits of an unsigned integer.
+// NumBits returns the exact number of bits needed to represent an unsigned
+// integer in zserio, considering the fact that 0 is not counted, due to the
+// zserio encoding.
 func NumBits(v uint64) int {
-	return bits.Len64(v)
+	if v == 0 {
+		return 0
+	}
+	if v == 1 {
+		return 1
+	}
+	// note that we subtract -1 here, because we will never encode a 0
+	return bits.Len64(v - 1)
 }
