@@ -741,8 +741,9 @@ func (expr *Expression) Evaluate(scope *Package) error {
 		err = errors.New("unknown expression type")
 	}
 
-	if err == nil {
-		expr.EvaluationState = EvaluationStateComplete
+	if err != nil {
+		return fmt.Errorf("evaluate %+v: %w", expr, err)
 	}
-	return err
+	expr.EvaluationState = EvaluationStateComplete
+	return nil
 }
