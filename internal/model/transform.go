@@ -38,6 +38,13 @@ var ErrIncorrectNumberOfTemplateParameters = errors.New("incorrect number of tem
 
 func (m *Model) CapitalizeNames() {
 	for _, pkg := range m.Packages {
+		for _, c := range pkg.Consts {
+			c.Name = strings.Title(c.Name)
+			if !c.Type.IsBuiltin {
+				c.Type.Name = strings.Title(c.Type.Name)
+			}
+		}
+
 		for _, e := range pkg.Enums {
 			e.Name = strings.Title(e.Name)
 			if !e.Type.IsBuiltin {
@@ -114,6 +121,18 @@ func (m *Model) CapitalizeNames() {
 			}
 		}
 	}
+}
+
+// EvaluateConsts evaluates all constants in a model
+func (m *Model) EvaluateConsts() error {
+	for _, pkg := range m.Packages {
+		for _, c := range pkg.Consts {
+			if err := c.Evaluate(pkg); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (m *Model) EvaluateEnums() error {
@@ -582,6 +601,20 @@ func (m *Model) ResolveImports() error {
 // This assumes that template instantiation has already happened.
 func (m *Model) ResolveTypes() error {
 	for _, pkg := range m.Packages {
+		for _, constant := range pkg.Consts {
+			if err := m.resolveTypeReference(pkg, constant.Type, map[string]bool{}); err != nil {
+				return TypeError{
+					TypeReference: ast.TypeReference{
+						IsBuiltin: false,
+						Package:   pkg.Name,
+						Name:      constant.Type.Name,
+					},
+					Field: constant.Name,
+					Err:   err,
+				}
+			}
+		}
+
 		for _, structure := range pkg.Structs {
 			templateParams := map[string]bool{}
 			for _, p := range structure.TemplateParameters {

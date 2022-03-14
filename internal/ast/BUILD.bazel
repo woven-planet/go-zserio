@@ -1,10 +1,11 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "ast",
     srcs = [
         "bitmask.go",
         "choice.go",
+        "const.go",
         "enum.go",
         "expression.go",
         "field.go",
@@ -18,4 +19,15 @@ go_library(
     importpath = "github.com/woven-planet/go-zserio/internal/ast",
     visibility = ["//:__subpackages__"],
     deps = ["//internal/parser"],
+)
+
+go_test(
+    name = "ast_test",
+    srcs = ["expression_test.go"],
+    deps = [
+        ":ast",
+        "//internal/parser",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+    ],
 )

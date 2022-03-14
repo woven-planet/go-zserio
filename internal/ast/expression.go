@@ -1,8 +1,8 @@
 package ast
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 	"math/bits"
 	"strconv"
 	"strings"
@@ -578,6 +578,30 @@ func (expr *Expression) evaluateBitwiseExpression() error {
 	return nil
 }
 
+func (expr *Expression) evaluateStringLiteral() error {
+	expressionString := expr.Text
+	// remove the quotes
+	if len(expressionString) < 2 {
+		return errors.New("string literal should contain quotes")
+	}
+	expr.ResultType = ExpressionTypeString
+	expr.ResultStringValue = expressionString[1 : len(expressionString)-1]
+	return nil
+}
+
+func (expr *Expression) evaluateBinaryLiteral() error {
+	expr.ResultType = ExpressionTypeInteger
+	// remove the trailing "b"
+	binaryString := expr.Text
+	if !strings.HasSuffix(binaryString, "b") {
+		return errors.New("binary expression is not valid")
+	}
+	binaryString = binaryString[:len(binaryString)-1]
+	var err error
+	expr.ResultIntValue, err = strconv.ParseInt(binaryString, 2, 64)
+	return err
+}
+
 // Evaluate evalues the value of the expression, by evaluating all child
 // expressions. If successful, expr will have valid ExpressionType and Values
 // set.
@@ -686,15 +710,10 @@ func (expr *Expression) Evaluate(scope *Package) error {
 		err = expr.evaluateComparisonExpression()
 	case parser.ZserioParserNE:
 		err = expr.evaluateComparisonExpression()
+	case parser.ZserioParserSTRING_LITERAL:
+		err = expr.evaluateStringLiteral()
 	case parser.ZserioParserBINARY_LITERAL:
-		expr.ResultType = ExpressionTypeInteger
-		// remove the trailing "b"
-		binaryString := expr.Text
-		if !strings.HasSuffix(binaryString, "b") {
-			return errors.New("binary expression is not valid")
-		}
-		binaryString = binaryString[:len(binaryString)-1]
-		expr.ResultIntValue, err = strconv.ParseInt(binaryString, 2, 64)
+		err = expr.evaluateBinaryLiteral()
 	case parser.ZserioParserQUESTIONMARK:
 		err = expr.evaluateTernaryExpression()
 	case parser.ZserioParserOCTAL_LITERAL:
@@ -711,7 +730,7 @@ func (expr *Expression) Evaluate(scope *Package) error {
 	case parser.ZserioParserBOOL_LITERAL:
 		expr.ResultType = ExpressionTypeBool
 		expr.ResultBoolValue = false
-		if expr.Text == "true" {
+		if "true" == strings.TrimSpace(strings.ToLower(expr.Text)) {
 			expr.ResultBoolValue = true
 		}
 	case parser.ZserioParserID:
@@ -722,8 +741,9 @@ func (expr *Expression) Evaluate(scope *Package) error {
 		err = errors.New("unknown expression type")
 	}
 
-	if err == nil {
-		expr.EvaluationState = EvaluationStateComplete
+	if err != nil {
+		return fmt.Errorf("evaluate %q: %w", expr.Text, err)
 	}
-	return err
+	expr.EvaluationState = EvaluationStateComplete
+	return nil
 }

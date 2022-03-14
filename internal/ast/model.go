@@ -5,13 +5,6 @@ type Import struct {
 	Type    string
 }
 
-type Const struct {
-	Name            string
-	Comment         string
-	Type            *TypeReference
-	ValueExpression *Expression
-}
-
 type Subtype struct {
 	Name    string
 	Comment string
