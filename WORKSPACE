@@ -38,6 +38,12 @@ http_archive(
 
 http_archive(
     name = "rules_antlr",
+    patch_args = [
+        "-p1",
+    ],
+    patches = [
+        "//third_party/patches:rules_antlr_no_gofmt.patch",
+    ],
     sha256 = "26e6a83c665cf6c1093b628b3a749071322f0f70305d12ede30909695ed85591",
     strip_prefix = "rules_antlr-0.5.0",
     urls = ["https://github.com/marcohu/rules_antlr/archive/0.5.0.tar.gz"],
