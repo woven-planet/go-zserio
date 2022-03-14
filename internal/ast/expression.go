@@ -742,7 +742,7 @@ func (expr *Expression) Evaluate(scope *Package) error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("evaluate %+v: %w", expr, err)
+		return fmt.Errorf("evaluate %q: %w", expr.Text, err)
 	}
 	expr.EvaluationState = EvaluationStateComplete
 	return nil
