@@ -5,6 +5,7 @@ go_library(
     srcs = [
         "bitmask.go",
         "choice.go",
+        "const.go",
         "enum.go",
         "expression.go",
         "field.go",

@@ -71,7 +71,7 @@ func walkDir(root string) ([]string, error) {
 			return nil
 		}
 
-		if (strings.HasSuffix(d.Name(), ".zs") || strings.HasSuffix(d.Name(), ".zserio")) {
+		if strings.HasSuffix(d.Name(), ".zs") || strings.HasSuffix(d.Name(), ".zserio") {
 			paths = append(paths, path)
 		}
 
@@ -110,6 +110,10 @@ func (m *Model) evaluate() error {
 
 	if err := m.InstantiateTemplates(); err != nil {
 		return fmt.Errorf("instantiate templates: %w", err)
+	}
+
+	if err := m.EvaluateConsts(); err != nil {
+		return fmt.Errorf("eval consts: %w", err)
 	}
 
 	if err := m.EvaluateEnums(); err != nil {

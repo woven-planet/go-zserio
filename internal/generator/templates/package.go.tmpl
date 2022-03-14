@@ -1,5 +1,12 @@
 {{ $scope := .pkg }}
 
+const (
+{{- range $name, $constant := .pkg.Consts }}
+    {{ $constant.Comment }}
+    {{ $constant.Name }} {{ goType $scope $constant.Type }} = {{ goExpression $scope $constant.ValueExpression }} 
+{{- end }}
+)
+
 {{- range $subtype := .pkg.Subtypes }}
 type {{ $subtype.Name }} {{ goType $scope .Type }}
 {{- end }}
