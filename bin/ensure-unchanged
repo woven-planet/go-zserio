@@ -12,5 +12,6 @@ if [[ -n $fail ]]; then
     echo "ERROR: Detected uncommited changes when running '$*'"
     echo "ERROR: Run the command and commit the changes to fix this error."
     git status --short
+    git diff
     exit 1
 fi

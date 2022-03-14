@@ -1,0 +1,12 @@
+diff --git a/antlr/impl.bzl b/antlr/impl.bzl
+index 326f02f..30ac8a7 100644
+--- a/antlr/impl.bzl
++++ b/antlr/impl.bzl
+@@ -64,6 +64,7 @@ def antlr(version, ctx, args):
+         mnemonic = "ANTLR" + version,
+         executable = ctx.executable._tool,
+         env = {
++            "ANTLR_GO_DISABLE_GOFMT": "true",
+             "ANTLR_VERSION": version,
+             "DIRECTORY_LAYOUT": ctx.attr.layout if hasattr(ctx.attr, "layout") else "",
+             "ENCODING": ctx.attr.encoding if hasattr(ctx.attr, "encoding") else "",
