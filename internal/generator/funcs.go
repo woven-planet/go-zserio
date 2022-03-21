@@ -8,6 +8,10 @@ import (
 	"github.com/woven-planet/go-zserio/internal/ast"
 )
 
+func IsDeltaPackable(scope ast.Scope, typ *ast.TypeReference) (bool, error) {
+	return scope.IsDeltaPackable(typ)
+}
+
 func GoType(scope ast.Scope, typ *ast.TypeReference) (string, error) {
 	return scope.GoType(typ)
 }
