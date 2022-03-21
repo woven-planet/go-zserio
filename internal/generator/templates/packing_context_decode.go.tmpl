@@ -61,48 +61,23 @@
         return err
     }
     {{- if or $native.IsMarshaler $native.RequiresCast }}
-    {{- $element := "elem" }}
-    {{- if $native.IsMarshaler }}
-        {{- $element = "*elem" }}
-    {{- end }}
-    for _, elem := range {{ $field.Name }}ArrayProperties.RawArray {
-        {{ $assign_str_lvalue }} = append({{ $assign_str_lvalue }}, {{ if $native.RequiresCast }}{{ goType $scope $field.Type }}({{ $element }}){{ else }}{{ $element }}{{ end }})
-    }
-    {{- end }}
-{{- else if eq $native.Type.Name "bool" }}
-    {{- if $native.RequiresCast }}
-        if tempValue, err := ztype.ReadBool(r); err != nil {
-            return err
-        } else {
-            {{ $assign_str_lvalue }} = ({{ goType $scope $field.Type }})(tempValue)
+        {{- $element := "elem" }}
+        {{- if $native.IsMarshaler }}
+            {{- $element = "*elem" }}
+        {{- end }}
+        for _, elem := range {{ $field.Name }}ArrayProperties.RawArray {
+            {{ $assign_str_lvalue }} = append({{ $assign_str_lvalue }}, {{ if $native.RequiresCast }}{{ goType $scope $field.Type }}({{ $element }}){{ else }}{{ $element }}{{ end }})
         }
     {{- else }}
-        if {{ $assign_str_lvalue }}, err = ztype.ReadBool(r); err != nil {
-            return err
-        }
+        {{ $assign_str_lvalue }} = {{ $field.Name }}ArrayProperties.RawArray
     {{- end }}
-
-{{- else if eq $native.Type.Name "extern" }}
-    if tempValue, err := ztype.ReadExtern(r); err == nil {
-        {{ $assign_str_lvalue }} = ({{ goType $scope $field.Type }})(tempValue)
-    } else {
-        return err
-    }
-
-{{- else if eq $native.Type.Name "string" }}
-    if tempValue, err := ztype.ReadString(r); err == nil {
-        {{ $assign_str_lvalue }} = ({{ goType $scope $field.Type }})(tempValue)
-    } else {
-        return err
-    }
 
 {{- else if $native.IsMarshaler }}
     if err = {{ $assign_str_rvalue }}.UnmarshalZserioPacked(childrenNodes[{{ $index }}], r); err != nil {
         return err
     }
-
-
-{{- else}}
+    
+{{- else if isDeltaPackable $scope $native.Type }}
     if field{{ $field.Name }}Context, ok := childrenNodes[{{ $index }}].Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}]); !ok {
         return errors.New("unknown context type")
     } else {
@@ -113,6 +88,14 @@
             return err
         }
     }
+
+{{- else }}
+    if tempValue, err := ztype.Read{{ title $native.Type.Name }}(r); err == nil {
+        {{ $assign_str_lvalue }} = ({{ goType $scope $field.Type }})(tempValue)
+    } else {
+        return err
+    }
+
 {{- end}}
 
 {{- if $field.IsOptional}}

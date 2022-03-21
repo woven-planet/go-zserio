@@ -5,14 +5,22 @@
 
 field{{ $field.Name }}Node := &zserio.PackingContextNode{}
 contextNode.AddChild(field{{ $field.Name }}Node)
-{{- if and (not $field.Array) (not (eq $native.Type.Name "bool")) (not (eq $native.Type.Name "string")) (not (eq $native.Type.Name "extern")) }}
+{{- if not $field.Array }}
     {{- if $native.IsMarshaler }}
+        {{- /* The if IsMarshaler must come before checking if the type is 
+        isDeltaPackable, because some marshable types, such es Enums, can also be 
+        delta packed */}}
+        // the field is a marshalable type, let the type itself decide if a delta
+        // context is needed
         var field{{ $field.Name }}Ptr *{{ goType $scope $native.Type }}
         if err := field{{ $field.Name }}Ptr.ZserioCreatePackingContext(field{{ $field.Name }}Node); err != nil {
             return err
         }
-    {{- else }}
-        // The field is not a marshalable type, therefore create use a delta context.
+       
+    {{- else if isDeltaPackable $scope $native.Type }}
+        // The field can be directly delta packed, therefore create a delta context
         field{{ $field.Name }}Node.Context = &ztype.DeltaContext[{{ goType $scope $native.Type }}]{}
+
+ 
     {{- end }}
 {{- end }}

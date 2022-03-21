@@ -18,7 +18,7 @@
 {{- end }}
 
 
-{{- if and (not $field.Array) (not (eq $native.Type.Name "bool")) (not (eq $native.Type.Name "string")) (not (eq $native.Type.Name "extern")) }}
+{{- if and (not $field.Array) (or ($native.IsMarshaler) (isDeltaPackable $scope $native.Type)) }}
     {{- if $field.OptionalClause }}
         if {{ goExpression $scope $field.OptionalClause }} {
     {{- end }}
@@ -31,7 +31,6 @@
         if err := {{ $field_name }}.ZserioInitPackingContext(childrenNodes[{{ $index }}]); err != nil {
             return err
         }
-
     {{- else }}
         if field{{ $field.Name }}Context, ok := childrenNodes[{{ $index }}].Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}]); !ok {
             return errors.New("unknown context type")

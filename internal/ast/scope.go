@@ -74,6 +74,32 @@ var zserioTypeToArrayTraits = map[string]string{
 	"extern": "ztype.ObjectArrayTraits[*ztype.ExternType]",
 }
 
+// zserioDeltaPackabeTypes are all native types that can be delta-packed
+var zserioDeltaPackabeTypes = map[string]bool{
+	// integer types
+	"int8":   true,
+	"int16":  true,
+	"int32":  true,
+	"int64":  true,
+	"uint8":  true,
+	"uint16": true,
+	"uint32": true,
+	"uint64": true,
+	"int":    true,
+	"uint":   true,
+	"bit":    true,
+	// varint types
+	"varint":    true,
+	"varint16":  true,
+	"varint32":  true,
+	"varint64":  true,
+	"varuint":   true,
+	"varsize":   true,
+	"varuint16": true,
+	"varuint32": true,
+	"varuint64": true,
+}
+
 type Scope interface {
 	// GoType looks up a name in the scope, and provides the Go type name for it.
 	// If the type is not found ErrUnkownType is returned.
@@ -82,6 +108,11 @@ type Scope interface {
 	// GoArrayTraits looks up a name in the scope, and provides the array traits
 	// for it.
 	GoArrayTraits(t *TypeReference) (string, error)
+
+	// IsDeltaPackable returns if a data type can be delta-packed: when stored in an
+	// array, a delta compression can be applied, which only stored the delta to
+	// the previous value, not the entire value. Only works for integer types.
+	IsDeltaPackable(t *TypeReference) (bool, error)
 
 	// HasType checks if a type is defined *in this scope*. It does not check parent
 	// scopes.
@@ -165,6 +196,7 @@ func (s *RootScope) GoType(t *TypeReference) (string, error) {
 	return "", fmt.Errorf("%w: %s", ErrUnknownType, t.Name)
 }
 
+// GoArrayTraits returns the array traits for a zserio basic type (int, float, ...)
 func (s *RootScope) GoArrayTraits(t *TypeReference) (string, error) {
 	if !t.IsBuiltin {
 		return "", ErrUnknownType
@@ -174,6 +206,15 @@ func (s *RootScope) GoArrayTraits(t *TypeReference) (string, error) {
 		return arrayTrait, nil
 	}
 	return "", fmt.Errorf("%w: %s", ErrUnknownType, t.Name)
+}
+
+// IsDeltaPackable reutrns if a zserio basic type is delta-packabe. If the type
+// is not a basic type, the function will return an error.
+func (s *RootScope) IsDeltaPackable(t *TypeReference) (bool, error) {
+	if !t.IsBuiltin {
+		return false, ErrUnknownType
+	}
+	return zserioDeltaPackabeTypes[t.Name], nil
 }
 
 // HasType checks if a type is defined *in this scope*. It does not check parent

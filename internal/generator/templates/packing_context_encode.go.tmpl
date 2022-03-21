@@ -54,30 +54,17 @@
         {{ $field.Name }}ArrayProperties.IsPacked = true
     {{- end }}
     {{- if $native.IsMarshaler }}
-    for index, _ := range {{ $field_name }} {
-        {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{if $native.RequiresCast }}(*{{ goType $scope $native.Type }})(&{{ $field_name }}[index]){{ else }}&{{ $field_name }}[index]{{ end }})
-    }
+        for index, _ := range {{ $field_name }} {
+            {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{if $native.RequiresCast }}(*{{ goType $scope $native.Type }})(&{{ $field_name }}[index]){{ else }}&{{ $field_name }}[index]{{ end }})
+        }
     {{- else if $native.RequiresCast }}
-    for _, element := range {{ $field_name }} {
-        {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{ goType $scope $native.Type }}(element))
-    }
+        for _, element := range {{ $field_name }} {
+            {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{ goType $scope $native.Type }}(element))
+        }
+    {{- else }}
+        {{ $field.Name }}ArrayProperties.RawArray = {{ $field_name }}
     {{- end }}
     if err = {{ $field.Name }}ArrayProperties.MarshalZserio(w); err != nil {
-        return err
-    }
-
-{{- else if eq $native.Type.Name "bool" }}
-    if err := ztype.WriteBool(w, {{ if $native.RequiresCast }}bool({{end}}{{ $field_name }}{{ if $native.RequiresCast }}){{end}}); err != nil {
-        return err
-    } 
-
-{{- else if eq $native.Type.Name "extern" }}
-    if err := ztype.WriteExtern(w, {{ $field_name }}); err != nil {
-        return err
-    }
-
-{{- else if eq $native.Type.Name "string" }}
-    if err := ztype.WriteString(w, {{ $field_name }}); err != nil {
         return err
     }
 
@@ -87,7 +74,7 @@
     }
 
 
-{{- else}}
+{{- else if isDeltaPackable $scope $native.Type }}
     if field{{ $field.Name }}Context, ok := childrenNodes[{{ $index }}].Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}]); !ok {
         return errors.New("unknown context type")
     } else {
@@ -95,6 +82,12 @@
             return err
         }
     }
+
+{{- else }}
+    if err := ztype.Write{{ title $native.Type.Name }}(w, {{ if $native.RequiresCast }}{{ goType $scope $native.Type }}({{end}}{{ $field_name }}{{ if $native.RequiresCast }}){{end}}); err != nil {
+        return err
+    } 
+
 {{- end}}
 
 {{- if $field.IsOptional}}

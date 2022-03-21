@@ -29,8 +29,11 @@ struct TestObject
     // This tests the correct type lookup if the choice selector type is enum
     SomeEnum choiceSelector;
     BasicChoice(choiceSelector) basicChoice;
-
-    // foo is just there to have something after an optional type
-    varint32 foo;
     
+    // test floats and array of floats
+    float32 floatMember;
+    float64 floatArray[100];
+
+    // foo is just there to have an easy to check value at the end of the byte stream
+    varint32 foo;
 };

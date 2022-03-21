@@ -15,6 +15,7 @@ var templates *template.Template
 func init() {
 	var err error
 	funcs := map[string]any{
+		"isDeltaPackable":  IsDeltaPackable,
 		"goType":           GoType,
 		"goPackageName":    GoPackageName,
 		"goGetAllImports":  GoGetAllImports,

@@ -128,6 +128,8 @@ func (p *Package) GoType(t *TypeReference) (string, error) {
 	return p.BaseScope.GoType(t)
 }
 
+// GoArrayTraits returns the array traits object for non-basic zserio types,
+// such as enums, subtypes, or structures.
 func (p *Package) GoArrayTraits(t *TypeReference) (string, error) {
 	if t.IsBuiltin {
 		return p.BaseScope.GoArrayTraits(t)
@@ -145,23 +147,46 @@ func (p *Package) GoArrayTraits(t *TypeReference) (string, error) {
 	objArrayTraitsStr := "ztype.ObjectArrayTraits"
 	switch n := typeSymbol.Symbol.(type) {
 	case *Const:
-		return "TODO", nil
+		return p.GoArrayTraits(n.Type)
 	case *Subtype:
 		return p.GoArrayTraits(n.Type)
-	case *InstantiateType:
-		return objArrayTraitsStr, nil
-	case *Struct:
-		return objArrayTraitsStr, nil
-	case *Enum:
-		return objArrayTraitsStr, nil
-	case *Union:
-		return objArrayTraitsStr, nil
-	case *BitmaskType:
-		return objArrayTraitsStr, nil
-	case *Choice:
+	case *InstantiateType, *Struct, *Enum, *Union, *BitmaskType, *Choice:
 		return objArrayTraitsStr, nil
 	default:
 		return "", fmt.Errorf("%w: %s", ErrUnknownType, t.Name)
+	}
+}
+
+// IsDeltaPackable indicates if a non-basic zserio type (struct, enum, subtype, ...)
+// can be delta-packed.
+func (p *Package) IsDeltaPackable(t *TypeReference) (bool, error) {
+	if t.IsBuiltin {
+		return p.BaseScope.Parent.IsDeltaPackable(t)
+	}
+
+	typeScope, err := p.GetImportedScope(t.Package)
+	if err != nil {
+		return false, err
+	}
+	typeSymbol, err := typeScope.GetSymbol(t.Name)
+	if err != nil {
+		return false, fmt.Errorf("%w: %s", ErrUnknownType, t.Name)
+	}
+
+	switch n := typeSymbol.Symbol.(type) {
+	case *Const:
+		return p.IsDeltaPackable(n.Type)
+	case *Subtype:
+		return p.IsDeltaPackable(n.Type)
+	case *InstantiateType:
+		return p.IsDeltaPackable(n.Type)
+	case *Struct, *Union, *Choice:
+		// compound types have their own packed marshaling function
+		return false, nil
+	case *Enum, *BitmaskType:
+		return true, nil
+	default:
+		return false, fmt.Errorf("%w: %s", ErrUnknownType, t.Name)
 	}
 }
 

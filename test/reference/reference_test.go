@@ -105,6 +105,12 @@ func want() testobject.TestObject {
 		HasA: 5,
 	}
 
+	// The next test checks that float types are correctly stored in arrays
+	d.FloatMember = 23.5
+	for i := 0; i < 100; i++ {
+		d.FloatArray = append(d.FloatArray, float64(i))
+	}
+
 	d.Foo = 42
 	return d
 }

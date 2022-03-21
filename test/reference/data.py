@@ -54,5 +54,11 @@ def new():
     d.basic_choice = BasicChoice(d.choice_selector)
     d.basic_choice.has_a = 5
 
+    # The next test checks that float types are correctly stored in packed and
+    # nonpacked arrays
+    d.float_member = 23.5
+    for i in range(100):
+        d.float_array.append(float(i))
+
     d.foo = 42
     return d
