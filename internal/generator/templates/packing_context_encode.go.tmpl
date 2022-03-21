@@ -54,13 +54,15 @@
         {{ $field.Name }}ArrayProperties.IsPacked = true
     {{- end }}
     {{- if $native.IsMarshaler }}
-    for index, _ := range {{ $field_name }} {
-        {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{if $native.RequiresCast }}(*{{ goType $scope $native.Type }})(&{{ $field_name }}[index]){{ else }}&{{ $field_name }}[index]{{ end }})
-    }
+        for index, _ := range {{ $field_name }} {
+            {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{if $native.RequiresCast }}(*{{ goType $scope $native.Type }})(&{{ $field_name }}[index]){{ else }}&{{ $field_name }}[index]{{ end }})
+        }
     {{- else if $native.RequiresCast }}
-    for _, element := range {{ $field_name }} {
-        {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{ goType $scope $native.Type }}(element))
-    }
+        for _, element := range {{ $field_name }} {
+            {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{ goType $scope $native.Type }}(element))
+        }
+    {{- else }}
+        {{ $field.Name }}ArrayProperties.RawArray = {{ $field_name }}
     {{- end }}
     if err = {{ $field.Name }}ArrayProperties.MarshalZserio(w); err != nil {
         return err

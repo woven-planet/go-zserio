@@ -61,13 +61,15 @@
         return err
     }
     {{- if or $native.IsMarshaler $native.RequiresCast }}
-    {{- $element := "elem" }}
-    {{- if $native.IsMarshaler }}
-        {{- $element = "*elem" }}
-    {{- end }}
-    for _, elem := range {{ $field.Name }}ArrayProperties.RawArray {
-        {{ $assign_str_lvalue }} = append({{ $assign_str_lvalue }}, {{ if $native.RequiresCast }}{{ goType $scope $field.Type }}({{ $element }}){{ else }}{{ $element }}{{ end }})
-    }
+        {{- $element := "elem" }}
+        {{- if $native.IsMarshaler }}
+            {{- $element = "*elem" }}
+        {{- end }}
+        for _, elem := range {{ $field.Name }}ArrayProperties.RawArray {
+            {{ $assign_str_lvalue }} = append({{ $assign_str_lvalue }}, {{ if $native.RequiresCast }}{{ goType $scope $field.Type }}({{ $element }}){{ else }}{{ $element }}{{ end }})
+        }
+    {{- else }}
+        {{ $assign_str_lvalue }} = {{ $field.Name }}ArrayProperties.RawArray
     {{- end }}
 
 {{- else if $native.IsMarshaler }}
