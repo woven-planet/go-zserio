@@ -44,18 +44,15 @@
     } else {
     endBitPosition += delta
     }
-{{- else if or $field.IsOptional (eq $native.Type.Name "bool") (eq $native.Type.Name "string") (eq $native.Type.Name "extern") }}
-    {{/* These fields use the standard packing */}}
-    {{- template "builtin_bitsizeof.go.tmpl" dict "pkg" $scope "name" $field_name "native" $native "isarray" $field.Array }}
 
-{{- else }}
-    {{- if $native.IsMarshaler }}
-        if delta, err := {{ $field_name }}.ZserioBitSizePacked(childrenNodes[{{ $index }}], endBitPosition); err != nil {
-            return 0, err
-        } else {
-            endBitPosition += delta
-        } 
-    {{- else }}
+{{- else  if $native.IsMarshaler }}
+    if delta, err := {{ $field_name }}.ZserioBitSizePacked(childrenNodes[{{ $index }}], endBitPosition); err != nil {
+        return 0, err
+    } else {
+        endBitPosition += delta
+    }
+
+{{- else if isDeltaPackable $scope $native.Type }}
     if field{{ $field.Name }}Context, ok := childrenNodes[{{ $index }}].Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}]); !ok {
         return 0, errors.New("invalid packing context")
     } else {
@@ -65,7 +62,12 @@
             endBitPosition += delta
         }
     }
-    {{- end }}
+
+
+{{- else }}
+    {{/* These fields use the standard packing */}}
+    {{- template "builtin_bitsizeof.go.tmpl" dict "pkg" $scope "name" $field_name "native" $native "isarray" $field.Array }}
+
 {{- end }}
 {{- if $field.IsOptional}}
     }
