@@ -150,17 +150,7 @@ func (p *Package) GoArrayTraits(t *TypeReference) (string, error) {
 		return p.GoArrayTraits(n.Type)
 	case *Subtype:
 		return p.GoArrayTraits(n.Type)
-	case *InstantiateType:
-		return objArrayTraitsStr, nil
-	case *Struct:
-		return objArrayTraitsStr, nil
-	case *Enum:
-		return objArrayTraitsStr, nil
-	case *Union:
-		return objArrayTraitsStr, nil
-	case *BitmaskType:
-		return objArrayTraitsStr, nil
-	case *Choice:
+	case *InstantiateType, *Struct, *Enum, *Union, *BitmaskType, *Choice:
 		return objArrayTraitsStr, nil
 	default:
 		return "", fmt.Errorf("%w: %s", ErrUnknownType, t.Name)
@@ -190,19 +180,11 @@ func (p *Package) IsDeltaPackable(t *TypeReference) (bool, error) {
 		return p.IsDeltaPackable(n.Type)
 	case *InstantiateType:
 		return p.IsDeltaPackable(n.Type)
-	case *Struct:
+	case *Struct, *Union, *Choice:
 		// compound types have their own packed marshaling function
 		return false, nil
-	case *Enum:
+	case *Enum, *BitmaskType:
 		return true, nil
-	case *Union:
-		// compound types have their own packed marshaling function
-		return false, nil
-	case *BitmaskType:
-		return true, nil
-	case *Choice:
-		// compound types have their own packed marshaling function
-		return false, nil
 	default:
 		return false, fmt.Errorf("%w: %s", ErrUnknownType, t.Name)
 	}
