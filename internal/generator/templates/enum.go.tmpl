@@ -122,5 +122,13 @@ func (v *{{ $enum.Name}}) ZserioInitializeOffsetsPacked(contextNode *zserio.Pack
 }
 
 func (v *{{ $enum.Name}}) ZserioBitSizePacked(contextNode *zserio.PackingContextNode, bitPosition int) (int, error) {
-  return 0, nil
+  context, ok := contextNode.Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}])
+  if !ok {
+      return 0, errors.New("invalid packing context")
+  }
+  delta, err := context.BitSizeOf(&{{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}, bitPosition, {{ goType $scope $native.Type }}(*v))
+  if err != nil {
+      return 0, err
+  }
+  return delta, nil
 }
