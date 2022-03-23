@@ -78,9 +78,18 @@ func (v *{{ $bitmask.Name}}) ZserioCreatePackingContext(contextNode *zserio.Pack
 
 
 func (v *{{ $bitmask.Name}}) ZserioInitPackingContext(contextNode *zserio.PackingContextNode) error {
+  if !contextNode.HasContext() {
+    return errors.New("context node has no packing")
+  }
+  context, ok := contextNode.Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}])
+  if !ok {
+    return errors.New("unsupported packing context type")
+  }
+
+  traits := {{- template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
+  context.Init(&traits, {{ goType $scope $native.Type }}(*v))
   return nil
 }
-
 
 func (v *{{ $bitmask.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingContextNode, r zserio.Reader) error {
   context, ok := contextNode.Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}])
@@ -112,5 +121,13 @@ func (v *{{ $bitmask.Name}}) ZserioInitializeOffsetsPacked(contextNode *zserio.P
 }
 
 func (v *{{ $bitmask.Name}}) ZserioBitSizePacked(contextNode *zserio.PackingContextNode, bitPosition int) (int, error) {
-  return 0, nil
+  context, ok := contextNode.Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}])
+  if !ok {
+      return 0, errors.New("invalid packing context")
+  }
+  delta, err := context.BitSizeOf(&{{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}, bitPosition, {{ goType $scope $native.Type }}(*v))
+  if err != nil {
+      return 0, err
+  }
+  return delta, nil
 }
