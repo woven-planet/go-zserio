@@ -16,6 +16,18 @@ const (
 {{- end }}
 )
 
+var _{{ $enum.Name }}Names = []string{
+{{- range $ix, $item := $enum.Items }}
+    "{{ $enum.Name }}{{ $item.Name }}",
+{{- end }}
+}
+
+var _{{ $enum.Name }}Values = []{{ $enum.Name }}{
+{{- range $ix, $item := $enum.Items }}
+    {{ $enum.Name }}{{ $item.Name }},
+{{- end }}
+}
+
 var _{{ $enum.Name }}Name = map[{{ $enum.Name }}]string{
 {{- range $ix, $item := $enum.Items }}
     {{ $enum.Name }}{{ $item.Name }}: "{{ $item.Name }}",
@@ -26,6 +38,18 @@ var _{{ $enum.Name }}NameToValue = map[string]{{ $enum.Name }}{
 {{- range $ix, $item := $enum.Items }}
     "{{ $item.Name }}": {{ $enum.Name }}{{ $item.Name }},
 {{- end }}
+}
+
+// {{ $enum.Name }}Values returns all values of the enum
+func {{ $enum.Name }}Values() []{{ $enum.Name }} {
+  return _{{ $enum.Name }}Values
+}
+
+// {{ $enum.Name }}Strings returns a slice of all string values of the enum
+func {{ $enum.Name }}Strings() []string {
+  strs := make([]string, len(_{{ $enum.Name }}Names))
+  copy(strs, _{{ $enum.Name }}Names)
+  return strs
 }
 
 // {{ $enum.Name }}String converts a string to an enum value. If the string
