@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_test")
+
+go_test(
+    name = "gencode_test",
+    srcs = ["enum_test.go"],
+    deps = [
+        "//:go-zserio",
+        "//testdata/reference_modules:go_core_instantiations",
+        "//testdata/reference_modules:go_core_types",
+        "//testdata/reference_modules:go_testobject",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@io_bazel_rules_go//go/tools/bazel:go_default_library",
+    ],
+)

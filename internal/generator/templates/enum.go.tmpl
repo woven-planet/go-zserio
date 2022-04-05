@@ -18,7 +18,7 @@ const (
 
 var _{{ $enum.Name }}Names = []string{
 {{- range $ix, $item := $enum.Items }}
-    "{{ $enum.Name }}{{ $item.Name }}",
+    "{{ $item.Name }}",
 {{- end }}
 }
 
