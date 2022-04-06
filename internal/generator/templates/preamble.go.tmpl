@@ -4,7 +4,9 @@ package {{ goPackageName .pkg.Name }}
 
 {{ $root := .rootPackage }}
 import (
-	"errors"
+    "errors"
+    "fmt"
+    "database/sql/driver"
     "github.com/icza/bitio"
     zserio "github.com/woven-planet/go-zserio"
     "github.com/woven-planet/go-zserio/ztype"

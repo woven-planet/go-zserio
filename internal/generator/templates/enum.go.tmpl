@@ -16,6 +16,93 @@ const (
 {{- end }}
 )
 
+var _{{ $enum.Name }}Names = []string{
+{{- range $ix, $item := $enum.Items }}
+    "{{ $item.Name }}",
+{{- end }}
+}
+
+var _{{ $enum.Name }}Values = []{{ $enum.Name }}{
+{{- range $ix, $item := $enum.Items }}
+    {{ $enum.Name }}{{ $item.Name }},
+{{- end }}
+}
+
+var _{{ $enum.Name }}Name = map[{{ $enum.Name }}]string{
+{{- range $ix, $item := $enum.Items }}
+    {{ $enum.Name }}{{ $item.Name }}: "{{ $item.Name }}",
+{{- end }}
+}
+
+var _{{ $enum.Name }}NameToValue = map[string]{{ $enum.Name }}{
+{{- range $ix, $item := $enum.Items }}
+    "{{ $item.Name }}": {{ $enum.Name }}{{ $item.Name }},
+{{- end }}
+}
+
+// {{ $enum.Name }}Values returns all values of the enum
+func {{ $enum.Name }}Values() []{{ $enum.Name }} {
+  return _{{ $enum.Name }}Values
+}
+
+// {{ $enum.Name }}Strings returns a slice of all string values of the enum
+func {{ $enum.Name }}Strings() []string {
+  strs := make([]string, len(_{{ $enum.Name }}Names))
+  copy(strs, _{{ $enum.Name }}Names)
+  return strs
+}
+
+// {{ $enum.Name }}String converts a string to an enum value. If the string
+// does not match a known value an error is returned.
+func {{ $enum.Name }}String(s string) ({{ $enum.Name }}, error) {
+  if value, found := _{{ $enum.Name }}NameToValue[s]; found {
+      return value, nil
+  }
+
+  var zero {{ $enum.Name }}
+  return zero, fmt.Errorf("%s does not belong to {{ $enum.Name }} values", s)
+}
+
+// String implements fmt.Stringer
+func (v {{ $enum.Name }}) String() string {
+    if name, found := _{{ $enum.Name }}Name[v]; found {
+        return name
+    }
+    return fmt.Sprintf("unknown<%v>", v)
+}
+
+// Value implements database.sql.driver.Valuer
+func (v {{ $enum.Name}}) Value() (driver.Value, error) {
+        return v.String(), nil
+}
+
+// Scan implements database.sql.Scanner
+func (i *{{ $enum.Name}}) Scan(src interface{}) error {
+        if src == nil {
+                return nil
+        }
+
+        var str string
+        switch v := src.(type) {
+        case []byte:
+                str = string(v)
+        case string:
+                str = v
+        case fmt.Stringer:
+                str = v.String()
+        default:
+                return fmt.Errorf("invalid value of {{ $enum.Name}}: %[1]T(%[1]v)", src)
+        }
+
+        val, err := {{ $enum.Name}}String(str)
+        if err != nil {
+                return err
+        }
+
+        *i = val
+        return nil
+}
+
 func (v *{{ $enum.Name}}) Clone() zserio.ZserioType {
   clone := *v
   return &clone
@@ -75,7 +162,6 @@ func (v *{{ $enum.Name}}) ZserioCreatePackingContext(contextNode *zserio.Packing
   contextNode.Context = &ztype.DeltaContext[{{ goType $scope $native.Type }}]{}
   return nil
 }
-
 
 func (v *{{ $enum.Name}}) ZserioInitPackingContext(contextNode *zserio.PackingContextNode) error {
   if !contextNode.HasContext() {
