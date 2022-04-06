@@ -11,6 +11,7 @@ import (
 	"github.com/bazelbuild/rules_go/go/tools/bazel"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
 	"github.com/woven-planet/go-zserio/internal/ast"
 	"github.com/woven-planet/go-zserio/internal/model"
 )
@@ -28,7 +29,9 @@ func TestStableOutputOrder(t *testing.T) {
 	for _, path := range strings.Split(os.Getenv("TEST_ZSERIO_EXAMPLES"), " ") {
 		path := path
 		for _, withPreamble := range []bool{true, false} {
-			withPreamble := withPreamble
+			opts := &options{
+				outputToStdout: !withPreamble,
+			}
 			t.Run(filepath.Base(path), func(t *testing.T) {
 				t.Parallel()
 				m, err := model.FromFiles(testWorkspace(t, path))
@@ -40,11 +43,11 @@ func TestStableOutputOrder(t *testing.T) {
 					break
 				}
 
-				first := newOutputs(pkg, "test", withPreamble)
+				first := newOutputs(pkg, "test", opts)
 				for i := range first {
 					first[i].data = nil
 				}
-				second := newOutputs(pkg, "test", withPreamble)
+				second := newOutputs(pkg, "test", opts)
 				for i := range second {
 					second[i].data = nil
 				}
