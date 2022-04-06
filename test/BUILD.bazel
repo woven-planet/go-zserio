@@ -13,3 +13,12 @@ go_test(
         "@io_bazel_rules_go//go/tools/bazel:go_default_library",
     ],
 )
+
+go_test(
+    name = "test_test",
+    srcs = ["enum_test.go"],
+    deps = [
+        "//testdata/reference_modules:go_core_types",
+        "@com_github_stretchr_testify//assert",
+    ],
+)
