@@ -15,7 +15,7 @@ var (
 	outputDirectory string
 	topLevelPackage string
 	noFormat        bool
-	emitSqlSupport  bool
+	emitSQLSupport  bool
 	outputPackage   string
 )
 
@@ -33,8 +33,8 @@ var generateCmd = &cobra.Command{
 		if noFormat {
 			options = append(options, generator.DoNotFormatSource)
 		}
-		if emitSqlSupport {
-			options = append(options, generator.EmitSqlSupport)
+		if emitSQLSupport {
+			options = append(options, generator.EmitSQLSupport)
 		}
 
 		if err = generator.Generate(m,
@@ -62,7 +62,7 @@ func init() {
 	generateCmd.Flags().BoolVarP(&noFormat, "noformat", "", false, "Do not format the source files.")
 	generateCmd.Flags().MarkHidden("noformat")
 
-	generateCmd.Flags().BoolVar(&emitSqlSupport, "sql", false, "Emit code for SQL support")
+	generateCmd.Flags().BoolVar(&emitSQLSupport, "sql", false, "Emit code for SQL support")
 
 	rootCmd.AddCommand(generateCmd)
 }

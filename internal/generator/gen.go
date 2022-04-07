@@ -24,7 +24,7 @@ type options struct {
 	doNotFormatSource bool
 	outputPackage     string
 	outputToStdout    bool
-	EmitSqlSupport    bool
+	EmitSQLSupport    bool
 }
 
 // Option sets a configuration option
@@ -35,10 +35,10 @@ func DoNotFormatSource(opts *options) {
 	opts.doNotFormatSource = true
 }
 
-// EmitSqlSupport tells the generator to produce support for storing enum
+// EmitSQLSupport tells the generator to produce support for storing enum
 // types in a SQL database.
-func EmitSqlSupport(opt *options) {
-	opt.EmitSqlSupport = true
+func EmitSQLSupport(opt *options) {
+	opt.EmitSQLSupport = true
 }
 
 type data map[string]any
