@@ -3,7 +3,7 @@
 
 load("@io_bazel_rules_go//go:def.bzl", _go_library = "go_library")
 
-def go_zserio_srcs(name, srcs, rootpackage, pkg = None, format = True):
+def go_zserio_srcs(name, srcs, rootpackage, pkg = None, format = True, sql = False):
     """Generate Go source code for the given zserio files.
 
     Args:
@@ -20,19 +20,21 @@ def go_zserio_srcs(name, srcs, rootpackage, pkg = None, format = True):
         "  --rootpackage {rootpackage} \\",
         "  --only {pkg} \\",
         "  {noformat} \\",
+        "  {sql} \\",
         "  {srcs} 2>/dev/null",
     ]).format(
         bin = "$(execpath //cmd/go-zserio)",
         rootpackage = rootpackage,
         pkg = pkg,
         noformat = "" if format else "--noformat",
+        sql = "--sql" if sql else "",
         srcs = "$(SRCS)",
     )
 
     native.genrule(
         name = name + ".script",
         srcs = srcs,
-        outs = [name + "_gen.sh"],
+        outs = [name + ".sh"],
         cmd = "echo -e '{}' >$@".format(script),
         tools = [
             "//cmd/go-zserio",
@@ -44,7 +46,7 @@ def go_zserio_srcs(name, srcs, rootpackage, pkg = None, format = True):
         # TODO @aignas 2022-02-08: use something more similar to rules_proto,
         # so that we can encode dependencies between different zs files.
         srcs = srcs,
-        outs = [name + "_gen.zs.go"],
+        outs = [name + ".zs.go"],
         cmd = "{bin} > $@".format(
             bin = "$(execpath {}.script)".format(name),
         ),
