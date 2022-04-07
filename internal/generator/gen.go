@@ -2,6 +2,7 @@ package generator
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"go/format"
 	"io"
@@ -45,6 +46,7 @@ type data map[string]any
 func Generate(m *model.Model, rootPath, rootPackage, outputPackage string, flags ...Option) error {
 	opts := &options{
 		outputToStdout: rootPath == "-",
+		rootPackage:    rootPackage,
 	}
 
 	for _, f := range flags {
@@ -249,6 +251,10 @@ func newOutputs(pkg *ast.Package, rootPackage string, opts *options) []output {
 }
 
 func generatePackage(rootPath string, pkg *ast.Package, opts *options) error {
+	if opts.rootPackage == "" {
+		return errors.New("BUG: root package needs to be specified")
+	}
+
 	outs := newOutputs(pkg, opts.rootPackage, opts)
 
 	if opts.outputToStdout {
