@@ -2,6 +2,7 @@ package generator
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"go/format"
 	"io"
@@ -12,25 +13,48 @@ import (
 	"strings"
 
 	"github.com/iancoleman/strcase"
+	"golang.org/x/exp/maps"
+
 	"github.com/woven-planet/go-zserio/internal/ast"
 	"github.com/woven-planet/go-zserio/internal/model"
 )
 
-type Options struct {
-	RootPackage       string
-	DoNotFormatSource bool
-	OutputPackage     string
+type options struct {
+	rootPackage       string
+	doNotFormatSource bool
+	outputPackage     string
+	outputToStdout    bool
+	EmitSQLSupport    bool
+}
 
-	outputToStdout bool
+// Option sets a configuration option
+type Option func(opts *options)
+
+// DoNotFormatSource indicates generate Go source should not be formatted
+func DoNotFormatSource(opts *options) {
+	opts.doNotFormatSource = true
+}
+
+// EmitSQLSupport tells the generator to produce support for storing enum
+// types in a SQL database.
+func EmitSQLSupport(opt *options) {
+	opt.EmitSQLSupport = true
 }
 
 type data map[string]any
 
-func Generate(m *model.Model, rootPath string, options *Options) error {
-	options.outputToStdout = rootPath == "-"
+func Generate(m *model.Model, rootPath, rootPackage, outputPackage string, flags ...Option) error {
+	opts := &options{
+		outputToStdout: rootPath == "-",
+		rootPackage:    rootPackage,
+	}
 
-	if options.outputToStdout {
-		pkg, ok := m.Packages[options.OutputPackage]
+	for _, f := range flags {
+		f(opts)
+	}
+
+	if opts.outputToStdout {
+		pkg, ok := m.Packages[outputPackage]
 		if !ok {
 			var known []string
 			for name := range m.Packages {
@@ -38,14 +62,14 @@ func Generate(m *model.Model, rootPath string, options *Options) error {
 			}
 			sort.Strings(known)
 
-			return fmt.Errorf("%q not found, only know about %q", options.OutputPackage, known)
+			return fmt.Errorf("%q not found, only know about %q", outputPackage, known)
 		}
 
-		return generatePackage(rootPath, pkg, options)
+		return generatePackage(rootPath, pkg, opts)
 	}
 
 	for _, pkg := range m.Packages {
-		if err := generatePackage(rootPath, pkg, options); err != nil {
+		if err := generatePackage(rootPath, pkg, opts); err != nil {
 			return err
 		}
 	}
@@ -118,18 +142,24 @@ type output struct {
 	template     string // template file name
 	data         data
 	withPreamble bool
+	options      *options
 }
 
-func newOutput(name, template string, data data, withPreamble bool) output {
+func newOutput(name, template string, templateData data, withPreamble bool, opts *options) output {
+	newData := data{
+		"options": opts,
+	}
+	maps.Copy(newData, templateData)
 	return output{
 		name:         name,
 		template:     template,
-		data:         data,
+		data:         newData,
 		withPreamble: withPreamble,
+		options:      opts,
 	}
 }
 
-func newTypeOutput(astType any, d data, withPreamble bool) output {
+func newTypeOutput(astType any, d data, withPreamble bool, opts *options) output {
 	var name, typeName string
 	switch t := astType.(type) {
 	case *ast.Enum:
@@ -156,7 +186,7 @@ func newTypeOutput(astType any, d data, withPreamble bool) output {
 		templateData[k] = v
 	}
 	templateData[typeName] = astType
-	return newOutput(strcase.ToSnake(name)+".go", typeName+".go.tmpl", templateData, withPreamble)
+	return newOutput(strcase.ToSnake(name)+".go", typeName+".go.tmpl", templateData, withPreamble, opts)
 }
 
 func (o *output) executeTemplate(w io.Writer) error {
@@ -169,7 +199,7 @@ func (o *output) executeTemplate(w io.Writer) error {
 	return executeTemplate(w, o.template, o.data)
 }
 
-func newOutputs(pkg *ast.Package, rootPackage string, singleFile bool) []output {
+func newOutputs(pkg *ast.Package, rootPackage string, opts *options) []output {
 	data := data{
 		"pkg":         pkg,
 		"rootPackage": rootPackage,
@@ -178,7 +208,7 @@ func newOutputs(pkg *ast.Package, rootPackage string, singleFile bool) []output 
 	var outs []output
 
 	for _, t := range pkg.Enums {
-		outs = append(outs, newTypeOutput(t, data, !singleFile))
+		outs = append(outs, newTypeOutput(t, data, !opts.outputToStdout, opts))
 	}
 
 	for _, t := range pkg.Unions {
@@ -186,11 +216,11 @@ func newOutputs(pkg *ast.Package, rootPackage string, singleFile bool) []output 
 			// We only need to generate source for instantiated templates
 			continue
 		}
-		outs = append(outs, newTypeOutput(t, data, !singleFile))
+		outs = append(outs, newTypeOutput(t, data, !opts.outputToStdout, opts))
 	}
 
 	for _, t := range pkg.Bitmasks {
-		outs = append(outs, newTypeOutput(t, data, !singleFile))
+		outs = append(outs, newTypeOutput(t, data, !opts.outputToStdout, opts))
 	}
 
 	for _, t := range pkg.Choices {
@@ -198,7 +228,7 @@ func newOutputs(pkg *ast.Package, rootPackage string, singleFile bool) []output 
 			// We only need to generate source for instantiated templates
 			continue
 		}
-		outs = append(outs, newTypeOutput(t, data, !singleFile))
+		outs = append(outs, newTypeOutput(t, data, !opts.outputToStdout, opts))
 	}
 
 	for _, t := range pkg.Structs {
@@ -206,7 +236,7 @@ func newOutputs(pkg *ast.Package, rootPackage string, singleFile bool) []output 
 			// We only need to generate source for instantiated templates
 			continue
 		}
-		outs = append(outs, newTypeOutput(t, data, !singleFile))
+		outs = append(outs, newTypeOutput(t, data, !opts.outputToStdout, opts))
 	}
 
 	sort.Slice(outs, func(i, j int) bool {
@@ -217,13 +247,17 @@ func newOutputs(pkg *ast.Package, rootPackage string, singleFile bool) []output 
 		return outs[i].template > outs[j].template
 	})
 
-	return append([]output{newOutput("pkg.go", "package.go.tmpl", data, true)}, outs...)
+	return append([]output{newOutput("pkg.go", "package.go.tmpl", data, true, opts)}, outs...)
 }
 
-func generatePackage(rootPath string, pkg *ast.Package, options *Options) error {
-	outs := newOutputs(pkg, options.RootPackage, options.outputToStdout)
+func generatePackage(rootPath string, pkg *ast.Package, opts *options) error {
+	if opts.rootPackage == "" {
+		return errors.New("BUG: root package needs to be specified")
+	}
 
-	if options.outputToStdout {
+	outs := newOutputs(pkg, opts.rootPackage, opts)
+
+	if opts.outputToStdout {
 		var out bytes.Buffer
 		for _, o := range outs {
 			if err := o.executeTemplate(&out); err != nil {
@@ -231,7 +265,7 @@ func generatePackage(rootPath string, pkg *ast.Package, options *Options) error 
 			}
 		}
 
-		return writeGoSource(os.Stdout, out.Bytes(), options.DoNotFormatSource)
+		return writeGoSource(os.Stdout, out.Bytes(), opts.doNotFormatSource)
 	}
 
 	for _, o := range outs {
@@ -240,7 +274,7 @@ func generatePackage(rootPath string, pkg *ast.Package, options *Options) error 
 			return fmt.Errorf("generate %s: %w", o.name, err)
 		}
 
-		if err := writeToFile(out.Bytes(), rootPath, pkg.Name, o.name, options.DoNotFormatSource); err != nil {
+		if err := writeToFile(out.Bytes(), rootPath, pkg.Name, o.name, opts.doNotFormatSource); err != nil {
 			return fmt.Errorf("write %s: %w", o.name, err)
 		}
 	}

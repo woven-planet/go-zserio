@@ -1,5 +1,6 @@
 {{ $scope := .pkg }} 
 {{ $enum := .enum }}
+{{ $options := .options }}
 {{ $native := goNativeType $scope $enum.Type }}
 
 {{ $enum.Comment }}
@@ -71,10 +72,12 @@ func (v {{ $enum.Name }}) String() string {
     return fmt.Sprintf("unknown<%v>", v)
 }
 
+{{ if $options.EmitSQLSupport }}
 // Value implements database.sql.driver.Valuer
 func (v {{ $enum.Name}}) Value() (driver.Value, error) {
         return v.String(), nil
 }
+{{ end }}
 
 // Scan implements database.sql.Scanner
 func (i *{{ $enum.Name}}) Scan(src interface{}) error {
