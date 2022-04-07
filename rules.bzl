@@ -12,6 +12,7 @@ def go_zserio_srcs(name, srcs, rootpackage, pkg = None, format = True, sql = Fal
         rootpackage: The rootpackage for the generated zserio code.
         pkg: The package name for generation.
         format: Should we format the source code with a code formatter? Default to True.
+        sql: Should we generate SQL marshalling and unmarshalling interfaces? Default to False.
     """
     script = "\n".join([
         "#!/bin/bash",
