@@ -1,0 +1,15 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.25.0
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  SNYK-GOLANG-GITHUBCOMMIEKGDNS-537825:
+    - '*':
+        reason: go-zserio never accesses the network
+        expires: 2030-04-14T18:30:23.706Z
+        created: 2022-04-14T18:30:23.706Z
+  SNYK-GOLANG-GOLANGORGXNETHTTP2-2313688:
+    - '*':
+        reason: go-zserio never accesses the network
+        expires: 2030-04-14T18:30:23.706Z
+        created: 2022-04-14T18:30:23.706Z
+patch: {}
