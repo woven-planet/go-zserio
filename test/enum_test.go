@@ -28,3 +28,26 @@ func TestSqlRoundtrip(t *testing.T) {
 		assert.Equal(t, want, got)
 	}
 }
+
+func TestStringer(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		input types.SomeEnum
+		want  string
+	}{
+		"known-value": {
+			input: types.SomeEnumATTR_A,
+			want:  "ATTR_A",
+		},
+		"unknown-value": {
+			input: types.SomeEnum(-1),
+			want:  "unknown(-1)",
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			got := tt.input.String()
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}

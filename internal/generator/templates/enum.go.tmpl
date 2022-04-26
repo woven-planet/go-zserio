@@ -69,7 +69,7 @@ func (v {{ $enum.Name }}) String() string {
     if name, found := _{{ $enum.Name }}Name[v]; found {
         return name
     }
-    return fmt.Sprintf("unknown<%v>", v)
+    return fmt.Sprintf("unknown(%v)", {{ goType $scope $enum.Type }}(v))
 }
 
 {{ if $options.EmitSQLSupport }}
