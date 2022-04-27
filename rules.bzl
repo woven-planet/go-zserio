@@ -57,7 +57,7 @@ def go_zserio_srcs(name, srcs, rootpackage, pkg = None, format = True, sql = Fal
         ],
     )
 
-def go_zserio_library(name, srcs, rootpackage, pkg, **kwargs):
+def go_zserio_library(name, srcs, rootpackage, pkg, sql = True, **kwargs):
     """go_zserio_library generates go source code and a go library.
 
     Args:
@@ -65,9 +65,10 @@ def go_zserio_library(name, srcs, rootpackage, pkg, **kwargs):
         srcs: Zserio source files.
         rootpackage: rootpackage for the zserio bindings.
         pkg: The package name to output.
+        sql: Should we generate SQL marshalling and unmarshalling interfaces? Default to False.
         **kwargs: Extra keyword arguments to be passed to the underlying go_library.
     """
-    go_zserio_srcs(name = name + "_gen", srcs = srcs, rootpackage = rootpackage, pkg = pkg)
+    go_zserio_srcs(name = name + "_gen", srcs = srcs, rootpackage = rootpackage, pkg = pkg, sql = sql)
     _go_library(
         name = name,
         srcs = [name + "_gen"],
