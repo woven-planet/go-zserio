@@ -38,7 +38,7 @@ struct ValueWrapper(int32 parameter)
 // SomeEnum defines some values
 enum int32 SomeEnum
 {
-    ATRR_A,
+    ATTR_A,
     ATTR_B,
     ATTR_C,
     HAS_A
@@ -56,7 +56,7 @@ enum int32 SomeOtherEnum
 
 choice BasicChoice(SomeEnum type) on type
 {
-    case ATRR_A: int32 fieldA;
+    case ATTR_A: int32 fieldA;
     case ATTR_B: int64 fieldB;
     case SomeEnum.ATTR_C: int8 fieldC;
 
