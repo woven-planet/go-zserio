@@ -22,6 +22,7 @@ filegroup(
         "enum_expressions.zs",
         "field_alignment.zs",
         "struct_bitfield.zs",
+        "struct_optional_field.zs",
         "struct_simple.zs",
         "struct_template.zs",
     ]
@@ -37,6 +38,7 @@ build_test(
         ":enum_expressions",
         ":field_alignment",
         ":struct_bitfield",
+        ":struct_optional_field",
         ":struct_simple",
         ":struct_template",
     ],
