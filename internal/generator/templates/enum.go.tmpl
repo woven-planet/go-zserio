@@ -10,7 +10,7 @@ const (
     {{- if $item.Comment}}
         {{ $item.Comment }}
     {{- end}}
-    {{ $enum.Name }}{{ $item.Name }} {{ $enum.Name }} = {{ if eq $item.ResultType "int" }}{{ .ResultIntValue }}
+    {{ $item.GoName }} {{ $enum.Name }} = {{ if eq $item.ResultType "int" }}{{ .ResultIntValue }}
     {{- else if eq $item.ResultType "string" }}{{ .ResultStringValue }}
     {{- else }}UNSUPPORTED
     {{- end }}
@@ -25,19 +25,19 @@ var _{{ $enum.Name }}Names = []string{
 
 var _{{ $enum.Name }}Values = []{{ $enum.Name }}{
 {{- range $ix, $item := $enum.Items }}
-    {{ $enum.Name }}{{ $item.Name }},
+    {{ $item.GoName }},
 {{- end }}
 }
 
 var _{{ $enum.Name }}Name = map[{{ $enum.Name }}]string{
 {{- range $ix, $item := $enum.Items }}
-    {{ $enum.Name }}{{ $item.Name }}: "{{ $item.Name }}",
+    {{ $item.GoName }}: "{{ $item.Name }}",
 {{- end }}
 }
 
 var _{{ $enum.Name }}NameToValue = map[string]{{ $enum.Name }}{
 {{- range $ix, $item := $enum.Items }}
-    "{{ $item.Name }}": {{ $enum.Name }}{{ $item.Name }},
+    "{{ $item.Name }}": {{ $item.GoName }},
 {{- end }}
 }
 

@@ -362,7 +362,7 @@ func (v *Visitor) VisitEnumDeclaration(ctx *parser.EnumDeclarationContext) any {
 		Type:    v.VisitTypeInstantiation(ctx.TypeInstantiation().(*parser.TypeInstantiationContext)).(*ast.TypeReference),
 	}
 	for _, enumItem := range ctx.AllEnumItem() {
-		typ.Items = append(typ.Items, v.VisitEnumItem(enumItem.(*parser.EnumItemContext)).(*ast.EnumItem))
+		typ.AddItem(v.VisitEnumItem(enumItem.(*parser.EnumItemContext)).(*ast.EnumItem))
 	}
 	return typ
 }
