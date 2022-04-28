@@ -16,9 +16,14 @@ go_test(
 
 go_test(
     name = "test_test",
-    srcs = ["enum_test.go"],
+    srcs = [
+        "enum_test.go",
+        "struct_test.go",
+    ],
     deps = [
+        "//:go-zserio",
         "//testdata/reference_modules:go_core_types",
         "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
     ],
 )
