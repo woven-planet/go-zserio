@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/iancoleman/strcase"
+
 	"github.com/woven-planet/go-zserio/internal/ast"
 	"github.com/woven-planet/go-zserio/internal/parser"
 )
@@ -49,7 +51,7 @@ func dotOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
 	// constant, which is Enum name, followed by the Enum value.
 	// The same is valid for bitmasks.
 	if expression.Operand1.ResultType == ast.ExpressionTypeEnum {
-		return leftText + rightText
+		return leftText + strcase.ToCamel(strings.ToLower(expression.Operand2.Text))
 	} else if expression.Operand1.ResultType == ast.ExpressionTypeBitmask {
 		return leftText + rightText
 	}

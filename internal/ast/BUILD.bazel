@@ -18,12 +18,18 @@ go_library(
     ],
     importpath = "github.com/woven-planet/go-zserio/internal/ast",
     visibility = ["//:__subpackages__"],
-    deps = ["//internal/parser"],
+    deps = [
+        "//internal/parser",
+        "@com_github_iancoleman_strcase//:strcase",
+    ],
 )
 
 go_test(
     name = "ast_test",
-    srcs = ["expression_test.go"],
+    srcs = [
+        "enum_test.go",
+        "expression_test.go",
+    ],
     deps = [
         ":ast",
         "//internal/parser",

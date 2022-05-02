@@ -36,7 +36,7 @@ func TestStringer(t *testing.T) {
 		want  string
 	}{
 		"known-value": {
-			input: types.SomeEnumATTR_A,
+			input: types.SomeEnumAttrA,
 			want:  "ATTR_A",
 		},
 		"unknown-value": {

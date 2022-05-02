@@ -62,11 +62,11 @@ func want() testobject.TestObject {
 			Parameter:   d.Parameter1,
 			Value:       72,
 			OtherValue:  121,
-			EnumValue:   types.ColorBLUE,
+			EnumValue:   types.ColorBlue,
 			Description: "test data",
 		},
 	}
-	d.Color1 = types.ColorRED
+	d.Color1 = types.ColorRed
 
 	d.Parameter2 = 12
 	for i := 0; i < 22; i++ {
@@ -99,7 +99,7 @@ func want() testobject.TestObject {
 
 	// The next test is for the correct lookup of choice selector types. The
 	// choice below is using an enum, whose values also exist in a different enum
-	d.ChoiceSelector = types.SomeEnumHAS_A
+	d.ChoiceSelector = types.SomeEnumHasA
 	d.BasicChoice = types.BasicChoice{
 		Type: d.ChoiceSelector,
 		HasA: 5,
