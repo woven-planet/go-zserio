@@ -33,3 +33,75 @@ go_test(
         "@io_bazel_rules_go//go/tools/bazel:go_default_library",
     ],
 )
+
+zs_payload(
+    name = "packed_uint32_array_data",
+    srcs = ["packed_uint32_array.py"],
+    out = "packed_uint32_array.bin",
+    module = "packed_uint32_array",
+    deps = ["//testdata/reference_modules:py_all"],
+)
+
+go_test(
+    name = "packed_uint32_array_test",
+    srcs = ["packed_uint32_array_test.go"],
+    data = [":packed_uint32_array_data"],
+    env = {
+        "TESTDATA_BIN": "$(rootpath :packed_uint32_array_data)",
+    },
+    deps = [
+        "//:go-zserio",
+        "//testdata/reference_modules:go_core_array",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@io_bazel_rules_go//go/tools/bazel:go_default_library",
+    ],
+)
+
+zs_payload(
+    name = "packed_compound_array_data",
+    srcs = ["packed_compound_array.py"],
+    out = "packed_compound_array.bin",
+    module = "packed_compound_array",
+    deps = ["//testdata/reference_modules:py_all"],
+)
+
+go_test(
+    name = "packed_compound_array_test",
+    srcs = ["packed_compound_array_test.go"],
+    data = [":packed_compound_array_data"],
+    env = {
+        "TESTDATA_BIN": "$(rootpath :packed_compound_array_data)",
+    },
+    deps = [
+        "//:go-zserio",
+        "//testdata/reference_modules:go_core_array",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@io_bazel_rules_go//go/tools/bazel:go_default_library",
+    ],
+)
+
+zs_payload(
+    name = "packed_nested_array_data",
+    srcs = ["packed_nested_array.py"],
+    out = "packed_nested_array.bin",
+    module = "packed_nested_array",
+    deps = ["//testdata/reference_modules:py_all"],
+)
+
+go_test(
+    name = "packed_nested_array_test",
+    srcs = ["packed_nested_array_test.go"],
+    data = [":packed_nested_array_data"],
+    env = {
+        "TESTDATA_BIN": "$(rootpath :packed_nested_array_data)",
+    },
+    deps = [
+        "//:go-zserio",
+        "//testdata/reference_modules:go_core_array",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@io_bazel_rules_go//go/tools/bazel:go_default_library",
+    ],
+)
