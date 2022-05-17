@@ -1,1 +1,1 @@
-zserio==2.4.2 --hash=sha256:681b3b855ad0dfbf966e29402551cd6ebeec476c2b29bbcb8654c297e48adc73
+zserio==2.6.0 --hash=sha256:180a359f71b12c95b4c1d576dbb1469e747b6d8927d9a8fdc04adbeed0862a60

@@ -58,8 +58,8 @@ http_archive(
 
 http_archive(
     name = "zserio",
-    sha256 = "62b61ab7d47ae62f54b74122ddf932a10fb7b2d9049c591b6516889032a2f9cb",
-    url = "https://github.com/ndsev/zserio/releases/download/v2.4.2/zserio-2.4.2-bin.zip",
+    sha256 = "dd23369dca96514fcab91ae9cefe15aaf27a54fc9fe8cb613c5d6b1c742d46fc",
+    url = "https://github.com/ndsev/zserio/releases/download/v2.6.0/zserio-2.6.0-bin.zip",
 )
 
 http_archive(
@@ -122,7 +122,7 @@ load("@rules_jvm_external//:defs.bzl", "maven_install")
 
 maven_install(
     artifacts = [
-        "io.github.ndsev:zserio:2.4.2",
+        "io.github.ndsev:zserio:2.6.0",
     ],
     repositories = [
         "https://repo.maven.apache.org/maven2/",
