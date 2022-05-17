@@ -42,7 +42,7 @@
     {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $field_name "field" $field "native" $native }}
     {{- if $field.Array.Length }}
         if len({{ $field_name }}) != int({{ goExpression $scope $field.Array.Length }}) {
-            return errors.New("array size does not match!")
+            return fmt.Errorf("{{ $field.Name }} array must have a size of %d", int({{ goExpression $scope $field.Array.Length }}))
         }
     {{- end }}
 {{- end }}
