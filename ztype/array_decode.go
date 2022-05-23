@@ -4,19 +4,6 @@ import (
 	zserio "github.com/woven-planet/go-zserio"
 )
 
-// readDescriptor reads the descriptor of a packed array, and all of its children.
-func readDescriptor(packingNode *zserio.PackingContextNode, reader zserio.Reader) error {
-	if packingNode.HasContext() {
-		return packingNode.ReadDescriptor(reader)
-	}
-	for _, childNode := range packingNode.GetChildren() {
-		if err := readDescriptor(childNode, reader); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // UnmarshalZserio reads an array from a bit reader, in either packed or unpacked configuration.
 func (array *Array[T, Y]) UnmarshalZserio(reader zserio.Reader) error {
 	arraySize := array.FixedSize
@@ -35,10 +22,6 @@ func (array *Array[T, Y]) UnmarshalZserio(reader zserio.Reader) error {
 			var err error
 			// A descriptor is only written for packed arrays.
 			array.PackedContext, err = array.ArrayTraits.PackedTraits().CreateContext()
-			if err != nil {
-				return err
-			}
-			err = readDescriptor(array.PackedContext, reader)
 			if err != nil {
 				return err
 			}

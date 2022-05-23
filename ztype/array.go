@@ -4,23 +4,6 @@ import (
 	zserio "github.com/woven-planet/go-zserio"
 )
 
-// BitSizeOfDescriptor returns the bit size of a descriptor.
-func bitSizeOfDescriptor(packingNode *zserio.PackingContextNode, bitPosition int) (int, error) {
-	endBitPosition := bitPosition
-	if packingNode.HasContext() {
-		endBitPosition += packingNode.BitSizeOfDescriptor()
-	} else {
-		for _, childNode := range packingNode.GetChildren() {
-			delta, err := bitSizeOfDescriptor(childNode, endBitPosition)
-			if err != nil {
-				return 0, err
-			}
-			endBitPosition += delta
-		}
-	}
-	return endBitPosition - bitPosition, nil
-}
-
 // OffsetMethod is a function used to set/check bit offsets in the buffer.
 type OffsetMethod func(int, int64)
 
@@ -98,11 +81,6 @@ func (array *Array[T, Y]) ZserioBitSizePacked(bitPosition int) (int, error) {
 		endBitPosition += delta
 	}
 	if size > 0 {
-		delta, err := bitSizeOfDescriptor(array.PackedContext, endBitPosition)
-		if err != nil {
-			return 0, err
-		}
-		endBitPosition += delta
 		for _, element := range array.RawArray {
 			if array.setOffsetMethod != nil {
 				endBitPosition = alignTo(8, endBitPosition)

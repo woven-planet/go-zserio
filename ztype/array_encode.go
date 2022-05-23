@@ -4,19 +4,6 @@ import (
 	zserio "github.com/woven-planet/go-zserio"
 )
 
-// writeDescriptor writes the descriptor of a packing context.
-func writeDescriptor(packingNode *zserio.PackingContextNode, writer zserio.Writer) error {
-	if packingNode.HasContext() {
-		return packingNode.WriteDescriptor(writer)
-	}
-	for _, childNode := range packingNode.GetChildren() {
-		if err := writeDescriptor(childNode, writer); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // MarshalZserio writes an array to a bit writer.
 func (array *Array[T, Y]) MarshalZserio(writer zserio.Writer) error {
 	size := array.Size()
@@ -40,7 +27,6 @@ func (array *Array[T, Y]) MarshalZserio(writer zserio.Writer) error {
 			for _, element := range array.RawArray {
 				packedTraits.InitContext(array.PackedContext, element)
 			}
-			writeDescriptor(array.PackedContext, writer)
 		}
 		for index, element := range array.RawArray {
 			if array.checkOffsetMethod != nil {

@@ -45,7 +45,7 @@ func absDiff(lhs, rhs uint64) uint64 {
 // Init initializes a delta context array, and calculates the needed space per element in the final array.
 func (context *DeltaContext[T]) Init(arrayTraits IArrayTraits[T], element T) {
 	context.numElements++
-	context.unpackedBitSize += arrayTraitsBitsizeOf(arrayTraits, 0, element)
+	context.unpackedBitSize += bitsizeOfUnpacked(arrayTraits, element)
 
 	if context.previousElement == nil {
 		elementAsUint64 := arrayTraits.AsUint64(element)
@@ -69,20 +69,15 @@ func (context *DeltaContext[T]) Init(arrayTraits IArrayTraits[T], element T) {
 	}
 }
 
-// BitSizeOfDescriptor returns the bit size of a delta context array descriptor.
-func (context *DeltaContext[T]) BitSizeOfDescriptor() int {
-	context.finishInit()
-	if context.isPacked {
-		return 1 + maxBitNumberBits
-	}
-	return 1
-}
-
 // BitSizeOf returns the size of the delta context array in bits.
 func (context *DeltaContext[T]) BitSizeOf(arrayTraits IArrayTraits[T], bitPosition int, element T) (int, error) {
-	if !context.processingStarted || !context.isPacked {
+	if !context.processingStarted {
 		context.processingStarted = true
-		return arrayTraitsBitsizeOf(arrayTraits, bitPosition, element), nil
+		context.finishInit()
+		return context.BitSizeOfDescriptor() + bitsizeOfUnpacked(arrayTraits, element), nil
+	}
+	if !context.isPacked {
+		return bitsizeOfUnpacked(arrayTraits, element), nil
 	}
 	if context.maxBitNumber > 0 {
 		return context.maxBitNumber + 1, nil
@@ -90,29 +85,15 @@ func (context *DeltaContext[T]) BitSizeOf(arrayTraits IArrayTraits[T], bitPositi
 	return 0, nil
 }
 
-// ReadDescriptor reads the descriptor of a delta context array.
-func (context *DeltaContext[T]) ReadDescriptor(reader zserio.Reader) error {
-	var err error
-	context.isPacked, err = reader.ReadBool()
-	if err != nil {
-		return err
-	}
-	if context.isPacked {
-		numOfBits := uint64(0)
-		numOfBits, err = reader.ReadBits(maxBitNumberBits)
-		context.maxBitNumber = int(numOfBits)
-	}
-	return nil
-}
-
 // Read reads the next element of an array encoded using delta contexts.
 func (context *DeltaContext[T]) Read(arrayTraits IArrayTraits[T], reader zserio.Reader) (T, error) {
-	if !context.processingStarted || !context.isPacked {
+	if !context.processingStarted {
 		context.processingStarted = true
-		element, err := arrayTraits.Read(reader, 0)
-		elementAsUint64 := arrayTraits.AsUint64(element)
-		context.previousElement = &elementAsUint64
-		return element, err
+		context.ReadDescriptor(reader)
+		return context.readUnpacked(arrayTraits, reader)
+	}
+	if !context.isPacked {
+		return context.readUnpacked(arrayTraits, reader)
 	}
 	if context.maxBitNumber > 0 {
 		delta, err := ReadSignedBits(reader, uint8(context.maxBitNumber+1))
@@ -125,34 +106,26 @@ func (context *DeltaContext[T]) Read(arrayTraits IArrayTraits[T], reader zserio.
 	return value, nil
 }
 
-func (context *DeltaContext[T]) WriteDescriptor(writer zserio.Writer) error {
-	context.finishInit()
-	err := writer.WriteBool(context.isPacked)
-	if err != nil {
-		return err
-	}
-	if context.isPacked {
-		writer.WriteBits(uint64(context.maxBitNumber), maxBitNumberBits)
-	}
-	return nil
-}
-
 // Write writes an element of an delta context array.
 func (context *DeltaContext[T]) Write(arrayTraits IArrayTraits[T], writer zserio.Writer, element T) error {
-	if !context.processingStarted || !context.isPacked {
+	if !context.processingStarted {
 		context.processingStarted = true
-		context.previousElement = new(uint64)
-		*context.previousElement = arrayTraits.AsUint64(element)
-		arrayTraits.Write(writer, element)
-	} else {
-		if context.maxBitNumber > 0 {
-			delta := arrayTraits.AsUint64(element) - *context.previousElement
-			err := writer.WriteBits(delta, uint8(context.maxBitNumber+1))
-			if err != nil {
-				return err
-			}
-			*context.previousElement = arrayTraits.AsUint64(element)
+		context.finishInit()
+		if err := context.WriteDescriptor(writer); err != nil {
+			return err
 		}
+		return context.writeUnpacked(arrayTraits, writer, element)
+	}
+	if !context.isPacked {
+		return context.writeUnpacked(arrayTraits, writer, element)
+	}
+	if context.maxBitNumber > 0 {
+		delta := arrayTraits.AsUint64(element) - *context.previousElement
+		err := writer.WriteBits(delta, uint8(context.maxBitNumber+1))
+		if err != nil {
+			return err
+		}
+		*context.previousElement = arrayTraits.AsUint64(element)
 	}
 	return nil
 }
@@ -177,4 +150,62 @@ func (context *DeltaContext[T]) finishInit() {
 			context.isPacked = false
 		}
 	}
+}
+
+// BitSizeOfDescriptor returns the bit size of a delta context array descriptor.
+func (context *DeltaContext[T]) BitSizeOfDescriptor() int {
+	context.finishInit()
+	if context.isPacked {
+		return 1 + maxBitNumberBits
+	}
+	return 1
+}
+
+// ReadDescriptor reads the descriptor of a delta packed context.
+func (context *DeltaContext[T]) ReadDescriptor(reader zserio.Reader) error {
+	var err error
+	if context.isPacked, err = reader.ReadBool(); err != nil {
+		return err
+	}
+	if context.isPacked {
+		// read how many bits are used for the delta encoding of each element
+		var maxBitNumber uint64
+		maxBitNumber, err = reader.ReadBits(maxBitNumberBits)
+		context.maxBitNumber = int(maxBitNumber)
+	}
+	return err
+}
+
+// readUnpacked reads an unpacked array element from a delta context.
+func (context *DeltaContext[T]) readUnpacked(arrayTraits IArrayTraits[T], reader zserio.Reader) (T, error) {
+	element, err := arrayTraits.Read(reader, 0)
+	if err != nil {
+		return arrayTraits.FromUint64(0), err
+	}
+	elementAsUint64 := arrayTraits.AsUint64(element)
+	context.previousElement = &elementAsUint64
+	return element, nil
+}
+
+// WriteDescriptor writes the descriptor of a delta packed context.
+func (context *DeltaContext[T]) WriteDescriptor(writer zserio.Writer) error {
+	if err := writer.WriteBool(context.isPacked); err != nil {
+		return err
+	}
+	if context.isPacked {
+		return writer.WriteBits(uint64(context.maxBitNumber), maxBitNumberBits)
+	}
+	return nil
+}
+
+// writeUnpacked writes an unpacked array element to a writer.
+func (context *DeltaContext[T]) writeUnpacked(arrayTraits IArrayTraits[T], writer zserio.Writer, element T) error {
+	elementAsUint64 := arrayTraits.AsUint64(element)
+	context.previousElement = &elementAsUint64
+	return arrayTraits.Write(writer, element)
+}
+
+// bitsizeOfUnpacked returns the unpacked bit size of an array element.
+func bitsizeOfUnpacked[T any](arrayTraits IArrayTraits[T], element T) int {
+	return arrayTraits.BitSizeOf(element, 0)
 }
