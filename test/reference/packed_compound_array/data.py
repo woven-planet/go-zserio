@@ -1,6 +1,4 @@
-from testdata.reference_modules.core.array.api import PackableStructure
-from testdata.reference_modules.core.array.api import PackedArrayOfCompounds
-
+from testdata.packed_compound_array.schema.api import (PackableStructure, PackedArrayOfCompounds)
 
 def new():
     array = PackedArrayOfCompounds(

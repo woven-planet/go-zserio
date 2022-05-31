@@ -11,16 +11,6 @@ filegroup(
 rootpkg = "gen/github.com/woven-planet/go-zserio/testdata"
 
 go_zserio_library(
-    name = "go_core_array",
-    srcs = [
-        ":schema",
-    ],
-    pkg = "reference_modules.core.array",
-    rootpackage = rootpkg,
-    visibility = ["//visibility:public"],
-)
-
-go_zserio_library(
     name = "go_core_types",
     srcs = [
         ":schema",
@@ -72,24 +62,6 @@ py_zserio_library(
     ],
     prefix = "testdata",
     proto = ":testobject1/testobject.zs",
-    proto_deps = [":schema"],
-    visibility = ["//visibility:public"],
-)
-
-py_zserio_library(
-    name = "py_all",
-    outs = [
-        "reference_modules/core/array/__init__.py",
-        "reference_modules/core/array/api.py",
-        "reference_modules/core/array/inner_structure.py",
-        "reference_modules/core/array/packable_nested_structure.py",
-        "reference_modules/core/array/packable_structure.py",
-        "reference_modules/core/array/packed_array_of_compounds.py",
-        "reference_modules/core/array/packed_nested_array.py",
-        "reference_modules/core/array/packed_uint32_array.py",
-    ],
-    prefix = "testdata",
-    proto = ":all.zs",
     proto_deps = [":schema"],
     visibility = ["//visibility:public"],
 )

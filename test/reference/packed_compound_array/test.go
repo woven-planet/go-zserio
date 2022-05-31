@@ -1,7 +1,7 @@
 package reference
 
 import (
-	"gen/github.com/woven-planet/go-zserio/testdata/reference_modules/core/array"
+	"gen/github.com/woven-planet/go-zserio/testdata/packed_compound_array/schema"
 	"os"
 	"testing"
 
@@ -26,7 +26,7 @@ func TestRoundTrip(t *testing.T) {
 	require.NoError(t, err)
 
 	// When
-	var object array.PackedUint32Array
+	var object schema.PackedArrayOfCompounds
 	require.NoError(t, zserio.Unmarshal(want, &object), "unmarshal")
 	got, err := zserio.Marshal(&object)
 	require.NoError(t, err, "marshal")
@@ -41,10 +41,18 @@ func TestEqual(t *testing.T) {
 	require.NoError(t, err)
 
 	// When
-	var got array.PackedUint32Array
+	var got schema.PackedArrayOfCompounds
 	require.NoError(t, zserio.Unmarshal(bytes, &got))
 
 	// Then
-	want := array.PackedUint32Array{List: []uint32{15, 14, 13, 16, 0}}
+	want := schema.PackedArrayOfCompounds{
+		List: []schema.PackableStructure{
+			{Value: 15, Text: "fünfzehn"},
+			{Value: 14, Text: "fourteen"},
+			{Value: 13, Text: "dertien"},
+			{Value: 16, Text: "seksten"},
+			{Value: 0, Text: "nul"},
+		},
+	}
 	assert.Equal(t, want, got)
 }

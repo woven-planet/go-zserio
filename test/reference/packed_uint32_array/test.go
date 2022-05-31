@@ -1,7 +1,7 @@
 package reference
 
 import (
-	"gen/github.com/woven-planet/go-zserio/testdata/reference_modules/core/array"
+	"gen/github.com/woven-planet/go-zserio/testdata/packed_uint32_array/schema"
 	"os"
 	"testing"
 
@@ -26,7 +26,7 @@ func TestRoundTrip(t *testing.T) {
 	require.NoError(t, err)
 
 	// When
-	var object array.PackedNestedArray
+	var object schema.PackedUint32Array
 	require.NoError(t, zserio.Unmarshal(want, &object), "unmarshal")
 	got, err := zserio.Marshal(&object)
 	require.NoError(t, err, "marshal")
@@ -41,18 +41,10 @@ func TestEqual(t *testing.T) {
 	require.NoError(t, err)
 
 	// When
-	var got array.PackedNestedArray
+	var got schema.PackedUint32Array
 	require.NoError(t, zserio.Unmarshal(bytes, &got))
 
 	// Then
-	want := array.PackedNestedArray{
-		List: []array.PackableNestedStructure{
-			{Value32: 15, Text: "fünfzehn", InnerStructure: array.InnerStructure{Value64: 15 * 15, Value16: 15 * 2}},
-			{Value32: 14, Text: "fourteen", InnerStructure: array.InnerStructure{Value64: 14 * 14, Value16: 14 * 2}},
-			{Value32: 13, Text: "dertien", InnerStructure: array.InnerStructure{Value64: 13 * 13, Value16: 13 * 2}},
-			{Value32: 16, Text: "seksten", InnerStructure: array.InnerStructure{Value64: 16 * 16, Value16: 16 * 2}},
-			{Value32: 0, Text: "nul", InnerStructure: array.InnerStructure{Value64: 0, Value16: 0 * 2}},
-		},
-	}
+	want := schema.PackedUint32Array{List: []uint32{15, 14, 13, 16, 0}}
 	assert.Equal(t, want, got)
 }

@@ -1,0 +1,46 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_test")
+load("//:rules.bzl", "go_zserio_library")
+load("//test/rules:rules.bzl", "py_zserio_library", "zs_payload")
+
+go_zserio_library(
+    name = "go_lib",
+    srcs = [":schema.zs"],
+    pkg = "packed_uint32_array.schema",
+    rootpackage = "gen/github.com/woven-planet/go-zserio/testdata",
+)
+
+py_zserio_library(
+    name = "py_lib",
+    outs = [
+        "packed_uint32_array/schema/__init__.py",
+        "packed_uint32_array/schema/api.py",
+        "packed_uint32_array/schema/packed_uint32_array.py",
+    ],
+    prefix = "testdata",
+    proto = ":schema.zs",
+)
+
+zs_payload(
+    name = "testdata",
+    srcs = ["data.py"],
+    out = "testdata.bin",
+    deps = [":py_lib"],
+)
+
+go_test(
+    name = "packed_uint32_array",
+    srcs = ["test.go"],
+    data = [
+        ":testdata",
+    ],
+    env = {
+        "TESTDATA_BIN": "$(rootpath :testdata)",
+    },
+    deps = [
+        ":go_lib",
+        "//:go-zserio",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@io_bazel_rules_go//go/tools/bazel:go_default_library",
+    ],
+)

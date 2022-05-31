@@ -1,6 +1,4 @@
-from testdata.reference_modules.core.array.api import PackableNestedStructure
-from testdata.reference_modules.core.array.api import PackedNestedArray
-from testdata.reference_modules.core.array.api import InnerStructure
+from testdata.packed_nested_array.schema.api import (PackableNestedStructure, PackedNestedArray, InnerStructure)
 
 
 def new():
