@@ -103,7 +103,7 @@ def py_zserio_library(name, proto, outs, proto_deps = [], prefix = None, **kwarg
         **kwargs
     )
 
-def zs_payload(name, srcs, out, **kwargs):
+def zs_payload(name, srcs, out, module = "data", **kwargs):
     """gen_data makes it easier to generate test data binary for running tests.
 
     It assums that there will be a file named 'data.py' and it will have a
@@ -113,10 +113,12 @@ def zs_payload(name, srcs, out, **kwargs):
         name: The name the genrule target, that is doing the generation.
         srcs: The source files used to create an object to be serialized.
         out: The output filename.
+        module: name of the Python module containing the "new" function
         **kwargs: Any extra arguments to be passed to the py_binary rule.
     """
-    if "data.py" not in srcs:
-        fail("'srcs' must include a file named 'data.py'")
+    module_src = module + ".py"
+    if module_src not in srcs:
+        fail("'srcs' must include a file named '%s'" % module_src)
 
     gen = name + "_gen"
     py_binary(
@@ -130,7 +132,7 @@ def zs_payload(name, srcs, out, **kwargs):
     native.genrule(
         name = name,
         outs = [out],
-        cmd = "$(execpath {}) >$@".format(gen),
+        cmd = "$(execpath {}) {} >$@".format(gen, module),
         message = "Generating zserio payload binary using official Python bindings",
         tools = [gen],
     )

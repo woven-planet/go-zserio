@@ -11,9 +11,9 @@ from testdata.reference_modules.core.types.color import Color
 from testdata.reference_modules.core.types.city_attributes import CityAttributes
 from testdata.reference_modules.core.types.some_enum import SomeEnum
 
+
 def new():
-    """Create a dummy object with some random values.
-    """
+    """Create a dummy object with some random values."""
     d = TestObject()
     d.parameter1 = 7
 
@@ -48,7 +48,7 @@ def new():
     d.option_choice2 = InstantiatedTemplateChoice(d.parameter3)
     d.option_choice2.default_field = 707
 
-    # The next test is for the correct lookup of choice selector types. The 
+    # The next test is for the correct lookup of choice selector types. The
     # choice below is using an enum, whose values also exist in a different enum
     d.choice_selector = SomeEnum.HAS_A
     d.basic_choice = BasicChoice(d.choice_selector)
