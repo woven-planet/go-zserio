@@ -651,6 +651,56 @@ func (trait BitFieldArrayTraits[T]) FromUint64(value uint64) T {
 	return T(value)
 }
 
+type BooleanArrayTraits struct{}
+
+func (trait BooleanArrayTraits) PackedTraits() IPackedArrayTraits[bool] {
+	return &PackedArrayTraits[bool, BooleanArrayTraits]{
+		ArrayTraits: trait,
+	}
+}
+
+func (trait BooleanArrayTraits) BitSizeOfIsConstant() bool {
+	return true
+}
+
+func (trait BooleanArrayTraits) NeedsBitsizeOfPosition() bool {
+	return false
+}
+
+func (trait BooleanArrayTraits) NeedsReadIndex() bool {
+	return false
+}
+
+func (trait BooleanArrayTraits) BitSizeOf(element bool, endBitPosition int) int {
+	// The bit size is always constant (1). The bit size of a boolean does not
+	// depend on the position in the array, endBitPosition is therefore not used.
+	return 1
+}
+
+func (trait BooleanArrayTraits) InitializeOffsets(bitPosition int, value bool) int {
+	return bitPosition + trait.BitSizeOf(value, 0) // endBitPosition is ignored
+}
+
+func (trait BooleanArrayTraits) Read(reader zserio.Reader, endBitPosition int) (bool, error) {
+	return ReadBool(reader)
+}
+
+func (trait BooleanArrayTraits) Write(writer zserio.Writer, value bool) error {
+	return WriteBool(writer, value)
+}
+
+func (trait BooleanArrayTraits) AsUint64(value bool) uint64 {
+	if value {
+		return 1
+	}
+
+	return 0
+}
+
+func (trait BooleanArrayTraits) FromUint64(value uint64) bool {
+	return value != 0
+}
+
 type StringArrayTraits struct{}
 
 func (trait StringArrayTraits) PackedTraits() IPackedArrayTraits[string] {

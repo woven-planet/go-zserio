@@ -63,7 +63,7 @@ var zserioTypeToArrayTraits = map[string]string{
 	"varuint32": "ztype.VarUInt32ArrayTraits",
 	"varuint64": "ztype.VarUInt64ArrayTraits",
 	// bool types
-	"bool": "ztype.BitFieldArrayTraits",
+	"bool": "ztype.BooleanArrayTraits",
 	// string types
 	"string": "ztype.StringArrayTraits",
 	// float types

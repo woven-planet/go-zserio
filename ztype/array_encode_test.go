@@ -248,6 +248,33 @@ func TestFloat64ArrayEncoding(t *testing.T) {
 		})
 	}
 }
+
+func TestBooleanArrayEncoding(t *testing.T) {
+	tests := map[string]struct {
+		arrayData []bool
+		arraySize int
+		isAuto    bool
+		want      []byte
+	}{
+		"auto-boolean-array": {
+			arrayData: []bool{true, false, true, true, false},
+			isAuto:    true,
+			want:      []byte{0x05, 0xB0},
+		},
+	}
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			arrayInstance := ztype.Array[bool, *ztype.BooleanArrayTraits]{
+				ArrayTraits: &ztype.BooleanArrayTraits{},
+				RawArray:    test.arrayData,
+				IsAuto:      test.isAuto,
+			}
+
+			assertEqualAfterMarshaling(t, test.want, &arrayInstance)
+		})
+	}
+}
+
 func TestStringArrayEncoding(t *testing.T) {
 	tests := map[string]struct {
 		arrayData []string
