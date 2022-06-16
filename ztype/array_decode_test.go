@@ -258,6 +258,36 @@ func TestFloat64ArrayDecoding(t *testing.T) {
 		})
 	}
 }
+
+func TestBooleanArrayDecoding(t *testing.T) {
+	tests := map[string]struct {
+		input     []byte
+		arraySize int
+		isAuto    bool
+		want      []bool
+	}{
+		"auto-boolean-array": {
+			input:  []byte{0x05, 0xB0},
+			isAuto: true,
+			want:   []bool{true, false, true, true, false},
+		},
+	}
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := zstream.NewReader(bytes.NewBuffer(test.input))
+			array, err := ztype.ArrayFromReader[bool](
+				r, &ztype.BooleanArrayTraits{},
+				test.arraySize, false, test.isAuto)
+			if err != nil {
+				t.Fatalf("error reading array: %v", err)
+			}
+			if diff := cmp.Diff(test.want, array.RawArray); diff != "" {
+				t.Errorf("incorrect encoding: %s", diff)
+			}
+		})
+	}
+}
+
 func TestStringArrayDecoding(t *testing.T) {
 	tests := map[string]struct {
 		input     []byte
