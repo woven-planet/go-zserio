@@ -30,6 +30,8 @@ func ReadExtern(r zserio.Reader) (*ExternType, error) {
 		if err != nil {
 			return nil, err
 		}
+		numOfBitShift := 8 - remainingBits
+		lastByte = lastByte << numOfBitShift
 		e.Buffer = append(e.Buffer, byte(lastByte))
 	}
 	return e, nil
