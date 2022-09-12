@@ -259,6 +259,7 @@ func (expr *Expression) evaluateFunctionCallExpression(scope *Package) error {
 	if err != nil {
 		return err
 	}
+	previousScope := functionEvaluationScope.LocalSymbols.CurrentCompoundScope
 	functionEvaluationScope.LocalSymbols.CurrentCompoundScope = &typeRef.Type.Name
 	err = function.Result.Evaluate(functionEvaluationScope)
 	if err != nil {
@@ -268,6 +269,9 @@ func (expr *Expression) evaluateFunctionCallExpression(scope *Package) error {
 	// copy the result symbol, in case the type of the symbol needs to be
 	// evaluated.
 	expr.ResultSymbol = expr.Operand1.ResultSymbol
+
+	// Restore the previous scope
+	functionEvaluationScope.LocalSymbols.CurrentCompoundScope = previousScope
 	return nil
 }
 
