@@ -131,6 +131,8 @@ func evaluateSymbolType(symbol any, scope *Package) (ExpressionType, error) {
 		return ExpressionTypeCompound, nil
 	case *Struct:
 		return ExpressionTypeCompound, nil
+	case *Choice:
+		return ExpressionTypeCompound, nil
 	case *Field:
 		return evaluateExpressionType(n.Type, scope)
 	case *Parameter:
@@ -224,6 +226,16 @@ func (expr *Expression) evaluateCompoundDotExpression(scope *Package) error {
 	}
 
 	if _, ok := compoundSymbol.Symbol.(*Struct); ok {
+		symbol, err := scope.GetCompoundType(compoundSymbol.Name, expr.Operand2.Text)
+		if err != nil {
+			return err
+		}
+		expr.ResultSymbol = symbol
+		expr.ResultType, err = evaluateSymbolType(symbol.Symbol, newScope)
+		return err
+	}
+
+	if _, ok := compoundSymbol.Symbol.(*Choice); ok {
 		symbol, err := scope.GetCompoundType(compoundSymbol.Name, expr.Operand2.Text)
 		if err != nil {
 			return err
