@@ -30,9 +30,24 @@ func GoPackageName(pkg string) string {
 // unused items will later be erased
 func GoGetAllImports(pkg *ast.Package) []string {
 	imports := []string{}
-	for _, importPkg := range pkg.ImportedPackages {
-		imports = append(imports, importPkg.Name)
-		imports = append(imports, GoGetAllImports(importPkg)...)
+	packagesToProcess := []*ast.Package{}
+	alreadyProcessed := map[string]bool{}
+
+	for {
+		for _, importPkg := range pkg.ImportedPackages {
+			// check if this package is already processed
+			if _, exists := alreadyProcessed[importPkg.Name]; exists {
+				continue
+			}
+			alreadyProcessed[importPkg.Name] = true
+			imports = append(imports, importPkg.Name)
+			packagesToProcess = append(packagesToProcess, importPkg)
+		}
+		if len(packagesToProcess) == 0 {
+			break
+		}
+		// pop the last entry
+		pkg, packagesToProcess = packagesToProcess[len(packagesToProcess)-1], packagesToProcess[:len(packagesToProcess)-1]
 	}
 	return imports
 }
