@@ -173,6 +173,20 @@ func (expr *Expression) evaluateIdentifier(scope *Package) error {
 	return err
 }
 
+// evaluateValueOfOperator evaluates a value of operator.
+func (expr *Expression) evaluateValueOfOperator() error {
+	if expr.Operand1 == nil {
+		return errors.New("valueof operator needs one operand")
+	}
+	if expr.Operand1.ResultType != ExpressionTypeEnum &&
+		expr.Operand1.ResultType != ExpressionTypeBitmask {
+		return errors.New("valueof operator needs an expression or bitmask type")
+	}
+	expr.ResultType = ExpressionTypeInteger
+	expr.ResultIntValue = expr.Operand1.ResultIntValue
+	return nil
+}
+
 // evaluateNumBitsOperator evaluates a bit counter operator.
 func (expr *Expression) evaluateNumBitsOperator() error {
 	if expr.Operand1 == nil {
@@ -663,11 +677,8 @@ func (expr *Expression) Evaluate(scope *Package) error {
 		err = expr.evaluateDotExpression(scope)
 	case parser.ZserioParserLENGTHOF:
 		err = expr.evaluateLengthOfOperator(scope)
-		/*
-
-			case parser.ZserioParserVALUEOF:
-
-		*/
+	case parser.ZserioParserVALUEOF:
+		err = expr.evaluateValueOfOperator()
 	case parser.ZserioParserNUMBITS:
 		err = expr.evaluateNumBitsOperator()
 	case parser.ZserioParserPLUS:
