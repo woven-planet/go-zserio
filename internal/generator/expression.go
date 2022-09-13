@@ -245,6 +245,9 @@ func ExpressionToGoString(scope ast.Scope, expression *ast.Expression) string {
 		return twoOperatorEqualTypesToGoString(scope, expression)
 	case parser.ZserioParserNE:
 		return twoOperatorEqualTypesToGoString(scope, expression)
+	case parser.ZserioParserINDEX:
+		// hard-code the name of the index variable used in the template
+		return "index"
 	case parser.ZserioParserID:
 		return IdentifierToGoString(scope, expression)
 	case parser.ZserioParserQUESTIONMARK:

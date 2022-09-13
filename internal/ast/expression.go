@@ -146,6 +146,13 @@ func evaluateSymbolType(symbol any, scope *Package) (ExpressionType, error) {
 	}
 }
 
+// evaluateIndexExpression evaluates an index expression, such as [@index].
+func (expr *Expression) evaluateIndexExpression() error {
+	expr.ResultType = ExpressionTypeInteger
+	expr.FullyResolved = false
+	return nil
+}
+
 // evaluateIdentifier evaluates an identifier expression.
 func (expr *Expression) evaluateIdentifier(scope *Package) error {
 	symbol, err := scope.GetSymbol(expr.Text)
@@ -733,6 +740,8 @@ func (expr *Expression) Evaluate(scope *Package) error {
 		if "true" == strings.TrimSpace(strings.ToLower(expr.Text)) {
 			expr.ResultBoolValue = true
 		}
+	case parser.ZserioParserINDEX:
+		err = expr.evaluateIndexExpression()
 	case parser.ZserioParserID:
 		err = expr.evaluateIdentifier(scope)
 	case parser.UnevaluatableExpressionType:
