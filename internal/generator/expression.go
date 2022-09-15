@@ -183,6 +183,10 @@ func lenOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
 	return fmt.Sprintf("len(%s)", ExpressionToGoString(scope, expression.Operand1))
 }
 
+func valueOfOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
+	return fmt.Sprintf("%s", ExpressionToGoString(scope, expression.Operand1))
+}
+
 func ExpressionToGoString(scope ast.Scope, expression *ast.Expression) string {
 	if expression.FullyResolved {
 		switch expression.ResultType {
@@ -205,6 +209,8 @@ func ExpressionToGoString(scope ast.Scope, expression *ast.Expression) string {
 		return dotOperatorToGoString(scope, expression)
 	case parser.ZserioParserLENGTHOF:
 		return lenOperatorToGoString(scope, expression)
+	case parser.ZserioParserVALUEOF:
+		return valueOfOperatorToGoString(scope, expression)
 	case parser.ZserioParserNUMBITS:
 		return numBitsOperatorToGoString(scope, expression)
 	case parser.ZserioParserPLUS:
