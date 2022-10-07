@@ -16,6 +16,8 @@ var (
 	topLevelPackage string
 	noFormat        bool
 	emitSQLSupport  bool
+	limitPathLength bool
+	maxPathLength   int
 	outputPackage   string
 )
 
@@ -35,6 +37,9 @@ var generateCmd = &cobra.Command{
 		}
 		if emitSQLSupport {
 			options = append(options, generator.EmitSQLSupport)
+		}
+		if limitPathLength {
+			options = append(options, generator.PathLengthLimiter{MaxPathLength: maxPathLength}.LimitPathLength)
 		}
 
 		if err = generator.Generate(m,
@@ -63,6 +68,9 @@ func init() {
 	generateCmd.Flags().MarkHidden("noformat")
 
 	generateCmd.Flags().BoolVar(&emitSQLSupport, "sql", false, "Emit code for SQL support")
+
+	generateCmd.Flags().BoolVar(&limitPathLength, "limitlength", false, "Limit path length to the number of character passed to maxlength")
+	generateCmd.Flags().IntVar(&maxPathLength, "maxlength", generator.DefaultMaxPathLength, "Limit path length to the given number of characters")
 
 	rootCmd.AddCommand(generateCmd)
 }

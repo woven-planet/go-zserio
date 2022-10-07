@@ -25,11 +25,13 @@ type options struct {
 	outputPackage     string
 	outputToStdout    bool
 	EmitSQLSupport    bool
+	limitPathLength   bool
+	maxPathLength     int
 }
 
 const (
-	MaxPathLength = 260 // Hard limit on Windows
-	FileSuffix    = ".go"
+	DefaultMaxPathLength = 260 // Hard limit on Windows
+	FileSuffix           = ".go"
 )
 
 // Option sets a configuration option
@@ -46,7 +48,20 @@ func EmitSQLSupport(opt *options) {
 	opt.EmitSQLSupport = true
 }
 
+// PathLengthLimiter indicates that generated source file paths should be clipped to the given length
+type PathLengthLimiter struct {
+	MaxPathLength int
+}
+
+func (limiter PathLengthLimiter) LimitPathLength(opts *options) {
+	opts.limitPathLength = true
+	opts.maxPathLength = limiter.MaxPathLength
+}
+
 type data map[string]any
+
+// uniquePaths keeps track of all codes files that have been generated so far and adds an "_idx" suffix if the same path appears again
+var uniquePaths map[string]int
 
 func Generate(m *model.Model, rootPath, rootPackage, outputPackage string, flags ...Option) error {
 	opts := &options{
@@ -90,10 +105,10 @@ func executeTemplate(out io.Writer, tmpl string, data data) error {
 	return templ.Execute(out, data)
 }
 
-func writeToFile(code []byte, rootPath, zserioPkg, fn string, doNotFormatCode bool) (retErr error) {
+func writeToFile(code []byte, rootPath, zserioPkg, fn string, opts *options) (retErr error) {
 	ids := strings.Split(strings.ToLower(zserioPkg), ".")
 	outputDir := path.Join(append([]string{rootPath}, ids...)...)
-	outputFile := assembleUniqueFilePath(outputDir, fn)
+	outputFile := assembleUniqueFilePath(outputDir, fn, opts.limitPathLength, opts.maxPathLength)
 
 	log.Printf("Writing %s\n", outputFile)
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
@@ -113,33 +128,32 @@ func writeToFile(code []byte, rootPath, zserioPkg, fn string, doNotFormatCode bo
 	}()
 	defer f.Close()
 
-	return writeGoSource(f, code, doNotFormatCode)
+	return writeGoSource(f, code, opts.doNotFormatSource)
 }
 
-var uniquePaths map[string]int
-
-func assembleUniqueFilePath(outputDir string, fn string) string {
+func assembleUniqueFilePath(outputDir string, fn string, limitPathLength bool, maxPathLength int) string {
 	if uniquePaths == nil {
 		uniquePaths = make(map[string]int)
 	}
 
-	filePath := path.Join(outputDir, fn)
-	maxLength := MaxPathLength - len(FileSuffix)
+	outputFile := path.Join(outputDir, fn)
 
-	if len(filePath) > maxLength {
-		filePath = filePath[:maxLength]
-		if strings.Contains(filePath, "_") {
-			filePath = filePath[:strings.LastIndex(filePath, "_")]
+	if limitPathLength {
+		maxLength := maxPathLength - len(FileSuffix)
+		if len(outputFile) > maxLength {
+			outputFile = outputFile[:maxLength]
+			if strings.Contains(outputFile, "_") {
+				outputFile = outputFile[:strings.LastIndex(outputFile, "_")]
+			}
 		}
 	}
 
-	if count, ok := uniquePaths[filePath]; ok {
-		count++
-		uniquePaths[filePath] = count
-		return fmt.Sprintf("%s_%d%s", filePath, count, FileSuffix)
+	if count, ok := uniquePaths[outputFile]; ok {
+		uniquePaths[outputFile]++
+		return fmt.Sprintf("%s_%d%s", outputFile, count, FileSuffix)
 	} else {
-		uniquePaths[filePath] = 0
-		return fmt.Sprintf("%s%s", filePath, FileSuffix)
+		uniquePaths[outputFile] = 1
+		return fmt.Sprintf("%s%s", outputFile, FileSuffix)
 	}
 }
 
@@ -306,7 +320,7 @@ func generatePackage(rootPath string, pkg *ast.Package, opts *options) error {
 			return fmt.Errorf("generate %s: %w", o.name, err)
 		}
 
-		if err := writeToFile(out.Bytes(), rootPath, pkg.Name, o.name, opts.doNotFormatSource); err != nil {
+		if err := writeToFile(out.Bytes(), rootPath, pkg.Name, o.name, opts); err != nil {
 			return fmt.Errorf("write %s: %w", o.name, err)
 		}
 	}
