@@ -61,24 +61,72 @@ func TestStableOutputOrder(t *testing.T) {
 
 func TestAssembleUniqueFilePath(t *testing.T) {
 	longRootDirectory := "/Users/my_user/my_projects/my_project_working_with_zserio/my_project_resources/my_zserio_schema_data"
+
 	longFileName := "my_very_sophisticated_zserio_template_based_data_type"
 	otherLongFileName := "my_other_very_sophisticated_zserio_template_based_data_type"
 
-	// Do not change current behaviour if limit is disabled
-	assert.Equal(t, path.Join(longRootDirectory, longFileName)+FileSuffix, assembleUniqueFilePath(longRootDirectory, longFileName, false, DefaultMaxPathLength))
+	tables := []struct {
+		fileName    string
+		maxLength   int
+		expected    string
+		expectedErr string
+	}{
+		{ // Do not change file path if length is below maximum
+			longFileName,
+			DefaultMaxPathLength,
+			path.Join(longRootDirectory, longFileName) + FileSuffix,
+			"",
+		},
+		{ // Shorten file name to stay below maximum
+			otherLongFileName,
+			130,
+			path.Join(longRootDirectory, "my_other_very") + FileSuffix,
+			"",
+		},
+		{
+			otherLongFileName,
+			130,
+			path.Join(longRootDirectory, "my_other_very_1") + FileSuffix,
+			"",
+		},
+		{
+			otherLongFileName,
+			130,
+			path.Join(longRootDirectory, "my_other_very_2") + FileSuffix,
+			"",
+		},
+		{ // Fail if maximum length is too short to fit the path
+			longFileName,
+			90,
+			"",
+			"maximum path length 90 is too short, at least 107 required to fit output directory",
+		},
+		{ // Fail if maximum length is too short to fit the path
+			longFileName,
+			107,
+			path.Join(longRootDirectory, "m") + FileSuffix,
+			"",
+		},
+		{ // Fail if maximum length is too short to fit the path
+			longFileName,
+			107,
+			path.Join(longRootDirectory, "m_1") + FileSuffix,
+			"",
+		},
+		{ // Fail if maximum length is too short to fit the path
+			longFileName,
+			107,
+			path.Join(longRootDirectory, "m_2") + FileSuffix,
+			"",
+		},
+	}
 
-	// Do not change file path if length is below maximum
-	assert.Equal(t, path.Join(longRootDirectory, otherLongFileName)+FileSuffix, assembleUniqueFilePath(longRootDirectory, otherLongFileName, true, DefaultMaxPathLength))
-
-	// Shorten file name to stay below maximum
-	assert.Equal(t, path.Join(longRootDirectory, "my_very_sophisticated")+FileSuffix, assembleUniqueFilePath(longRootDirectory, longFileName, true, 130))
-
-	// Append indexed suffix if same file appears again
-	assert.Equal(t, path.Join(longRootDirectory, "my_very_sophisticated")+"_1"+FileSuffix, assembleUniqueFilePath(longRootDirectory, longFileName, true, 130))
-	assert.Equal(t, path.Join(longRootDirectory, "my_very_sophisticated")+"_2"+FileSuffix, assembleUniqueFilePath(longRootDirectory, longFileName, true, 130))
-
-	assert.Equal(t, path.Join(longRootDirectory, "my_other_very")+FileSuffix, assembleUniqueFilePath(longRootDirectory, otherLongFileName, true, 130))
-	assert.Equal(t, path.Join(longRootDirectory, "my_other_very")+"_1"+FileSuffix, assembleUniqueFilePath(longRootDirectory, otherLongFileName, true, 130))
-	assert.Equal(t, path.Join(longRootDirectory, "my_other_very")+"_2"+FileSuffix, assembleUniqueFilePath(longRootDirectory, otherLongFileName, true, 130))
-	assert.Equal(t, path.Join(longRootDirectory, "my_other_very")+"_3"+FileSuffix, assembleUniqueFilePath(longRootDirectory, otherLongFileName, true, 130))
+	for _, table := range tables {
+		result, err := assembleUniqueFilePath(longRootDirectory, table.fileName, table.maxLength)
+		assert.Equal(t, table.expected, result)
+		assert.LessOrEqual(t, len(result), table.maxLength)
+		if table.expectedErr != "" {
+			assert.EqualError(t, err, table.expectedErr)
+		}
+	}
 }

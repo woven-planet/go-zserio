@@ -25,12 +25,13 @@ type options struct {
 	outputPackage     string
 	outputToStdout    bool
 	EmitSQLSupport    bool
-	limitPathLength   bool
 	maxPathLength     int
 }
 
 const (
 	DefaultMaxPathLength = 260 // Hard limit on Windows
+	MinFileNameLength    = 2
+	FileSuffixLength     = 5 // Leave space for at least single-digit index if needed
 	FileSuffix           = ".go"
 )
 
@@ -54,7 +55,6 @@ type PathLengthLimiter struct {
 }
 
 func (limiter PathLengthLimiter) LimitPathLength(opts *options) {
-	opts.limitPathLength = true
 	opts.maxPathLength = limiter.MaxPathLength
 }
 
@@ -108,7 +108,10 @@ func executeTemplate(out io.Writer, tmpl string, data data) error {
 func writeToFile(code []byte, rootPath, zserioPkg, fn string, opts *options) (retErr error) {
 	ids := strings.Split(strings.ToLower(zserioPkg), ".")
 	outputDir := path.Join(append([]string{rootPath}, ids...)...)
-	outputFile := assembleUniqueFilePath(outputDir, fn, opts.limitPathLength, opts.maxPathLength)
+	outputFile, err := assembleUniqueFilePath(outputDir, fn, opts.maxPathLength)
+	if err != nil {
+		return fmt.Errorf("file path: %w", err)
+	}
 
 	log.Printf("Writing %s\n", outputFile)
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
@@ -131,18 +134,22 @@ func writeToFile(code []byte, rootPath, zserioPkg, fn string, opts *options) (re
 	return writeGoSource(f, code, opts.doNotFormatSource)
 }
 
-func assembleUniqueFilePath(outputDir string, fn string, limitPathLength bool, maxPathLength int) string {
+func assembleUniqueFilePath(outputDir string, fn string, maxPathLength int) (string, error) {
 	if uniquePaths == nil {
 		uniquePaths = make(map[string]int)
 	}
 
+	if minLength := len(outputDir) + FileSuffixLength + MinFileNameLength; maxPathLength < minLength {
+		return "", fmt.Errorf("maximum path length %d is too short, at least %d required to fit output directory", maxPathLength, minLength)
+	}
+
 	outputFile := path.Join(outputDir, fn)
 
-	if limitPathLength {
-		maxLength := maxPathLength - len(FileSuffix)
+	if maxPathLength > 0 {
+		maxLength := maxPathLength - FileSuffixLength
 		if len(outputFile) > maxLength {
 			outputFile = outputFile[:maxLength]
-			if strings.Contains(outputFile, "_") {
+			if strings.Contains(outputFile, "_") && strings.LastIndex(outputFile, "_") > strings.LastIndex(outputFile, "/") {
 				outputFile = outputFile[:strings.LastIndex(outputFile, "_")]
 			}
 		}
@@ -150,10 +157,10 @@ func assembleUniqueFilePath(outputDir string, fn string, limitPathLength bool, m
 
 	if count, ok := uniquePaths[outputFile]; ok {
 		uniquePaths[outputFile]++
-		return fmt.Sprintf("%s_%d%s", outputFile, count, FileSuffix)
+		return fmt.Sprintf("%s_%d%s", outputFile, count, FileSuffix), nil
 	} else {
 		uniquePaths[outputFile] = 1
-		return fmt.Sprintf("%s%s", outputFile, FileSuffix)
+		return fmt.Sprintf("%s%s", outputFile, FileSuffix), nil
 	}
 }
 

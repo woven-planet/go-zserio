@@ -16,7 +16,6 @@ var (
 	topLevelPackage string
 	noFormat        bool
 	emitSQLSupport  bool
-	limitPathLength bool
 	maxPathLength   int
 	outputPackage   string
 )
@@ -38,7 +37,7 @@ var generateCmd = &cobra.Command{
 		if emitSQLSupport {
 			options = append(options, generator.EmitSQLSupport)
 		}
-		if limitPathLength {
+		if maxPathLength > 0 {
 			options = append(options, generator.PathLengthLimiter{MaxPathLength: maxPathLength}.LimitPathLength)
 		}
 
@@ -69,8 +68,7 @@ func init() {
 
 	generateCmd.Flags().BoolVar(&emitSQLSupport, "sql", false, "Emit code for SQL support")
 
-	generateCmd.Flags().BoolVar(&limitPathLength, "limitlength", false, "Limit path length to the number of character passed to maxlength")
-	generateCmd.Flags().IntVar(&maxPathLength, "maxlength", generator.DefaultMaxPathLength, "Limit path length to the given number of characters")
+	generateCmd.Flags().IntVar(&maxPathLength, "max-path-length", generator.DefaultMaxPathLength, "Maximum length of generated file paths. Set to 0 for no limit.")
 
 	rootCmd.AddCommand(generateCmd)
 }
