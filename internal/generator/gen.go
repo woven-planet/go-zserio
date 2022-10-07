@@ -27,6 +27,11 @@ type options struct {
 	EmitSQLSupport    bool
 }
 
+const (
+	MaxPathLength = 260 // Hard limit on Windows
+	FileSuffix    = ".go"
+)
+
 // Option sets a configuration option
 type Option func(opts *options)
 
@@ -88,7 +93,7 @@ func executeTemplate(out io.Writer, tmpl string, data data) error {
 func writeToFile(code []byte, rootPath, zserioPkg, fn string, doNotFormatCode bool) (retErr error) {
 	ids := strings.Split(strings.ToLower(zserioPkg), ".")
 	outputDir := path.Join(append([]string{rootPath}, ids...)...)
-	outputFile := path.Join(outputDir, fn)
+	outputFile := assembleUniqueFilePath(outputDir, fn)
 
 	log.Printf("Writing %s\n", outputFile)
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
@@ -109,6 +114,33 @@ func writeToFile(code []byte, rootPath, zserioPkg, fn string, doNotFormatCode bo
 	defer f.Close()
 
 	return writeGoSource(f, code, doNotFormatCode)
+}
+
+var uniquePaths map[string]int
+
+func assembleUniqueFilePath(outputDir string, fn string) string {
+	if uniquePaths == nil {
+		uniquePaths = make(map[string]int)
+	}
+
+	filePath := path.Join(outputDir, fn)
+	maxLength := MaxPathLength - len(FileSuffix)
+
+	if len(filePath) > maxLength {
+		filePath = filePath[:maxLength]
+		if strings.Contains(filePath, "_") {
+			filePath = filePath[:strings.LastIndex(filePath, "_")]
+		}
+	}
+
+	if count, ok := uniquePaths[filePath]; ok {
+		count++
+		uniquePaths[filePath] = count
+		return fmt.Sprintf("%s_%d%s", filePath, count, FileSuffix)
+	} else {
+		uniquePaths[filePath] = 0
+		return fmt.Sprintf("%s%s", filePath, FileSuffix)
+	}
 }
 
 func writeGoSource(w io.Writer, code []byte, doNotFormatCode bool) error {
@@ -186,7 +218,7 @@ func newTypeOutput(astType any, d data, withPreamble bool, opts *options) output
 		templateData[k] = v
 	}
 	templateData[typeName] = astType
-	return newOutput(strcase.ToSnake(name)+".go", typeName+".go.tmpl", templateData, withPreamble, opts)
+	return newOutput(strcase.ToSnake(name), typeName+".go.tmpl", templateData, withPreamble, opts)
 }
 
 func (o *output) executeTemplate(w io.Writer) error {
@@ -247,7 +279,7 @@ func newOutputs(pkg *ast.Package, rootPackage string, opts *options) []output {
 		return outs[i].template > outs[j].template
 	})
 
-	return append([]output{newOutput("pkg.go", "package.go.tmpl", data, true, opts)}, outs...)
+	return append([]output{newOutput("pkg", "package.go.tmpl", data, true, opts)}, outs...)
 }
 
 func generatePackage(rootPath string, pkg *ast.Package, opts *options) error {

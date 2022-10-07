@@ -539,13 +539,7 @@ func (m *Model) instantiateChoice(
 
 func generateInstantiatedName(tr *ast.TypeReference, templateArguments []*ast.TypeReference) string {
 	name := []string{strings.Title(tr.Name)}
-	nameLength := len(tr.Name)
 	for _, ta := range templateArguments {
-		nameLength += len(ta.Name)
-		// Long names make code hard to read and may cause problems on certain file systems
-		if nameLength > 60 {
-			break
-		}
 		name = append(name, strings.Title(ta.Name))
 	}
 	return strings.Join(name, "")
