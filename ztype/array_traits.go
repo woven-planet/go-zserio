@@ -1,6 +1,8 @@
 package ztype
 
 import (
+	"math"
+
 	"golang.org/x/exp/constraints"
 
 	zserio "github.com/woven-planet/go-zserio"
@@ -649,6 +651,67 @@ func (trait BitFieldArrayTraits[T]) AsUint64(value T) uint64 {
 
 func (trait BitFieldArrayTraits[T]) FromUint64(value uint64) T {
 	return T(value)
+}
+
+type SignedBitFieldArrayTraits[T constraints.Signed] struct {
+	NumBits uint8
+}
+
+func fillUpperBits(value uint64, numBits uint8) uint64 {
+	// check if the value is negative. If yes,
+	// it will be later casted to the correct final type,
+	// and the uint64 needs to be made negative.
+	isNegative := (value & (1 << uint64(numBits-1))) != 0
+	if isNegative {
+		// if yes, mask all bits from NumBits to 64 with a 1, to make
+		// the uint64 negative when casting to an int type
+		upperMask := uint64(math.MaxUint64) - (1<<uint64(numBits) - 1)
+		value = value | upperMask
+	}
+	return value
+}
+
+func (trait SignedBitFieldArrayTraits[T]) PackedTraits() IPackedArrayTraits[T] {
+	return &PackedArrayTraits[T, SignedBitFieldArrayTraits[T]]{
+		ArrayTraits: trait,
+	}
+}
+
+func (trait SignedBitFieldArrayTraits[T]) BitSizeOfIsConstant() bool {
+	return true
+}
+
+func (trait SignedBitFieldArrayTraits[T]) NeedsBitsizeOfPosition() bool {
+	return false
+}
+
+func (trait SignedBitFieldArrayTraits[T]) NeedsReadIndex() bool {
+	return false
+}
+
+func (trait SignedBitFieldArrayTraits[T]) BitSizeOf(element T, endBitPosition int) int {
+	return int(trait.NumBits)
+}
+
+func (trait SignedBitFieldArrayTraits[T]) InitializeOffsets(bitPosition int, value T) int {
+	return bitPosition + trait.BitSizeOf(value, 0) // endBitPosition is ignored
+}
+
+func (trait SignedBitFieldArrayTraits[T]) Read(reader zserio.Reader, endBitPosition int) (T, error) {
+	value, err := reader.ReadBits(uint8(trait.NumBits))
+	return T(fillUpperBits(value, trait.NumBits)), err
+}
+
+func (trait SignedBitFieldArrayTraits[T]) Write(writer zserio.Writer, value T) error {
+	return writer.WriteBits(uint64(value), trait.NumBits)
+}
+
+func (trait SignedBitFieldArrayTraits[T]) AsUint64(value T) uint64 {
+	return uint64(value)
+}
+
+func (trait SignedBitFieldArrayTraits[T]) FromUint64(value uint64) T {
+	return T(fillUpperBits(value, trait.NumBits))
 }
 
 type BooleanArrayTraits struct{}

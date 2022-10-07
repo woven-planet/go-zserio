@@ -30,9 +30,20 @@ func IdentifierToGoString(scope ast.Scope, expression *ast.Expression) string {
 		return name
 	case *ast.BitmaskType:
 		return name
+	case *ast.Function:
+		return "v." + n.Name
 	default:
 		return "UNSUPPORTED_TYPE"
 	}
+}
+
+// bracketedExpressionToGoString prints an array access expression,
+// such as array[index].
+func bracketedExpressionToGoString(scope ast.Scope, expression *ast.Expression) string {
+	return fmt.Sprintf("%s[%s]",
+		ExpressionToGoString(scope, expression.Operand1),
+		ExpressionToGoString(scope, expression.Operand2),
+	)
 }
 
 func parenthesizedExpressionToGoString(scope ast.Scope, expression *ast.Expression) string {
@@ -173,14 +184,31 @@ func twoOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
 }
 
 func ternaryExpressionToGoString(scope ast.Scope, expression *ast.Expression) string {
+	op1 := ExpressionToGoString(scope, expression.Operand1)
+	op2 := ExpressionToGoString(scope, expression.Operand2)
+	op3 := ExpressionToGoString(scope, expression.Operand3)
+	if expression.ResultType == ast.ExpressionTypeInteger {
+		// in case the expression is a subtype of int (such as uint16), cast to
+		// integer to avoid type cast errors
+		typeCast := "int"
+		op3 = fmt.Sprintf("%s(%s)", typeCast, op3)
+		op2 = fmt.Sprintf("%s(%s)", typeCast, op2)
+	}
+	// Ternary expressions are not supported by Go. As a workaround,
+	// generate the ternary expression as an if/else
 	return fmt.Sprintf("%s\nif %s {\nretVal = %s\n}\n",
-		ExpressionToGoString(scope, expression.Operand3),
-		ExpressionToGoString(scope, expression.Operand1),
-		ExpressionToGoString(scope, expression.Operand2))
+		op3,
+		op1,
+		op2,
+	)
 }
 
 func lenOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
 	return fmt.Sprintf("len(%s)", ExpressionToGoString(scope, expression.Operand1))
+}
+
+func valueOfOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
+	return fmt.Sprintf("%s", ExpressionToGoString(scope, expression.Operand1))
 }
 
 func ExpressionToGoString(scope ast.Scope, expression *ast.Expression) string {
@@ -197,6 +225,8 @@ func ExpressionToGoString(scope ast.Scope, expression *ast.Expression) string {
 		}
 	}
 	switch expression.Type {
+	case parser.ZserioParserLBRACKET:
+		return bracketedExpressionToGoString(scope, expression)
 	case parser.ZserioParserLPAREN:
 		return parenthesizedExpressionToGoString(scope, expression)
 	case parser.ZserioParserRPAREN:
@@ -205,6 +235,8 @@ func ExpressionToGoString(scope ast.Scope, expression *ast.Expression) string {
 		return dotOperatorToGoString(scope, expression)
 	case parser.ZserioParserLENGTHOF:
 		return lenOperatorToGoString(scope, expression)
+	case parser.ZserioParserVALUEOF:
+		return valueOfOperatorToGoString(scope, expression)
 	case parser.ZserioParserNUMBITS:
 		return numBitsOperatorToGoString(scope, expression)
 	case parser.ZserioParserPLUS:
@@ -245,6 +277,9 @@ func ExpressionToGoString(scope ast.Scope, expression *ast.Expression) string {
 		return twoOperatorEqualTypesToGoString(scope, expression)
 	case parser.ZserioParserNE:
 		return twoOperatorEqualTypesToGoString(scope, expression)
+	case parser.ZserioParserINDEX:
+		// hard-code the name of the index variable used in the template
+		return "index"
 	case parser.ZserioParserID:
 		return IdentifierToGoString(scope, expression)
 	case parser.ZserioParserQUESTIONMARK:

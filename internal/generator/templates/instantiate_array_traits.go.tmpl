@@ -2,7 +2,7 @@
 {{- $type := .type }}
 {{- $traits := goArrayTraits $scope $type }}
 {{- template "array_traits_type.go.tmpl" dict "pkg" $scope "type" $type }} {
-{{- if eq $traits "ztype.BitFieldArrayTraits" -}}
+{{- if or (eq $traits "ztype.BitFieldArrayTraits") (eq $traits "ztype.SignedBitFieldArrayTraits") -}}
     NumBits: uint8(
     {{- if gt $type.Bits 0 }}
         {{- $type.Bits }}

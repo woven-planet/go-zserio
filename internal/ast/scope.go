@@ -41,15 +41,15 @@ var zserioTypeToGoType = map[string]string{
 
 var zserioTypeToArrayTraits = map[string]string{
 	// integer types
-	"int8":   "ztype.BitFieldArrayTraits",
-	"int16":  "ztype.BitFieldArrayTraits",
-	"int32":  "ztype.BitFieldArrayTraits",
-	"int64":  "ztype.BitFieldArrayTraits",
+	"int8":   "ztype.SignedBitFieldArrayTraits",
+	"int16":  "ztype.SignedBitFieldArrayTraits",
+	"int32":  "ztype.SignedBitFieldArrayTraits",
+	"int64":  "ztype.SignedBitFieldArrayTraits",
 	"uint8":  "ztype.BitFieldArrayTraits",
 	"uint16": "ztype.BitFieldArrayTraits",
 	"uint32": "ztype.BitFieldArrayTraits",
 	"uint64": "ztype.BitFieldArrayTraits",
-	"int":    "ztype.BitFieldArrayTraits",
+	"int":    "ztype.SignedBitFieldArrayTraits",
 	"uint":   "ztype.BitFieldArrayTraits",
 	"bit":    "ztype.BitFieldArrayTraits",
 	// varint types

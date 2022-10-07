@@ -131,6 +131,8 @@ func evaluateSymbolType(symbol any, scope *Package) (ExpressionType, error) {
 		return ExpressionTypeCompound, nil
 	case *Struct:
 		return ExpressionTypeCompound, nil
+	case *Choice:
+		return ExpressionTypeCompound, nil
 	case *Field:
 		return evaluateExpressionType(n.Type, scope)
 	case *Parameter:
@@ -144,6 +146,13 @@ func evaluateSymbolType(symbol any, scope *Package) (ExpressionType, error) {
 	default:
 		return "", errors.New("unable to evaluate the expression type")
 	}
+}
+
+// evaluateIndexExpression evaluates an index expression, such as [@index].
+func (expr *Expression) evaluateIndexExpression() error {
+	expr.ResultType = ExpressionTypeInteger
+	expr.FullyResolved = false
+	return nil
 }
 
 // evaluateIdentifier evaluates an identifier expression.
@@ -171,6 +180,20 @@ func (expr *Expression) evaluateIdentifier(scope *Package) error {
 	expr.ResultSymbol = symbol
 	expr.ResultType, err = evaluateSymbolType(symbol.Symbol, scope)
 	return err
+}
+
+// evaluateValueOfOperator evaluates a value of operator.
+func (expr *Expression) evaluateValueOfOperator() error {
+	if expr.Operand1 == nil {
+		return errors.New("valueof operator needs one operand")
+	}
+	if expr.Operand1.ResultType != ExpressionTypeEnum &&
+		expr.Operand1.ResultType != ExpressionTypeBitmask {
+		return errors.New("valueof operator needs an expression or bitmask type")
+	}
+	expr.ResultType = ExpressionTypeInteger
+	expr.ResultIntValue = expr.Operand1.ResultIntValue
+	return nil
 }
 
 // evaluateNumBitsOperator evaluates a bit counter operator.
@@ -232,6 +255,16 @@ func (expr *Expression) evaluateCompoundDotExpression(scope *Package) error {
 		expr.ResultType, err = evaluateSymbolType(symbol.Symbol, newScope)
 		return err
 	}
+
+	if _, ok := compoundSymbol.Symbol.(*Choice); ok {
+		symbol, err := scope.GetCompoundType(compoundSymbol.Name, expr.Operand2.Text)
+		if err != nil {
+			return err
+		}
+		expr.ResultSymbol = symbol
+		expr.ResultType, err = evaluateSymbolType(symbol.Symbol, newScope)
+		return err
+	}
 	return errors.New("compound type is not supported")
 }
 
@@ -259,6 +292,7 @@ func (expr *Expression) evaluateFunctionCallExpression(scope *Package) error {
 	if err != nil {
 		return err
 	}
+	previousScope := functionEvaluationScope.LocalSymbols.CurrentCompoundScope
 	functionEvaluationScope.LocalSymbols.CurrentCompoundScope = &typeRef.Type.Name
 	err = function.Result.Evaluate(functionEvaluationScope)
 	if err != nil {
@@ -268,6 +302,9 @@ func (expr *Expression) evaluateFunctionCallExpression(scope *Package) error {
 	// copy the result symbol, in case the type of the symbol needs to be
 	// evaluated.
 	expr.ResultSymbol = expr.Operand1.ResultSymbol
+
+	// Restore the previous scope
+	functionEvaluationScope.LocalSymbols.CurrentCompoundScope = previousScope
 	return nil
 }
 
@@ -663,11 +700,8 @@ func (expr *Expression) Evaluate(scope *Package) error {
 		err = expr.evaluateDotExpression(scope)
 	case parser.ZserioParserLENGTHOF:
 		err = expr.evaluateLengthOfOperator(scope)
-		/*
-
-			case parser.ZserioParserVALUEOF:
-
-		*/
+	case parser.ZserioParserVALUEOF:
+		err = expr.evaluateValueOfOperator()
 	case parser.ZserioParserNUMBITS:
 		err = expr.evaluateNumBitsOperator()
 	case parser.ZserioParserPLUS:
@@ -733,6 +767,8 @@ func (expr *Expression) Evaluate(scope *Package) error {
 		if "true" == strings.TrimSpace(strings.ToLower(expr.Text)) {
 			expr.ResultBoolValue = true
 		}
+	case parser.ZserioParserINDEX:
+		err = expr.evaluateIndexExpression()
 	case parser.ZserioParserID:
 		err = expr.evaluateIdentifier(scope)
 	case parser.UnevaluatableExpressionType:
