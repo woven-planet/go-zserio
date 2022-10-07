@@ -4,6 +4,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -56,4 +57,28 @@ func TestStableOutputOrder(t *testing.T) {
 			})
 		}
 	}
+}
+
+func TestAssembleUniqueFilePath(t *testing.T) {
+	longRootDirectory := "/Users/my_user/my_projects/my_project_working_with_zserio/my_project_resources/my_zserio_schema_data"
+	longFileName := "my_very_sophisticated_zserio_template_based_data_type"
+	otherLongFileName := "my_other_very_sophisticated_zserio_template_based_data_type"
+
+	// Do not change current behaviour if limit is disabled
+	assert.Equal(t, path.Join(longRootDirectory, longFileName)+FileSuffix, assembleUniqueFilePath(longRootDirectory, longFileName, false, DefaultMaxPathLength))
+
+	// Do not change file path if length is below maximum
+	assert.Equal(t, path.Join(longRootDirectory, otherLongFileName)+FileSuffix, assembleUniqueFilePath(longRootDirectory, otherLongFileName, true, DefaultMaxPathLength))
+
+	// Shorten file name to stay below maximum
+	assert.Equal(t, path.Join(longRootDirectory, "my_very_sophisticated")+FileSuffix, assembleUniqueFilePath(longRootDirectory, longFileName, true, 130))
+
+	// Append indexed suffix if same file appears again
+	assert.Equal(t, path.Join(longRootDirectory, "my_very_sophisticated")+"_1"+FileSuffix, assembleUniqueFilePath(longRootDirectory, longFileName, true, 130))
+	assert.Equal(t, path.Join(longRootDirectory, "my_very_sophisticated")+"_2"+FileSuffix, assembleUniqueFilePath(longRootDirectory, longFileName, true, 130))
+
+	assert.Equal(t, path.Join(longRootDirectory, "my_other_very")+FileSuffix, assembleUniqueFilePath(longRootDirectory, otherLongFileName, true, 130))
+	assert.Equal(t, path.Join(longRootDirectory, "my_other_very")+"_1"+FileSuffix, assembleUniqueFilePath(longRootDirectory, otherLongFileName, true, 130))
+	assert.Equal(t, path.Join(longRootDirectory, "my_other_very")+"_2"+FileSuffix, assembleUniqueFilePath(longRootDirectory, otherLongFileName, true, 130))
+	assert.Equal(t, path.Join(longRootDirectory, "my_other_very")+"_3"+FileSuffix, assembleUniqueFilePath(longRootDirectory, otherLongFileName, true, 130))
 }
