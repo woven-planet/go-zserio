@@ -52,7 +52,7 @@ func TestStableOutputOrder(t *testing.T) {
 				for i := range second {
 					second[i].data = nil
 				}
-				assert.Equal(t, "pkg.go", first[0].name)
+				assert.Equal(t, "pkg", first[0].name)
 				assert.Equal(t, first, second)
 			})
 		}
