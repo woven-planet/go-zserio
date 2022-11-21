@@ -18,6 +18,8 @@ func WriteExtern(w zserio.Writer, e *ExternType) error {
 	// and the remaining 1-7 bits
 	if remainingBits != 0 {
 		lastByte := uint64(e.Buffer[len(e.Buffer)-1])
+		numOfBitShift := 8 - remainingBits
+		lastByte = lastByte >> numOfBitShift
 		if err := w.WriteBits(lastByte, remainingBits); err != nil {
 			return err
 		}

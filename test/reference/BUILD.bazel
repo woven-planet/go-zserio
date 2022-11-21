@@ -28,6 +28,7 @@ go_test(
         "//testdata/reference_modules:go_core_instantiations",
         "//testdata/reference_modules:go_core_types",
         "//testdata/reference_modules:go_testobject",
+        "//ztype",
         "@com_github_stretchr_testify//assert",
         "@com_github_stretchr_testify//require",
         "@io_bazel_rules_go//go/tools/bazel:go_default_library",

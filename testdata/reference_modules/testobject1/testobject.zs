@@ -34,6 +34,9 @@ struct TestObject
     float32 floatMember;
     float64 floatArray[100];
 
+    // test extern
+    extern data;
+
     // foo is just there to have an easy to check value at the end of the byte stream
     varint32 foo;
 };
