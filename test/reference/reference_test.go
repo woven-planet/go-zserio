@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	zserio "github.com/woven-planet/go-zserio"
+	"github.com/woven-planet/go-zserio/ztype"
 )
 
 func testWorkspace(t require.TestingT, filePath string) string {
@@ -109,6 +110,11 @@ func want() testobject.TestObject {
 	d.FloatMember = 23.5
 	for i := 0; i < 100; i++ {
 		d.FloatArray = append(d.FloatArray, float64(i))
+	}
+
+	d.Data = &ztype.ExternType{
+		BitSize: 13,
+		Buffer:  []byte(`A@`),
 	}
 
 	d.Foo = 42

@@ -10,6 +10,7 @@ from testdata.reference_modules.core.types.basic_choice import BasicChoice
 from testdata.reference_modules.core.types.color import Color
 from testdata.reference_modules.core.types.city_attributes import CityAttributes
 from testdata.reference_modules.core.types.some_enum import SomeEnum
+from zserio.bitbuffer import BitBuffer
 
 
 def new():
@@ -60,5 +61,6 @@ def new():
     for i in range(100):
         d.float_array.append(float(i))
 
+    d.data = BitBuffer(b"ABC", 13)
     d.foo = 42
     return d
