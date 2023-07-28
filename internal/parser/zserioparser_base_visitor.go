@@ -11,6 +11,10 @@ func (v *BaseZserioParserVisitor) VisitPackageDeclaration(ctx *PackageDeclaratio
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseZserioParserVisitor) VisitCompatibilityVersionDirective(ctx *CompatibilityVersionDirectiveContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseZserioParserVisitor) VisitPackageNameDefinition(ctx *PackageNameDefinitionContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -263,6 +267,10 @@ func (v *BaseZserioParserVisitor) VisitLogicalOrExpression(ctx *LogicalOrExpress
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseZserioParserVisitor) VisitIsSetExpression(ctx *IsSetExpressionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseZserioParserVisitor) VisitBitwiseOrExpression(ctx *BitwiseOrExpressionContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -368,5 +376,9 @@ func (v *BaseZserioParserVisitor) VisitFloatType(ctx *FloatTypeContext) interfac
 }
 
 func (v *BaseZserioParserVisitor) VisitExternType(ctx *ExternTypeContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseZserioParserVisitor) VisitBytesType(ctx *BytesTypeContext) interface{} {
 	return v.VisitChildren(ctx)
 }

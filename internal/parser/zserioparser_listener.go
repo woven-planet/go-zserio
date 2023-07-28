@@ -10,6 +10,9 @@ type ZserioParserListener interface {
 	// EnterPackageDeclaration is called when entering the packageDeclaration production.
 	EnterPackageDeclaration(c *PackageDeclarationContext)
 
+	// EnterCompatibilityVersionDirective is called when entering the compatibilityVersionDirective production.
+	EnterCompatibilityVersionDirective(c *CompatibilityVersionDirectiveContext)
+
 	// EnterPackageNameDefinition is called when entering the packageNameDefinition production.
 	EnterPackageNameDefinition(c *PackageNameDefinitionContext)
 
@@ -199,6 +202,9 @@ type ZserioParserListener interface {
 	// EnterLogicalOrExpression is called when entering the logicalOrExpression production.
 	EnterLogicalOrExpression(c *LogicalOrExpressionContext)
 
+	// EnterIsSetExpression is called when entering the isSetExpression production.
+	EnterIsSetExpression(c *IsSetExpressionContext)
+
 	// EnterBitwiseOrExpression is called when entering the bitwiseOrExpression production.
 	EnterBitwiseOrExpression(c *BitwiseOrExpressionContext)
 
@@ -280,8 +286,14 @@ type ZserioParserListener interface {
 	// EnterExternType is called when entering the externType production.
 	EnterExternType(c *ExternTypeContext)
 
+	// EnterBytesType is called when entering the bytesType production.
+	EnterBytesType(c *BytesTypeContext)
+
 	// ExitPackageDeclaration is called when exiting the packageDeclaration production.
 	ExitPackageDeclaration(c *PackageDeclarationContext)
+
+	// ExitCompatibilityVersionDirective is called when exiting the compatibilityVersionDirective production.
+	ExitCompatibilityVersionDirective(c *CompatibilityVersionDirectiveContext)
 
 	// ExitPackageNameDefinition is called when exiting the packageNameDefinition production.
 	ExitPackageNameDefinition(c *PackageNameDefinitionContext)
@@ -472,6 +484,9 @@ type ZserioParserListener interface {
 	// ExitLogicalOrExpression is called when exiting the logicalOrExpression production.
 	ExitLogicalOrExpression(c *LogicalOrExpressionContext)
 
+	// ExitIsSetExpression is called when exiting the isSetExpression production.
+	ExitIsSetExpression(c *IsSetExpressionContext)
+
 	// ExitBitwiseOrExpression is called when exiting the bitwiseOrExpression production.
 	ExitBitwiseOrExpression(c *BitwiseOrExpressionContext)
 
@@ -552,4 +567,7 @@ type ZserioParserListener interface {
 
 	// ExitExternType is called when exiting the externType production.
 	ExitExternType(c *ExternTypeContext)
+
+	// ExitBytesType is called when exiting the bytesType production.
+	ExitBytesType(c *BytesTypeContext)
 }
