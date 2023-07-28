@@ -40,6 +40,7 @@ ALIGN               : 'align' ;
 BIT_FIELD           : 'bit' ;
 BOOL                : 'bool' ;
 BITMASK             : 'bitmask' ;
+BYTES               : 'bytes' ;
 CASE                : 'case' ;
 CHOICE              : 'choice' ;
 CONST               : 'const' ;
@@ -61,6 +62,7 @@ INT16               : 'int16' ;
 INT32               : 'int32' ;
 INT64               : 'int64' ;
 INT8                : 'int8' ;
+ISSET               : 'isset' ;
 LENGTHOF            : 'lengthof' ;
 NUMBITS             : 'numbits' ;
 ON                  : 'on' ;
@@ -99,6 +101,7 @@ VARUINT             : 'varuint' ;
 VARUINT16           : 'varuint16' ;
 VARUINT32           : 'varuint32' ;
 VARUINT64           : 'varuint64' ;
+COMPAT_VERSION      : 'zserio_compatibility_version' ;
 
 // whitespaces
 WS : [\r\n\f\t ] -> skip ;
