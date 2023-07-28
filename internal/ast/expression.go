@@ -441,24 +441,51 @@ func (expr *Expression) evaluateArithmeticExpression() error {
 	}
 
 	// currently, only integer and string arithmetics are supported
-	if expr.Operand1.ResultType != ExpressionTypeInteger || expr.Operand2.ResultType != ExpressionTypeInteger {
-		return errors.New("arithmetic expressions for types other than int or string not implemented")
-	}
+	if expr.Operand1.ResultType == ExpressionTypeInteger && expr.Operand2.ResultType == ExpressionTypeInteger {
+		expr.ResultType = ExpressionTypeInteger
+		switch expr.Type {
+		case parser.ZserioParserPLUS:
+			expr.ResultIntValue = expr.Operand1.ResultIntValue + expr.Operand2.ResultIntValue
+		case parser.ZserioParserMINUS:
+			expr.ResultIntValue = expr.Operand1.ResultIntValue - expr.Operand2.ResultIntValue
+		case parser.ZserioParserMULTIPLY:
+			expr.ResultIntValue = expr.Operand1.ResultIntValue * expr.Operand2.ResultIntValue
+		case parser.ZserioParserDIVIDE:
+			expr.ResultIntValue = expr.Operand1.ResultIntValue / expr.Operand2.ResultIntValue
+		case parser.ZserioParserMODULO:
+			expr.ResultIntValue = expr.Operand1.ResultIntValue % expr.Operand2.ResultIntValue
+		default:
+			return errors.New("unexpected operation in integer arithmetic expression")
+		}
+	} else if (expr.Operand1.ResultType == ExpressionTypeFloat && expr.Operand2.ResultType == ExpressionTypeFloat) ||
+		(expr.Operand1.ResultType == ExpressionTypeInteger && expr.Operand2.ResultType == ExpressionTypeFloat) ||
+		(expr.Operand1.ResultType == ExpressionTypeFloat && expr.Operand2.ResultType == ExpressionTypeInteger) {
+		// zserio supports mixing of integer and float operands. If these are mixed, the result
+		// type will always be a float type.
+		op1 := expr.Operand1.ResultFloatValue
+		op2 := expr.Operand2.ResultFloatValue
+		if expr.Operand1.ResultType == ExpressionTypeInteger {
+			op1 = float64(expr.Operand1.ResultIntValue)
+		}
+		if expr.Operand2.ResultType == ExpressionTypeInteger {
+			op2 = float64(expr.Operand2.ResultIntValue)
+		}
 
-	expr.ResultType = ExpressionTypeInteger
-	switch expr.Type {
-	case parser.ZserioParserPLUS:
-		expr.ResultIntValue = expr.Operand1.ResultIntValue + expr.Operand2.ResultIntValue
-	case parser.ZserioParserMINUS:
-		expr.ResultIntValue = expr.Operand1.ResultIntValue - expr.Operand2.ResultIntValue
-	case parser.ZserioParserMULTIPLY:
-		expr.ResultIntValue = expr.Operand1.ResultIntValue * expr.Operand2.ResultIntValue
-	case parser.ZserioParserDIVIDE:
-		expr.ResultIntValue = expr.Operand1.ResultIntValue / expr.Operand2.ResultIntValue
-	case parser.ZserioParserMODULO:
-		expr.ResultIntValue = expr.Operand1.ResultIntValue % expr.Operand2.ResultIntValue
-	default:
-		return errors.New("unexpected operation in arithmetic expression")
+		expr.ResultType = ExpressionTypeFloat
+		switch expr.Type {
+		case parser.ZserioParserPLUS:
+			expr.ResultFloatValue = op1 + op2
+		case parser.ZserioParserMINUS:
+			expr.ResultFloatValue = op1 - op2
+		case parser.ZserioParserMULTIPLY:
+			expr.ResultFloatValue = op1 * op2
+		case parser.ZserioParserDIVIDE:
+			expr.ResultFloatValue = op1 / op2
+		default:
+			return errors.New("unexpected operation in float arithmetic expression")
+		}
+	} else {
+		return errors.New("arithmetic expressions for types other than int, float or string not implemented")
 	}
 	return nil
 }
@@ -764,9 +791,12 @@ func (expr *Expression) Evaluate(scope *Package) error {
 	case parser.ZserioParserBOOL_LITERAL:
 		expr.ResultType = ExpressionTypeBool
 		expr.ResultBoolValue = false
-		if "true" == strings.TrimSpace(strings.ToLower(expr.Text)) {
+		if strings.TrimSpace(strings.ToLower(expr.Text)) == "true" {
 			expr.ResultBoolValue = true
 		}
+	case parser.ZserioParserDOUBLE_LITERAL:
+		expr.ResultType = ExpressionTypeFloat
+		expr.ResultFloatValue, err = strconv.ParseFloat(expr.Text, 64)
 	case parser.ZserioParserINDEX:
 		err = expr.evaluateIndexExpression()
 	case parser.ZserioParserID:
