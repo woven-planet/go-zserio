@@ -26,8 +26,9 @@ type Package struct {
 	LocalSymbols     *SymbolScope
 }
 
-// NativeZserioTypeReference is a reference to the basic zserio type
-type NativeZserioTypeReference struct {
+// OriginalTypeReference is a reference to the original zserio type, for example
+// fundamental types, but also enums/structs, that were aliased by a subtype.
+type OriginalTypeReference struct {
 	Type         *TypeReference
 	RequiresCast bool
 	IsMarshaler  bool
@@ -290,13 +291,65 @@ func (p *Package) GetOtherType(name string) (*SymbolReference, error) {
 	return nil, errors.New("other type not found")
 }
 
-func (p *Package) GetZserioNativeType(typeRef *TypeReference) (*NativeZserioTypeReference, error) {
+func (p *Package) GetOriginalSymbol(symbolReference *SymbolReference) (*SymbolReference, error) {
+	var typeRef *TypeReference
+	var err error
+	counter := 0
+	for {
+		switch n := symbolReference.Symbol.(type) {
+		case *Enum:
+			return symbolReference, nil
+		case *EnumItem:
+			return symbolReference, nil
+		case *Union:
+			return symbolReference, nil
+		case *Struct:
+			return symbolReference, nil
+		case *Choice:
+			return symbolReference, nil
+		case *Field:
+			typeRef = n.Type
+		case *Parameter:
+			typeRef = n.Type
+		case *Subtype:
+			typeRef = n.Type
+		case *TypeReference:
+			typeRef = n
+		case *Function:
+			return symbolReference, nil
+		case *BitmaskType:
+			return symbolReference, nil
+		default:
+			return nil, errors.New("unable to evaluate the expression type")
+		}
+		if typeRef.IsBuiltin {
+			return &SymbolReference{
+				Symbol: typeRef,
+			}, nil
+		}
+		p, err = p.GetImportedScope(typeRef.Package)
+		if err != nil {
+			return nil, err
+		}
+		symbolReference, err = p.GetSymbol(typeRef.Name)
+		if err != nil {
+			return nil, err
+		}
+		counter += 1
+		if counter > 100 {
+			return nil, errors.New("symbol lookup failed")
+		}
+	}
+
+}
+
+func (p *Package) GetOriginalType(typeRef *TypeReference) (*OriginalTypeReference, error) {
 	requiresCast := false
 	counter := 0
 	currentScope := p
 	for {
 		if typeRef.IsBuiltin {
-			return &NativeZserioTypeReference{
+			return &OriginalTypeReference{
 				Type:         typeRef,
 				RequiresCast: requiresCast,
 			}, nil
@@ -312,31 +365,31 @@ func (p *Package) GetZserioNativeType(typeRef *TypeReference) (*NativeZserioType
 
 		switch n := symbol.Symbol.(type) {
 		case *Enum:
-			return &NativeZserioTypeReference{
+			return &OriginalTypeReference{
 				Type:         typeRef,
 				RequiresCast: requiresCast,
 				IsMarshaler:  true,
 			}, nil
 		case *Union:
-			return &NativeZserioTypeReference{
+			return &OriginalTypeReference{
 				Type:         typeRef,
 				RequiresCast: requiresCast,
 				IsMarshaler:  true,
 			}, nil
 		case *BitmaskType:
-			return &NativeZserioTypeReference{
+			return &OriginalTypeReference{
 				Type:         typeRef,
 				RequiresCast: requiresCast,
 				IsMarshaler:  true,
 			}, nil
 		case *Choice:
-			return &NativeZserioTypeReference{
+			return &OriginalTypeReference{
 				Type:         typeRef,
 				RequiresCast: requiresCast,
 				IsMarshaler:  true,
 			}, nil
 		case *Struct:
-			return &NativeZserioTypeReference{
+			return &OriginalTypeReference{
 				Type:         typeRef,
 				RequiresCast: requiresCast,
 				IsMarshaler:  true,
@@ -365,7 +418,7 @@ func GoPackageAlias(packageName string) string {
 
 // GetTypeParameter returns the parameters of a referenced type
 func (p *Package) GetTypeParameter(typeRef *TypeReference) ([]*Parameter, error) {
-	nativeType, err := p.GetZserioNativeType(typeRef)
+	nativeType, err := p.GetOriginalType(typeRef)
 	if err != nil {
 		return nil, err
 	}
