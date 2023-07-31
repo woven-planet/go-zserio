@@ -9,6 +9,9 @@ type ZserioParserVisitor interface {
 	// Visit a parse tree produced by ZserioParser#packageDeclaration.
 	VisitPackageDeclaration(ctx *PackageDeclarationContext) interface{}
 
+	// Visit a parse tree produced by ZserioParser#compatibilityVersionDirective.
+	VisitCompatibilityVersionDirective(ctx *CompatibilityVersionDirectiveContext) interface{}
+
 	// Visit a parse tree produced by ZserioParser#packageNameDefinition.
 	VisitPackageNameDefinition(ctx *PackageNameDefinitionContext) interface{}
 
@@ -198,6 +201,9 @@ type ZserioParserVisitor interface {
 	// Visit a parse tree produced by ZserioParser#logicalOrExpression.
 	VisitLogicalOrExpression(ctx *LogicalOrExpressionContext) interface{}
 
+	// Visit a parse tree produced by ZserioParser#isSetExpression.
+	VisitIsSetExpression(ctx *IsSetExpressionContext) interface{}
+
 	// Visit a parse tree produced by ZserioParser#bitwiseOrExpression.
 	VisitBitwiseOrExpression(ctx *BitwiseOrExpressionContext) interface{}
 
@@ -278,5 +284,8 @@ type ZserioParserVisitor interface {
 
 	// Visit a parse tree produced by ZserioParser#externType.
 	VisitExternType(ctx *ExternTypeContext) interface{}
+
+	// Visit a parse tree produced by ZserioParser#bytesType.
+	VisitBytesType(ctx *BytesTypeContext) interface{}
 
 }
