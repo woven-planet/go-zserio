@@ -30,4 +30,5 @@ var ZserioTypeToGoType = map[string]string{
 	"float64": "float64",
 	// arbitrary type
 	"extern": "any",
+	"bytes":  "any",
 }

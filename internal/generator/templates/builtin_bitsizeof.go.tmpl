@@ -21,6 +21,7 @@
         {{- else if eq $native.Type.Name "float32" }} endBitPosition += 32
         {{- else if eq $native.Type.Name "float64" }} endBitPosition += 64
         {{- else if eq $native.Type.Name "extern" }} endBitPosition += int({{ $name }}.BitSize)
+        {{- else if eq $native.Type.Name "bytes" }} endBitPosition += 8 * int({{ $name }}.ByteSize)
         {{- else }}
             if delta, err := 
             {{- if eq $native.Type.Name "varuint" }} ztype.UnsignedBitSize({{ $name }}, 9)

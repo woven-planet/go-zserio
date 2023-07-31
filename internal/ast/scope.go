@@ -72,6 +72,7 @@ var zserioTypeToArrayTraits = map[string]string{
 	"float64": "ztype.Float64ArrayTraits",
 	// other
 	"extern": "ztype.ObjectArrayTraits[*ztype.ExternType]",
+	"bytes":  "ztype.ObjectArrayTraits[*ztype.BytesType]",
 }
 
 // zserioDeltaPackabeTypes are all native types that can be delta-packed
@@ -186,8 +187,14 @@ func (s *RootScope) GoType(t *TypeReference) (string, error) {
 		return "uint" + goBits(t.Bits), nil
 	}
 
+	// Extern and Bytes are both zserio internal types, that store
+	// bit and byte buffers, respectively.
 	if t.Name == "extern" {
 		return "*ztype.ExternType", nil
+	}
+
+	if t.Name == "bytes" {
+		return "*ztype.BytesType", nil
 	}
 
 	if goType, found := zserioTypeToGoType[t.Name]; found {
@@ -220,7 +227,7 @@ func (s *RootScope) IsDeltaPackable(t *TypeReference) (bool, error) {
 // HasType checks if a type is defined *in this scope*. It does not check parent
 // scopes.
 func (s *RootScope) HasType(t string) bool {
-	if t == "int" || t == "bit" || t == "uint" || t == "extern" {
+	if t == "int" || t == "bit" || t == "uint" || t == "extern" || t == "bytes" {
 		return true
 	}
 	_, found := zserioTypeToGoType[t]
