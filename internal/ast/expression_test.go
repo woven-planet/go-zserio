@@ -104,3 +104,76 @@ func TestBinaryLiteralExpressions(t *testing.T) {
 		})
 	}
 }
+
+func TestFloatArithmeticExpressions(t *testing.T) {
+	tests := map[string]struct {
+		testOperand1  *ast.Expression
+		testOperand2  *ast.Expression
+		operand       int
+		expectedValue float64
+	}{
+		"adding-two-floats": {
+			testOperand1: &ast.Expression{
+				Type: parser.ZserioLexerDOUBLE_LITERAL,
+				Text: "17.23",
+			},
+			testOperand2: &ast.Expression{
+				Type: parser.ZserioLexerDOUBLE_LITERAL,
+				Text: "0.5",
+			},
+			operand:       parser.ZserioParserPLUS,
+			expectedValue: 17.73,
+		},
+		"subtracting-float-from-int": {
+			testOperand1: &ast.Expression{
+				Type: parser.ZserioLexerDECIMAL_LITERAL,
+				Text: "23",
+			},
+			testOperand2: &ast.Expression{
+				Type: parser.ZserioLexerDOUBLE_LITERAL,
+				Text: "0.5",
+			},
+			operand:       parser.ZserioParserMINUS,
+			expectedValue: 22.5,
+		},
+		"multiplying-float-with-int": {
+			testOperand1: &ast.Expression{
+				Type: parser.ZserioLexerDOUBLE_LITERAL,
+				Text: "2.25",
+			},
+			testOperand2: &ast.Expression{
+				Type: parser.ZserioLexerDECIMAL_LITERAL,
+				Text: "3",
+			},
+			operand:       parser.ZserioParserMULTIPLY,
+			expectedValue: 6.75,
+		},
+		"dividing-floats": {
+			testOperand1: &ast.Expression{
+				Type: parser.ZserioLexerDOUBLE_LITERAL,
+				Text: "9.9",
+			},
+			testOperand2: &ast.Expression{
+				Type: parser.ZserioLexerDOUBLE_LITERAL,
+				Text: "3.3",
+			},
+			operand:       parser.ZserioParserDIVIDE,
+			expectedValue: 3.0,
+		},
+	}
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			scope := &ast.Package{}
+			expression := &ast.Expression{
+				Operand1: test.testOperand1,
+				Operand2: test.testOperand2,
+				Type:     test.operand,
+			}
+			err := expression.Evaluate(scope)
+			assert.Nil(t, err)
+			assert.Equal(t, ast.ExpressionTypeFloat, expression.ResultType)
+			assert.Equal(t, ast.EvaluationStateComplete, expression.EvaluationState)
+			assert.InDelta(t, test.expectedValue, expression.ResultFloatValue, 1e-7)
+		})
+	}
+}
