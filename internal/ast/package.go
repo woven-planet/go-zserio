@@ -129,6 +129,12 @@ func (p *Package) GoType(t *TypeReference) (string, error) {
 	return p.BaseScope.GoType(t)
 }
 
+// GoType looks up a name in the scope, and provides the Go type name for it.
+// If the type is not found ErrUnkownType is returned.
+func (p *Package) OriginalType(t *TypeReference) (*OriginalTypeReference, error) {
+	return p.GetOriginalType(t)
+}
+
 // GoArrayTraits returns the array traits object for non-basic zserio types,
 // such as enums, subtypes, or structures.
 func (p *Package) GoArrayTraits(t *TypeReference) (string, error) {
