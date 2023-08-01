@@ -160,6 +160,22 @@ func TestFloatArithmeticExpressions(t *testing.T) {
 			operand:       parser.ZserioParserDIVIDE,
 			expectedValue: 3.0,
 		},
+		"do-not-divide-by-zero": {
+			testOperand1: &ast.Expression{
+				Type: parser.ZserioLexerDOUBLE_LITERAL,
+				Text: "9.9",
+			},
+			testOperand2: &ast.Expression{
+				Type:            parser.ZserioParserID,
+				FullyResolved:   false,
+				Text:            "some_identifier",
+				EvaluationState: ast.EvaluationStateComplete,
+				ResultType:      ast.ExpressionTypeInteger,
+				ResultIntValue:  0,
+			},
+			operand:       parser.ZserioParserDIVIDE,
+			expectedValue: 1.0,
+		},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
