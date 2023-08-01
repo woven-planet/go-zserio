@@ -83,7 +83,11 @@ func dotOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
 		}
 		// Generate the enum value using the original type name, as well as the
 		// enumeration value.
-		return originalType.Type.Name + strcase.ToCamel(strings.ToLower(expression.Operand2.Text))
+		enumValue := originalType.Type.Name + strcase.ToCamel(strings.ToLower(expression.Operand2.Text))
+		if originalType.RequiresCast {
+			enumValue = fmt.Sprintf("%s(%s)", leftText, enumValue)
+		}
+		return enumValue
 	} else if expression.Operand1.ResultType == ast.ExpressionTypeBitmask {
 		return leftText + rightText
 	}
