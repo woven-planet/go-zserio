@@ -89,10 +89,15 @@ func copyExpressionResult(src, dst *Expression) {
 }
 
 func evaluateExpressionType(typeRef *TypeReference, scope *Package) (ExpressionType, error) {
-	if !typeRef.IsBuiltin && typeRef.Package == "" {
+
+	originalType, err := scope.GetOriginalType(typeRef)
+	if err != nil {
+		return "", err
+	}
+	if !originalType.Type.IsBuiltin && originalType.Type.Package == "" {
 		return "", errors.New("type is not fully resolved")
 	}
-	if typeRef.IsBuiltin {
+	if originalType.Type.IsBuiltin {
 		switch typeRef.Name {
 		case "bool":
 			return ExpressionTypeBool, nil
@@ -117,12 +122,15 @@ func evaluateExpressionType(typeRef *TypeReference, scope *Package) (ExpressionT
 		return "", err
 	}
 
-	return evaluateSymbolType(symbol.Symbol, scope)
+	return evaluateSymbolType(symbol, scope)
 }
 
-func evaluateSymbolType(symbol any, scope *Package) (ExpressionType, error) {
-
-	switch n := symbol.(type) {
+func evaluateSymbolType(symbol *SymbolReference, scope *Package) (ExpressionType, error) {
+	fundamentalSymbol, err := scope.GetOriginalSymbol(symbol)
+	if err != nil {
+		return "", err
+	}
+	switch n := fundamentalSymbol.Symbol.(type) {
 	case *Enum:
 		return ExpressionTypeEnum, nil
 	case *EnumItem:
@@ -133,16 +141,12 @@ func evaluateSymbolType(symbol any, scope *Package) (ExpressionType, error) {
 		return ExpressionTypeCompound, nil
 	case *Choice:
 		return ExpressionTypeCompound, nil
-	case *Field:
-		return evaluateExpressionType(n.Type, scope)
-	case *Parameter:
-		return evaluateExpressionType(n.Type, scope)
-	case *Subtype:
-		return evaluateExpressionType(n.Type, scope)
 	case *Function:
 		return n.Result.ResultType, nil
 	case *BitmaskType:
 		return ExpressionTypeBitmask, nil
+	case *TypeReference:
+		return evaluateExpressionType(n, scope)
 	default:
 		return "", errors.New("unable to evaluate the expression type")
 	}
@@ -178,7 +182,7 @@ func (expr *Expression) evaluateIdentifier(scope *Package) error {
 	// All subsequent symbols cannot be fully resolved.
 	expr.FullyResolved = false
 	expr.ResultSymbol = symbol
-	expr.ResultType, err = evaluateSymbolType(symbol.Symbol, scope)
+	expr.ResultType, err = evaluateSymbolType(symbol, scope)
 	return err
 }
 
@@ -252,7 +256,7 @@ func (expr *Expression) evaluateCompoundDotExpression(scope *Package) error {
 			return err
 		}
 		expr.ResultSymbol = symbol
-		expr.ResultType, err = evaluateSymbolType(symbol.Symbol, newScope)
+		expr.ResultType, err = evaluateSymbolType(symbol, newScope)
 		return err
 	}
 
@@ -262,7 +266,7 @@ func (expr *Expression) evaluateCompoundDotExpression(scope *Package) error {
 			return err
 		}
 		expr.ResultSymbol = symbol
-		expr.ResultType, err = evaluateSymbolType(symbol.Symbol, newScope)
+		expr.ResultType, err = evaluateSymbolType(symbol, newScope)
 		return err
 	}
 	return errors.New("compound type is not supported")
@@ -280,7 +284,7 @@ func (expr *Expression) evaluateFunctionCallExpression(scope *Package) error {
 		Package:   expr.Operand1.ResultSymbol.Package,
 		IsBuiltin: false,
 	}
-	typeRef, err := scope.GetZserioNativeType(compoundTypeRef)
+	typeRef, err := scope.GetOriginalType(compoundTypeRef)
 	if err != nil {
 		return err
 	}
@@ -350,9 +354,16 @@ func (expr *Expression) evaluateDotExpression(scope *Package) error {
 	if expr.Operand1 == nil || expr.Operand2 == nil {
 		return errors.New("dot expression needs two operands")
 	}
+	// In case the expression does not directly reference to actual enum/bitmask type,
+	// but references it using subtypes, we first need to resolve the actual type.
+	op1Symbol := expr.Operand1.ResultSymbol
+	op1Symbol, err := scope.GetOriginalSymbol(op1Symbol)
+	if err != nil {
+		return err
+	}
 
 	if expr.Operand1.ResultType == ExpressionTypeEnum {
-		if enum, ok := expr.Operand1.ResultSymbol.Symbol.(*Enum); ok {
+		if enum, ok := op1Symbol.Symbol.(*Enum); ok {
 			for _, enumItem := range enum.Items {
 				if enumItem.Name == expr.Operand2.Text {
 					if enumItem.EvaluationState != EvaluationStateComplete {
@@ -366,7 +377,7 @@ func (expr *Expression) evaluateDotExpression(scope *Package) error {
 			}
 		}
 	} else if expr.Operand1.ResultType == ExpressionTypeBitmask {
-		if bitmask, ok := expr.Operand1.ResultSymbol.Symbol.(*BitmaskType); ok {
+		if bitmask, ok := op1Symbol.Symbol.(*BitmaskType); ok {
 			for _, bitmaskValue := range bitmask.Values {
 				if bitmaskValue.Name == expr.Operand2.Text {
 					copyExpressionResult(bitmaskValue.Expression, expr)

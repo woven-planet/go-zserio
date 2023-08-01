@@ -106,6 +106,10 @@ type Scope interface {
 	// If the type is not found ErrUnkownType is returned.
 	GoType(t *TypeReference) (string, error)
 
+	// Returns the original zserio type, removing all indirections caused by
+	// subtyping.
+	OriginalType(T *TypeReference) (*OriginalTypeReference, error)
+
 	// GoArrayTraits looks up a name in the scope, and provides the array traits
 	// for it.
 	GoArrayTraits(t *TypeReference) (string, error)
@@ -137,6 +141,13 @@ func (s *BaseScope) GoType(t *TypeReference) (string, error) {
 		return s.Parent.GoType(t)
 	}
 	return "", fmt.Errorf("%w: %s", ErrUnknownType, t.Name)
+}
+
+func (s *BaseScope) OriginalType(t *TypeReference) (*OriginalTypeReference, error) {
+	if s.Parent != nil {
+		return s.Parent.OriginalType(t)
+	}
+	return nil, fmt.Errorf("%w: %s", ErrUnknownType, t.Name)
 }
 
 func (s *BaseScope) GoArrayTraits(t *TypeReference) (string, error) {
@@ -201,6 +212,10 @@ func (s *RootScope) GoType(t *TypeReference) (string, error) {
 		return goType, nil
 	}
 	return "", fmt.Errorf("%w: %s", ErrUnknownType, t.Name)
+}
+
+func (s *RootScope) OriginalType(t *TypeReference) (*OriginalTypeReference, error) {
+	return nil, fmt.Errorf("Root scope should never be called to resolve an original type %s", t.Name)
 }
 
 // GoArrayTraits returns the array traits for a zserio basic type (int, float, ...)

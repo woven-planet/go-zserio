@@ -64,8 +64,8 @@ func GoExpression(scope ast.Scope, expression *ast.Expression) string {
 	return ExpressionToGoString(scope, expression)
 }
 
-func GoNativeType(pkg *ast.Package, typ *ast.TypeReference) (*ast.NativeZserioTypeReference, error) {
-	return pkg.GetZserioNativeType(typ)
+func GoNativeType(pkg *ast.Package, typ *ast.TypeReference) (*ast.OriginalTypeReference, error) {
+	return pkg.GetOriginalType(typ)
 }
 
 func Add(op1, op2 int) int {
