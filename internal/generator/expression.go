@@ -32,6 +32,8 @@ func IdentifierToGoString(scope ast.Scope, expression *ast.Expression) string {
 		return name
 	case *ast.Function:
 		return "v." + n.Name
+	case *ast.Subtype:
+		return name
 	default:
 		return "UNSUPPORTED_TYPE"
 	}
@@ -62,7 +64,26 @@ func dotOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
 	// constant, which is Enum name, followed by the Enum value.
 	// The same is valid for bitmasks.
 	if expression.Operand1.ResultType == ast.ExpressionTypeEnum {
-		return leftText + strcase.ToCamel(strings.ToLower(expression.Operand2.Text))
+		// Due to Go not supporting Enums, we need to check if subtyping is used.
+		// Instead of generating the Enum value with the subtyped name, we need the
+		// original type name.
+		// For example, instead of:
+		// SubTypeColorBlue
+		// we want:
+		// ColorBlue
+		// because only the latter one is defined in the generated Go code.
+		// First, resolve the original type from the scope.
+		originalType, err := scope.OriginalType(
+			&ast.TypeReference{
+				Name:    expression.Operand1.ResultSymbol.Name,
+				Package: expression.Operand1.ResultSymbol.Package,
+			})
+		if err != nil {
+			return "ENUM_TYPE_LOOKUP_FAILED"
+		}
+		// Generate the enum value using the original type name, as well as the
+		// enumeration value.
+		return originalType.Type.Name + strcase.ToCamel(strings.ToLower(expression.Operand2.Text))
 	} else if expression.Operand1.ResultType == ast.ExpressionTypeBitmask {
 		return leftText + rightText
 	}
