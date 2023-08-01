@@ -47,8 +47,8 @@ func TestEqual(t *testing.T) {
 	// Then
 	want := schema.DummyStruct{
 		Colour1: schema.ColourPurple,
-		Colour2: schema.SubtypedColourBlue,
-		Colour3: schema.OtherSubtypedColourOrange,
+		Colour2: schema.SubtypedColour(schema.ColourBlue),
+		Colour3: schema.OtherSubtypedColour(schema.ColourOrange),
 	}
 	assert.Equal(t, want, got)
 }

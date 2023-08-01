@@ -14,7 +14,10 @@ py_zserio_library(
     outs = [
         "subtypes/schema/__init__.py",
         "subtypes/schema/api.py",
-        "subtypes/schema/subtypes.py",
+        "subtypes/schema/colour.py",
+        "subtypes/schema/dummy_struct.py",
+        "subtypes/schema/other_subtyped_colour.py",
+        "subtypes/schema/subtyped_colour.py",
     ],
     prefix = "testdata",
     proto = ":schema.zs",
