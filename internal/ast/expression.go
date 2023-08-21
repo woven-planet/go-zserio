@@ -451,7 +451,7 @@ func (expr *Expression) evaluateArithmeticExpression() error {
 		return errors.New("invalid operation on string operands")
 	}
 
-	// currently, only integer and string arithmetics are supported
+	// currently, only integer, float and string arithmetics are supported
 	if expr.Operand1.ResultType == ExpressionTypeInteger && expr.Operand2.ResultType == ExpressionTypeInteger {
 		expr.ResultType = ExpressionTypeInteger
 		op1 := expr.Operand1.ResultIntValue

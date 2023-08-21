@@ -181,6 +181,19 @@ func twoOperatorEqualTypesToGoString(scope ast.Scope, expression *ast.Expression
 			operand2Str = fmt.Sprintf("%s(%s)", op1GoString, operand2Str)
 		}
 	}
+	// Casting is also needed when mixing integer with float values.
+	// In that case, always assume that the result is a floating point type.
+	// Currently, the zserio reference implementation is also not specific,
+	// as different programming languages implement different behaviors.
+	// See https://github.com/ndsev/zserio/issues/152.
+	// For now, we use the float operator, when mixing float with integer
+	// operators.
+	if expression.Operand1.ResultType == ast.ExpressionTypeFloat && expression.Operand2.ResultType == ast.ExpressionTypeInteger {
+		operand2Str = fmt.Sprintf("float64(%s)", operand2Str)
+	} else if expression.Operand1.ResultType == ast.ExpressionTypeInteger && expression.Operand2.ResultType == ast.ExpressionTypeFloat {
+		operand1Str = fmt.Sprintf("float64(%s)", operand1Str)
+	}
+
 	return fmt.Sprintf("%s %s %s",
 		operand1Str,
 		operator,
