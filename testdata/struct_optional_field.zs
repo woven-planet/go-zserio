@@ -1,4 +1,4 @@
-package struct_optional_field
+package struct_optional_field;
 
 enum uint8 State
 {

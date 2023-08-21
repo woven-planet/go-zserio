@@ -27,10 +27,20 @@ struct ValueWrapper(int32 parameter)
     Color enumValue if parameter == 7;
     align(8):
     string description;
+
+    float16 f16Value;
+    float32 f32Value;
+    float64 f64Value;
     
     function int32 getValue()
     {
         return value + parameter;
+    }
+
+    function float64 getSum()
+    {
+        // Just some random additions and divisions.
+        return f16Value + f32Value + f64Value / (value << 2);
     }
 };
 
