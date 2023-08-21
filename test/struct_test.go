@@ -19,3 +19,10 @@ func TestOptionalField(t *testing.T) {
 	require.NoError(t, err)
 	require.Greater(t, len(dataWithOptional), len(dataWithoutOptional))
 }
+
+func TestZserioFunction(t *testing.T) {
+	// This test case ensures that the zserio functions were correctly generated,
+	// and the float types were correctly generated.
+	value := &types.ValueWrapper{Value: 1, F16Value: 0.5, F32Value: 1.5, F64Value: 10.0}
+	require.Equal(value.getSum(), 12.0)
+}
