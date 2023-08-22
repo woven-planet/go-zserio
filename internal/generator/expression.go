@@ -1,7 +1,6 @@
 package generator
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -102,30 +101,6 @@ func numBitsOperatorToGoString(scope ast.Scope, expression *ast.Expression) stri
 	return fmt.Sprintf("ztype.NumBits(uint64(%s))", ExpressionToGoString(scope, expression.Operand1))
 }
 
-func getSymbolType(scope ast.Scope, symbol *ast.SymbolReference) (*ast.TypeReference, error) {
-
-	switch n := symbol.Symbol.(type) {
-	case *ast.Enum:
-		return n.Type, nil
-	case *ast.Field:
-		return n.Type, nil
-	case *ast.Parameter:
-		return n.Type, nil
-	case *ast.Subtype:
-		return &ast.TypeReference{
-			Name:      n.Name,
-			IsBuiltin: false,
-			Package:   symbol.Package,
-		}, nil
-	case *ast.Function:
-		return n.ReturnType, nil
-	case *ast.BitmaskType:
-		return n.Type, nil
-	default:
-		return nil, errors.New("unable to evaluate the symbol type")
-	}
-}
-
 // twoOperatorEqualTypesToGoString prints out an expression that uses two
 // operands, where the operator expects to be both sides of the same type.
 // since there are many different integer and type to integer types, casting
@@ -160,38 +135,60 @@ func twoOperatorEqualTypesToGoString(scope ast.Scope, expression *ast.Expression
 	operand1Str := ExpressionToGoString(scope, expression.Operand1)
 	operand2Str := ExpressionToGoString(scope, expression.Operand2)
 
-	// If the type definitions are not matching, a typecast might be needed
-	if expression.Operand1.ResultType == ast.ExpressionTypeInteger &&
-		expression.Operand1.ResultSymbol != nil &&
-		expression.Operand2.ResultSymbol != nil {
-		op1Type, err := getSymbolType(scope, expression.Operand1.ResultSymbol)
+	// Check if casting is needed because of different original types.
+	// Casting is needed in the following cases:
+	// - mixing floats with integers
+	// - mixing signed/unsigned types
+	// - mixing different bit lengths
+	// - mixing numerals of different types, e.g. 17 + 3.5
+	// Casting is not needed in the following cases:
+	// - The expression result is not an integer.
+	// - One or both operands are numerals without type annotations, for example
+	//   "17.5 + 13.6"
+	//   In that case, NativeZserioType will be set to nil. Both operands must be
+	//   integer or float numerals.
+	if (expression.ResultType == ast.ExpressionTypeInteger || expression.ResultType == ast.ExpressionTypeFloat) && expression.NativeZserioType != nil {
+
+		// Retrieve the resulting type of the expression
+		expressionGoType, err := GoType(scope, expression.NativeZserioType)
 		if err != nil {
-			return "TYPE_ERROR"
+			panic(err)
 		}
-		op2Type, err := getSymbolType(scope, expression.Operand2.ResultSymbol)
-		if err != nil {
-			return "TYPE_ERROR"
-		}
-		if op1Type.Name != op2Type.Name {
-			// implicitly cast
-			op1GoString, err := scope.GoType(op1Type)
+		// Check if operand1 or operand2 (or both) needs a type cast.
+		// In very rare cases, both operands need to be casted:
+		// For example, mixing an uint8 with an int32 will require both
+		// operands to be casted to uint32 (highest rank + unsigned wins).
+		operand1RequiresCast := false
+		if expression.Operand1.ResultType != expression.ResultType {
+			operand1RequiresCast = true
+		} else if expression.Operand1.NativeZserioType != nil {
+			operand1GoType, err := GoType(scope, expression.Operand1.NativeZserioType)
 			if err != nil {
-				return "TYPE_ERROR"
+				panic(err)
 			}
-			operand2Str = fmt.Sprintf("%s(%s)", op1GoString, operand2Str)
+			if operand1GoType != expressionGoType {
+				operand1RequiresCast = true
+			}
 		}
-	}
-	// Casting is also needed when mixing integer with float values.
-	// In that case, always assume that the result is a floating point type.
-	// Currently, the zserio reference implementation is also not specific,
-	// as different programming languages implement different behaviors.
-	// See https://github.com/ndsev/zserio/issues/152.
-	// For now, we use the float operator, when mixing float with integer
-	// operators.
-	if expression.Operand1.ResultType == ast.ExpressionTypeFloat && expression.Operand2.ResultType == ast.ExpressionTypeInteger {
-		operand2Str = fmt.Sprintf("float64(%s)", operand2Str)
-	} else if expression.Operand1.ResultType == ast.ExpressionTypeInteger && expression.Operand2.ResultType == ast.ExpressionTypeFloat {
-		operand1Str = fmt.Sprintf("float64(%s)", operand1Str)
+		operand2RequiresCast := false
+		if expression.Operand2.ResultType != expression.ResultType {
+			operand2RequiresCast = true
+		} else if expression.Operand2.NativeZserioType != nil {
+			operand2GoType, err := GoType(scope, expression.Operand2.NativeZserioType)
+			if err != nil {
+				panic(err)
+			}
+			if operand2GoType != expressionGoType {
+				operand2RequiresCast = true
+			}
+		}
+
+		if operand1RequiresCast {
+			operand1Str = fmt.Sprintf("%s(%s)", expressionGoType, operand1Str)
+		}
+		if operand2RequiresCast {
+			operand2Str = fmt.Sprintf("%s(%s)", expressionGoType, operand2Str)
+		}
 	}
 
 	return fmt.Sprintf("%s %s %s",
@@ -250,7 +247,7 @@ func lenOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
 }
 
 func valueOfOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
-	return fmt.Sprintf("%s", ExpressionToGoString(scope, expression.Operand1))
+	return ExpressionToGoString(scope, expression.Operand1)
 }
 
 func ExpressionToGoString(scope ast.Scope, expression *ast.Expression) string {
