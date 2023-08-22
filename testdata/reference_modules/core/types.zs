@@ -40,7 +40,7 @@ struct ValueWrapper(int32 parameter)
     varuint64 varu64Value;
     varuint varuValue;
     varsize varSizeValue;
-    int32 i32ValueArray[5];
+    int32 i32ValueArray[];
 
 
     function int32 getValue()
