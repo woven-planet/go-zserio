@@ -22,7 +22,26 @@ func TestOptionalField(t *testing.T) {
 
 func TestZserioFunction(t *testing.T) {
 	// This test case ensures that the zserio functions were correctly generated,
-	// and the float types were correctly generated.
-	value := &types.ValueWrapper{Value: 1, F64Value: 10.0}
-	require.Equal(value.getSum(), 22.0)
+	// and the float types were correctly generated and casted.
+	value := &types.ValueWrapper{Value: 1, F16Value: 1.5, F32Value: 1.5, F64Value: 10.0}
+	require.Equal(value.getSum(), 25.0)
+}
+
+func TestGoIntegerTypeCasts(t *testing.T) {
+	// This test case tests integer type casts, when integers of different bit length
+	// and signed/unsigned are used within an expression.
+	value := &types.ValueWrapper{
+		Value:         1,
+		Vari16Value:   16,
+		Vari32Value:   32,
+		Vari64Value:   64,
+		VariValue:     -33,
+		Varu16Value:   1,
+		Varu32Value:   0,
+		Varu64Value:   352342562363,
+		VaruValue:     6456457,
+		VarSizeValue:  4453425,
+		I32ValueArray: []int32{-1, -2, -3, -4, -5},
+	}
+	require.Equal(value.TestTypeCasts(), 25.0)
 }

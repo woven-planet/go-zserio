@@ -28,7 +28,21 @@ struct ValueWrapper(int32 parameter)
     align(8):
     string description;
     float64 f64Value;
-    
+    float32 f32Value;
+    float16 f16Value;
+
+    varint16 vari16Value;
+    varint32 vari32Value;
+    varint64 vari64Value;
+    varint variValue;
+    varuint16 varu16Value;
+    varuint32 varu32Value;
+    varuint64 varu64Value;
+    varuint varuValue;
+    varsize varSizeValue;
+    int32 i32ValueArray[5];
+
+
     function int32 getValue()
     {
         return value + parameter;
@@ -37,7 +51,16 @@ struct ValueWrapper(int32 parameter)
     function float64 getSum()
     {
         // Just some random additions and divisions.
-        return 12.0 + f64Value / (value << 2);
+        return 12.0 + f16Value + f32Value + f64Value / (value << 2);
+    }
+
+    function float32 testTypeCasts()
+    {
+        // Test mixing different integer types, and make
+        // sure the generated code handles type casts correctly.
+        return value + vari16Value + vari32Value + vari64Value + variValue + 
+            varu16Value + varu32Value + varu64Value + varuValue + varSizeValue +
+            i32ValueArray[0] + lengthof(i32ValueArray);   
     }
 };
 
