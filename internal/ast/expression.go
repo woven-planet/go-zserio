@@ -357,6 +357,7 @@ func (expr *Expression) evaluateLengthOfOperator(scope *Package) error {
 		return err
 	}
 	expr.ResultType = ExpressionTypeInteger
+	expr.NativeZserioType = &TypeReference{IsBuiltin: true, Name: "int64"}
 	return nil
 }
 

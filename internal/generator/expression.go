@@ -243,7 +243,10 @@ func ternaryExpressionToGoString(scope ast.Scope, expression *ast.Expression) st
 }
 
 func lenOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
-	return fmt.Sprintf("len(%s)", ExpressionToGoString(scope, expression.Operand1))
+	// zserio internally does not support platform "int" types, so the return value
+	// is casted to an (zserio) int64 types. Note that this value must be aligned
+	// with the zserio type set in evaluateLengthOfOperator().
+	return fmt.Sprintf("(int64)(len(%s))", ExpressionToGoString(scope, expression.Operand1))
 }
 
 func valueOfOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
