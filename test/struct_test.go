@@ -24,7 +24,7 @@ func TestZserioFunction(t *testing.T) {
 	// This test case ensures that the zserio functions were correctly generated,
 	// and the float types were correctly generated and casted.
 	value := &types.ValueWrapper{Value: 1, F16Value: 1.5, F32Value: 1.5, F64Value: 10.0}
-	require.Equal(value.getSum(), 25.0)
+	require.Equal(t, 17.5, value.GetSum())
 }
 
 func TestGoIntegerTypeCasts(t *testing.T) {
@@ -38,10 +38,10 @@ func TestGoIntegerTypeCasts(t *testing.T) {
 		VariValue:     -33,
 		Varu16Value:   1,
 		Varu32Value:   0,
-		Varu64Value:   352342562363,
-		VaruValue:     6456457,
-		VarSizeValue:  4453425,
+		Varu64Value:   353,
+		VaruValue:     6457,
+		VarSizeValue:  4425,
 		I32ValueArray: []int32{-1, -2, -3, -4, -5},
 	}
-	require.Equal(value.TestTypeCasts(), 25.0)
+	require.Equal(t, (float32)(11320.0), value.TestTypeCasts())
 }

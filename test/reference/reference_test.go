@@ -60,11 +60,12 @@ func want() testobject.TestObject {
 	d.Struct1 = instantiations.InstantiatedTemplateStruct{
 		Parameter: d.Parameter1,
 		Field: types.ValueWrapper{
-			Parameter:   d.Parameter1,
-			Value:       72,
-			OtherValue:  121,
-			EnumValue:   types.ColorBlue,
-			Description: "test data",
+			Parameter:     d.Parameter1,
+			Value:         72,
+			OtherValue:    121,
+			EnumValue:     types.ColorBlue,
+			Description:   "test data",
+			I32ValueArray: []int32{},
 		},
 	}
 	d.Color1 = types.ColorRed
@@ -74,10 +75,11 @@ func want() testobject.TestObject {
 		d.StructArray = append(d.StructArray, instantiations.InstantiatedTemplateStruct{
 			Parameter: d.Parameter2,
 			Field: types.ValueWrapper{
-				Parameter:   d.Parameter2,
-				Value:       int32(i + 100),
-				OtherValue:  int8(i),
-				Description: "some dummy description",
+				Parameter:     d.Parameter2,
+				Value:         int32(i + 100),
+				OtherValue:    int8(i),
+				Description:   "some dummy description",
+				I32ValueArray: []int32{},
 				// the field "EnumValue" does not need to be set, because it
 				// is configured with a condition in zserio:
 				// Color enumValue if parameter == 7;
