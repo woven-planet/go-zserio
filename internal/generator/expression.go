@@ -249,6 +249,8 @@ func ExpressionToGoString(scope ast.Scope, expression *ast.Expression) string {
 			return fmt.Sprintf("%t", expression.ResultBoolValue)
 		case ast.ExpressionTypeString:
 			return fmt.Sprintf("%q", expression.ResultStringValue)
+		case ast.ExpressionTypeFloat:
+			return fmt.Sprintf("%f", expression.ResultFloatValue)
 		default:
 			return "UNSUPPORTED_TYPE"
 		}
