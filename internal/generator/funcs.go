@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/woven-planet/go-zserio/internal/ast"
+	"github.com/woven-planet/go-zserio/internal/parser"
 )
 
 func IsDeltaPackable(scope ast.Scope, typ *ast.TypeReference) (bool, error) {
@@ -70,4 +71,34 @@ func GoNativeType(pkg *ast.Package, typ *ast.TypeReference) (*ast.OriginalTypeRe
 
 func Add(op1, op2 int) int {
 	return op1 + op2
+}
+
+func hasIndexOperator(expression *ast.Expression) bool {
+	if expression == nil {
+		return false
+	}
+
+	if hasIndexOperator(expression.Operand1) {
+		return true
+	}
+	if hasIndexOperator(expression.Operand2) {
+		return true
+	}
+	if hasIndexOperator(expression.Operand3) {
+		return true
+	}
+
+	if expression.Type == parser.ZserioParserINDEX {
+		return true
+	}
+	return false
+}
+
+func HasIndexOperators(typeRef *ast.TypeReference) bool {
+	for _, typeArgument := range typeRef.TypeArguments {
+		if hasIndexOperator(typeArgument) {
+			return true
+		}
+	}
+	return false
 }
