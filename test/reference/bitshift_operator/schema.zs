@@ -7,6 +7,8 @@ struct BitShiftOperator
 
     function float64 testBitShift()
     {
+        // This test case validates the correct generation of bitshift expressions.
+        // See https://github.com/woven-planet/go-zserio/pull/123.
         return (1 << u8BitShift) + f64Value;
     }
 };
