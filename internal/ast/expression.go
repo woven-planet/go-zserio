@@ -95,11 +95,14 @@ func copyExpressionResult(src, dst *Expression) {
 	dst.NativeZserioType = src.NativeZserioType
 }
 
-// evaluateExpressionType returns the expression type and the bit
-// size of the underlying type for a type reference.
-// For example, if the type reference is an int16, ExpressionTypeInt, 16
-// is returned. For types where the bit count is not relevant, the bit
-// count is 0.
+// evaluateExpressionType returns the expression type and the type
+// reference of the underlying internal zserio type.
+// For example, if the expression type is an int16, ExpressionTypeInt,
+// TypeReference{Name: "int16"} is returned.
+// For types where there is no zserio internal type (for example, for structs,
+// unions or choices), the type reference is nil.
+// The type reference is also nil for (integer or float) numerals. Their type
+// will depend on how they are used, and will be determined later.
 func evaluateExpressionType(typeRef *TypeReference, scope *Package) (ExpressionType, *TypeReference, error) {
 
 	originalType, err := scope.GetOriginalType(typeRef)
