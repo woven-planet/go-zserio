@@ -9,6 +9,7 @@ go_library(
         "enum.go",
         "expression.go",
         "field.go",
+        "mixing_native_types.go",
         "model.go",
         "package.go",
         "scope.go",

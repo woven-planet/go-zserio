@@ -71,6 +71,12 @@ type Expression struct {
 	// ExpressionTypeBool
 	ResultBoolValue bool
 
+	// NativeZserioType stores the exact zserio type, in case ResultType is
+	// an integer or float type. This is needed to make type casts in the
+	// generated Go code when mixing different types - for example
+	// mixing varint with uint32, or mixing float types with integer types.
+	NativeZserioType *TypeReference
+
 	// ResultSymbol points to the symbol if ResultType is ExpressionTypeEnum or
 	// ExpressionTypeStruct.
 	ResultSymbol *SymbolReference
@@ -86,69 +92,78 @@ func copyExpressionResult(src, dst *Expression) {
 	dst.ResultStringValue = src.ResultStringValue
 	dst.ResultSymbol = src.ResultSymbol
 	dst.ResultType = src.ResultType
+	dst.NativeZserioType = src.NativeZserioType
 }
 
-func evaluateExpressionType(typeRef *TypeReference, scope *Package) (ExpressionType, error) {
+// evaluateExpressionType returns the expression type and the type
+// reference of the underlying internal zserio type.
+// For example, if the expression type is an int16, ExpressionTypeInt,
+// TypeReference{Name: "int16"} is returned.
+// For types where there is no zserio internal type (for example, for structs,
+// unions or choices), the type reference is nil.
+// The type reference is also nil for (integer or float) numerals. Their type
+// will depend on how they are used, and will be determined later.
+func evaluateExpressionType(typeRef *TypeReference, scope *Package) (ExpressionType, *TypeReference, error) {
 
 	originalType, err := scope.GetOriginalType(typeRef)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	if !originalType.Type.IsBuiltin && originalType.Type.Package == "" {
-		return "", errors.New("type is not fully resolved")
+		return "", nil, errors.New("type is not fully resolved")
 	}
 	if originalType.Type.IsBuiltin {
 		switch typeRef.Name {
 		case "bool":
-			return ExpressionTypeBool, nil
+			return ExpressionTypeBool, typeRef, nil
 		case "string":
-			return ExpressionTypeString, nil
+			return ExpressionTypeString, typeRef, nil
 		case "float16":
-			return ExpressionTypeFloat, nil
+			return ExpressionTypeFloat, typeRef, nil
 		case "float32":
-			return ExpressionTypeFloat, nil
+			return ExpressionTypeFloat, typeRef, nil
 		case "float64":
-			return ExpressionTypeFloat, nil
+			return ExpressionTypeFloat, typeRef, nil
 		default:
-			return ExpressionTypeInteger, nil
+			return ExpressionTypeInteger, typeRef, nil
 		}
 	}
 	symbolScope, err := scope.GetImportedScope(typeRef.Package)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	symbol, err := symbolScope.GetSymbol(typeRef.Name)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	return evaluateSymbolType(symbol, scope)
 }
 
-func evaluateSymbolType(symbol *SymbolReference, scope *Package) (ExpressionType, error) {
+func evaluateSymbolType(symbol *SymbolReference, scope *Package) (ExpressionType, *TypeReference, error) {
 	fundamentalSymbol, err := scope.GetOriginalSymbol(symbol)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	switch n := fundamentalSymbol.Symbol.(type) {
 	case *Enum:
-		return ExpressionTypeEnum, nil
+		return ExpressionTypeEnum, nil, nil
 	case *EnumItem:
-		return ExpressionTypeInteger, nil
+		return ExpressionTypeInteger, nil, nil
 	case *Union:
-		return ExpressionTypeCompound, nil
+		return ExpressionTypeCompound, nil, nil
 	case *Struct:
-		return ExpressionTypeCompound, nil
+		return ExpressionTypeCompound, nil, nil
 	case *Choice:
-		return ExpressionTypeCompound, nil
+		return ExpressionTypeCompound, nil, nil
 	case *Function:
-		return n.Result.ResultType, nil
+		return n.Result.ResultType, nil, nil
 	case *BitmaskType:
-		return ExpressionTypeBitmask, nil
+		return ExpressionTypeBitmask, nil, nil
 	case *TypeReference:
 		return evaluateExpressionType(n, scope)
 	default:
-		return "", errors.New("unable to evaluate the expression type")
+		return "", nil, errors.New("unable to evaluate the expression type")
 	}
 }
 
@@ -182,7 +197,7 @@ func (expr *Expression) evaluateIdentifier(scope *Package) error {
 	// All subsequent symbols cannot be fully resolved.
 	expr.FullyResolved = false
 	expr.ResultSymbol = symbol
-	expr.ResultType, err = evaluateSymbolType(symbol, scope)
+	expr.ResultType, expr.NativeZserioType, err = evaluateSymbolType(symbol, scope)
 	return err
 }
 
@@ -256,7 +271,7 @@ func (expr *Expression) evaluateCompoundDotExpression(scope *Package) error {
 			return err
 		}
 		expr.ResultSymbol = symbol
-		expr.ResultType, err = evaluateSymbolType(symbol, newScope)
+		expr.ResultType, expr.NativeZserioType, err = evaluateSymbolType(symbol, newScope)
 		return err
 	}
 
@@ -266,7 +281,7 @@ func (expr *Expression) evaluateCompoundDotExpression(scope *Package) error {
 			return err
 		}
 		expr.ResultSymbol = symbol
-		expr.ResultType, err = evaluateSymbolType(symbol, newScope)
+		expr.ResultType, expr.NativeZserioType, err = evaluateSymbolType(symbol, newScope)
 		return err
 	}
 	return errors.New("compound type is not supported")
@@ -333,7 +348,7 @@ func (expr *Expression) evaluateArrayElement(scope *Package) error {
 	if expr.Operand2.ResultType != ExpressionTypeInteger {
 		return errors.New("array index expression must be an integger")
 	}
-	if expr.ResultType, err = evaluateExpressionType(field.Type, scope); err != nil {
+	if expr.ResultType, expr.NativeZserioType, err = evaluateExpressionType(field.Type, scope); err != nil {
 		return err
 	}
 	return nil
@@ -345,6 +360,7 @@ func (expr *Expression) evaluateLengthOfOperator(scope *Package) error {
 		return err
 	}
 	expr.ResultType = ExpressionTypeInteger
+	expr.NativeZserioType = &TypeReference{IsBuiltin: true, Name: "int64"}
 	return nil
 }
 
@@ -402,6 +418,7 @@ func (expr *Expression) evaluateParenthesizedExpression() error {
 	expr.ResultIntValue = expr.Operand1.ResultIntValue
 	expr.ResultStringValue = expr.Operand1.ResultStringValue
 	expr.ResultBoolValue = expr.Operand1.ResultBoolValue
+	expr.NativeZserioType = expr.Operand1.NativeZserioType
 	return nil
 }
 
@@ -417,6 +434,7 @@ func (expr *Expression) evaluateUnaryArithmeticExpression() error {
 		return errors.New("unary arithmetic expression must be float or int")
 	}
 	expr.ResultType = expr.Operand1.ResultType
+	expr.NativeZserioType = expr.Operand1.NativeZserioType
 	if expr.Operand1.ResultType == ExpressionTypeInteger {
 		expr.ResultIntValue = expr.Operand1.ResultIntValue
 		if expr.Type == parser.ZserioParserMINUS {
@@ -435,7 +453,7 @@ func (expr *Expression) evaluateArithmeticExpression() error {
 	if expr.Operand1 == nil {
 		return errors.New("arithmetic operations need at least one operand")
 	}
-	// single arithemtic expressions
+	// single arithmetic expressions
 	if expr.Operand2 == nil {
 		return expr.evaluateUnaryArithmeticExpression()
 	}
@@ -451,9 +469,13 @@ func (expr *Expression) evaluateArithmeticExpression() error {
 		return errors.New("invalid operation on string operands")
 	}
 
-	// currently, only integer and string arithmetics are supported
+	// currently, only integer, float and string arithmetics are supported
 	if expr.Operand1.ResultType == ExpressionTypeInteger && expr.Operand2.ResultType == ExpressionTypeInteger {
-		expr.ResultType = ExpressionTypeInteger
+		var err error
+		expr.ResultType, expr.NativeZserioType, err = DetermineArithmeticOperationResultType(expr.Operand1, expr.Operand2)
+		if err != nil {
+			return err
+		}
 		op1 := expr.Operand1.ResultIntValue
 		op2 := expr.Operand2.ResultIntValue
 		if !expr.Operand1.FullyResolved || !expr.Operand2.FullyResolved {
@@ -464,6 +486,7 @@ func (expr *Expression) evaluateArithmeticExpression() error {
 			op2 = 1
 			expr.FullyResolved = false
 		}
+
 		switch expr.Type {
 		case parser.ZserioParserPLUS:
 			expr.ResultIntValue = op1 + op2
@@ -483,7 +506,11 @@ func (expr *Expression) evaluateArithmeticExpression() error {
 		(expr.Operand1.ResultType == ExpressionTypeFloat && expr.Operand2.ResultType == ExpressionTypeInteger) {
 		// zserio supports mixing of integer and float operands. If these are mixed, the result
 		// type will always be a float type.
-		expr.ResultType = ExpressionTypeFloat
+		var err error
+		expr.ResultType, expr.NativeZserioType, err = DetermineArithmeticOperationResultType(expr.Operand1, expr.Operand2)
+		if err != nil {
+			return err
+		}
 		op1 := expr.Operand1.ResultFloatValue
 		op2 := expr.Operand2.ResultFloatValue
 		if expr.Operand1.ResultType == ExpressionTypeInteger {
@@ -616,11 +643,13 @@ func (expr *Expression) evaluateTernaryExpression() error {
 		expr.ResultIntValue = expr.Operand2.ResultIntValue
 		expr.ResultBoolValue = expr.Operand2.ResultBoolValue
 		expr.ResultStringValue = expr.Operand2.ResultStringValue
+		expr.NativeZserioType = expr.Operand2.NativeZserioType
 	} else {
 		expr.ResultType = expr.Operand3.ResultType
 		expr.ResultIntValue = expr.Operand3.ResultIntValue
 		expr.ResultBoolValue = expr.Operand3.ResultBoolValue
 		expr.ResultStringValue = expr.Operand3.ResultStringValue
+		expr.NativeZserioType = expr.Operand3.NativeZserioType
 	}
 	return nil
 }
@@ -635,6 +664,7 @@ func (expr *Expression) evaluateBitwiseNegation() error {
 	}
 	expr.ResultType = expr.Operand1.ResultType
 	expr.ResultIntValue = ^expr.Operand1.ResultIntValue
+	expr.NativeZserioType = expr.Operand1.NativeZserioType
 	return nil
 }
 
@@ -649,6 +679,7 @@ func (expr *Expression) evaluateBitwiseExpression() error {
 	}
 
 	expr.ResultType = expr.Operand1.ResultType
+	expr.NativeZserioType = expr.Operand1.NativeZserioType
 
 	switch expr.Type {
 	case parser.ZserioLexerLSHIFT:
@@ -819,8 +850,13 @@ func (expr *Expression) Evaluate(scope *Package) error {
 		if strings.TrimSpace(strings.ToLower(expr.Text)) == "true" {
 			expr.ResultBoolValue = true
 		}
+	case parser.ZserioLexerFLOAT_LITERAL:
+		expr.ResultType = ExpressionTypeFloat
+		expr.NativeZserioType = &TypeReference{IsBuiltin: true, Name: "float32"}
+		expr.ResultFloatValue, err = strconv.ParseFloat(expr.Text, 32)
 	case parser.ZserioParserDOUBLE_LITERAL:
 		expr.ResultType = ExpressionTypeFloat
+		expr.NativeZserioType = &TypeReference{IsBuiltin: true, Name: "float64"}
 		expr.ResultFloatValue, err = strconv.ParseFloat(expr.Text, 64)
 	case parser.ZserioParserINDEX:
 		err = expr.evaluateIndexExpression()

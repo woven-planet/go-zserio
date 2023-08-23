@@ -160,27 +160,91 @@ func twoOperatorEqualTypesToGoString(scope ast.Scope, expression *ast.Expression
 	operand1Str := ExpressionToGoString(scope, expression.Operand1)
 	operand2Str := ExpressionToGoString(scope, expression.Operand2)
 
-	// If the type definitions are not matching, a typecast might be needed
-	if expression.Operand1.ResultType == ast.ExpressionTypeInteger &&
-		expression.Operand1.ResultSymbol != nil &&
-		expression.Operand2.ResultSymbol != nil {
-		op1Type, err := getSymbolType(scope, expression.Operand1.ResultSymbol)
+	// Check if casting is needed because of different original types.
+	// Casting is needed in the following cases:
+	// - mixing floats with integers
+	// - mixing signed/unsigned types
+	// - mixing different bit lengths
+	// - mixing numerals of different types, e.g. 17 + 3.5
+	// Casting is not needed in the following cases:
+	// - The expression result is not an integer.
+	// - One or both operands are numerals without type annotations, for example
+	//   "17.5 + 13.6"
+	//   In that case, NativeZserioType will be set to nil. Both operands must be
+	//   integer or float numerals.
+	if (expression.ResultType == ast.ExpressionTypeInteger || expression.ResultType == ast.ExpressionTypeFloat) && expression.NativeZserioType != nil {
+		// Retrieve the resulting type of the expression
+		expressionGoType, err := GoType(scope, expression.NativeZserioType)
 		if err != nil {
-			return "TYPE_ERROR"
+			panic(err)
 		}
-		op2Type, err := getSymbolType(scope, expression.Operand2.ResultSymbol)
-		if err != nil {
-			return "TYPE_ERROR"
-		}
-		if op1Type.Name != op2Type.Name {
-			// implicitly cast
-			op1GoString, err := scope.GoType(op1Type)
+
+		operand1RequiresCast := false
+		operand2RequiresCast := false
+		operand1GoType := ""
+		operand2GoType := ""
+		// Check if operand1 or operand2 (or both) needs a type cast.
+		// In very rare cases, both operands need to be casted:
+		// For example, mixing an uint8 with an int32 will require both
+		// operands to be casted to uint32 (highest rank + unsigned wins).
+		if expression.Operand1.ResultSymbol != nil {
+			// If symbols are used, they are likely subtypes. We also need
+			// to cast if different subtypes are used
+			op1Type, err := getSymbolType(scope, expression.Operand1.ResultSymbol)
 			if err != nil {
-				return "TYPE_ERROR"
+				panic(err)
 			}
-			operand2Str = fmt.Sprintf("%s(%s)", op1GoString, operand2Str)
+			operand1GoType, err = GoType(scope, op1Type)
+			if err != nil {
+				panic(err)
+			}
+		} else {
+			if expression.Operand1.ResultType != expression.ResultType {
+				operand1RequiresCast = true
+			} else if expression.Operand1.NativeZserioType != nil {
+				operand1GoType, err = GoType(scope, expression.Operand1.NativeZserioType)
+				if err != nil {
+					panic(err)
+				}
+			}
+		}
+		if operand1GoType != expressionGoType {
+			operand1RequiresCast = true
+		}
+
+		if expression.Operand2.ResultSymbol != nil {
+			// If symbols are used, they are likely subtypes. We also need
+			// to cast if different subtypes are used
+			op2Type, err := getSymbolType(scope, expression.Operand2.ResultSymbol)
+			if err != nil {
+				panic(err)
+			}
+			operand2GoType, err = GoType(scope, op2Type)
+			if err != nil {
+				panic(err)
+			}
+		} else {
+			if expression.Operand2.ResultType != expression.ResultType {
+				operand2RequiresCast = true
+			} else if expression.Operand2.NativeZserioType != nil {
+				operand2GoType, err = GoType(scope, expression.Operand2.NativeZserioType)
+				if err != nil {
+					panic(err)
+				}
+			}
+		}
+		if operand2GoType != expressionGoType {
+			operand2RequiresCast = true
+		}
+
+		if operand1RequiresCast {
+			operand1Str = fmt.Sprintf("%s(%s)", expressionGoType, operand1Str)
+		}
+		if operand2RequiresCast {
+			operand2Str = fmt.Sprintf("%s(%s)", expressionGoType, operand2Str)
 		}
 	}
+
 	return fmt.Sprintf("%s %s %s",
 		operand1Str,
 		operator,
@@ -233,11 +297,14 @@ func ternaryExpressionToGoString(scope ast.Scope, expression *ast.Expression) st
 }
 
 func lenOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
-	return fmt.Sprintf("len(%s)", ExpressionToGoString(scope, expression.Operand1))
+	// zserio internally does not support platform "int" types, so the return value
+	// is casted to an (zserio) int64 types. Note that this value must be aligned
+	// with the zserio type set in evaluateLengthOfOperator().
+	return fmt.Sprintf("(int64)(len(%s))", ExpressionToGoString(scope, expression.Operand1))
 }
 
 func valueOfOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
-	return fmt.Sprintf("%s", ExpressionToGoString(scope, expression.Operand1))
+	return ExpressionToGoString(scope, expression.Operand1)
 }
 
 func ExpressionToGoString(scope ast.Scope, expression *ast.Expression) string {
