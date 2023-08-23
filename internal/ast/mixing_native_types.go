@@ -159,7 +159,7 @@ func evaluateMixingIntegerTypes(type1 *TypeReference, type2 *TypeReference) (*Ty
 		}
 		*newType = *type1
 	} else {
-		if op1IsSigned == resultIsSigned {
+		if op2IsSigned == resultIsSigned {
 			return type2, nil
 		}
 		*newType = *type2
