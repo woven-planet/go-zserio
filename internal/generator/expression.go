@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -101,6 +102,30 @@ func numBitsOperatorToGoString(scope ast.Scope, expression *ast.Expression) stri
 	return fmt.Sprintf("ztype.NumBits(uint64(%s))", ExpressionToGoString(scope, expression.Operand1))
 }
 
+func getSymbolType(scope ast.Scope, symbol *ast.SymbolReference) (*ast.TypeReference, error) {
+
+	switch n := symbol.Symbol.(type) {
+	case *ast.Enum:
+		return n.Type, nil
+	case *ast.Field:
+		return n.Type, nil
+	case *ast.Parameter:
+		return n.Type, nil
+	case *ast.Subtype:
+		return &ast.TypeReference{
+			Name:      n.Name,
+			IsBuiltin: false,
+			Package:   symbol.Package,
+		}, nil
+	case *ast.Function:
+		return n.ReturnType, nil
+	case *ast.BitmaskType:
+		return n.Type, nil
+	default:
+		return nil, errors.New("unable to evaluate the symbol type")
+	}
+}
+
 // twoOperatorEqualTypesToGoString prints out an expression that uses two
 // operands, where the operator expects to be both sides of the same type.
 // since there are many different integer and type to integer types, casting
@@ -148,39 +173,68 @@ func twoOperatorEqualTypesToGoString(scope ast.Scope, expression *ast.Expression
 	//   In that case, NativeZserioType will be set to nil. Both operands must be
 	//   integer or float numerals.
 	if (expression.ResultType == ast.ExpressionTypeInteger || expression.ResultType == ast.ExpressionTypeFloat) && expression.NativeZserioType != nil {
-
 		// Retrieve the resulting type of the expression
 		expressionGoType, err := GoType(scope, expression.NativeZserioType)
 		if err != nil {
 			panic(err)
 		}
+
+		operand1RequiresCast := false
+		operand2RequiresCast := false
+		operand1GoType := ""
+		operand2GoType := ""
 		// Check if operand1 or operand2 (or both) needs a type cast.
 		// In very rare cases, both operands need to be casted:
 		// For example, mixing an uint8 with an int32 will require both
 		// operands to be casted to uint32 (highest rank + unsigned wins).
-		operand1RequiresCast := false
-		if expression.Operand1.ResultType != expression.ResultType {
-			operand1RequiresCast = true
-		} else if expression.Operand1.NativeZserioType != nil {
-			operand1GoType, err := GoType(scope, expression.Operand1.NativeZserioType)
+		if expression.Operand1.ResultSymbol != nil {
+			// If symbols are used, they are likely subtypes. We also need
+			// to cast if different subtypes are used
+			op1Type, err := getSymbolType(scope, expression.Operand1.ResultSymbol)
 			if err != nil {
 				panic(err)
 			}
-			if operand1GoType != expressionGoType {
+			operand1GoType, err = GoType(scope, op1Type)
+			if err != nil {
+				panic(err)
+			}
+		} else {
+			if expression.Operand1.ResultType != expression.ResultType {
 				operand1RequiresCast = true
+			} else if expression.Operand1.NativeZserioType != nil {
+				operand1GoType, err = GoType(scope, expression.Operand1.NativeZserioType)
+				if err != nil {
+					panic(err)
+				}
 			}
 		}
-		operand2RequiresCast := false
-		if expression.Operand2.ResultType != expression.ResultType {
-			operand2RequiresCast = true
-		} else if expression.Operand2.NativeZserioType != nil {
-			operand2GoType, err := GoType(scope, expression.Operand2.NativeZserioType)
+		if operand1GoType != expressionGoType {
+			operand1RequiresCast = true
+		}
+
+		if expression.Operand2.ResultSymbol != nil {
+			// If symbols are used, they are likely subtypes. We also need
+			// to cast if different subtypes are used
+			op2Type, err := getSymbolType(scope, expression.Operand2.ResultSymbol)
 			if err != nil {
 				panic(err)
 			}
-			if operand2GoType != expressionGoType {
-				operand2RequiresCast = true
+			operand2GoType, err = GoType(scope, op2Type)
+			if err != nil {
+				panic(err)
 			}
+		} else {
+			if expression.Operand2.ResultType != expression.ResultType {
+				operand2RequiresCast = true
+			} else if expression.Operand2.NativeZserioType != nil {
+				operand2GoType, err = GoType(scope, expression.Operand2.NativeZserioType)
+				if err != nil {
+					panic(err)
+				}
+			}
+		}
+		if operand2GoType != expressionGoType {
+			operand2RequiresCast = true
 		}
 
 		if operand1RequiresCast {
