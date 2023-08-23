@@ -680,12 +680,15 @@ func (expr *Expression) evaluateBitwiseExpression() error {
 
 	expr.ResultType = expr.Operand1.ResultType
 	expr.NativeZserioType = expr.Operand1.NativeZserioType
+	isShiftOperation := false
 
 	switch expr.Type {
 	case parser.ZserioLexerLSHIFT:
 		expr.ResultIntValue = expr.Operand1.ResultIntValue << expr.Operand2.ResultIntValue
+		isShiftOperation = true
 	case parser.ZserioParserRSHIFT:
 		expr.ResultIntValue = expr.Operand1.ResultIntValue >> expr.Operand2.ResultIntValue
+		isShiftOperation = true
 	case parser.ZserioParserAND:
 		expr.ResultIntValue = expr.Operand1.ResultIntValue & expr.Operand2.ResultIntValue
 	case parser.ZserioParserOR:
@@ -695,6 +698,25 @@ func (expr *Expression) evaluateBitwiseExpression() error {
 	default:
 		return errors.New("unexpected bitwise operator")
 	}
+
+	// If operand 1 has no native zserio type determined (e.g. because it is
+	// a numeral), try to deduce the type from the second operand.
+	// This does not apply to shift operations.
+	if expr.NativeZserioType == nil && !isShiftOperation {
+		expr.NativeZserioType = expr.Operand2.NativeZserioType
+	}
+
+	// If this is a shift operation, and there is no clear type defined,
+	// assume an uint32. This is the case if numerals are used, e.g.
+	// "17 < numShift". In this case, the result type is not determined.
+	// To avoid https://stackoverflow.com/questions/24865339/invalid-operation-shift-of-type-float64
+	if isShiftOperation && expr.NativeZserioType == nil {
+		expr.NativeZserioType = &TypeReference{
+			IsBuiltin: true,
+			Name:      "uint32",
+		}
+	}
+
 	return nil
 }
 

@@ -253,11 +253,14 @@ func twoOperatorEqualTypesToGoString(scope ast.Scope, expression *ast.Expression
 
 func twoOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
 	operator := ""
+	isShiftOperator := false
 	switch expression.Type {
 	case parser.ZserioLexerLSHIFT:
 		operator = "<<"
+		isShiftOperator = true
 	case parser.ZserioParserRSHIFT:
 		operator = ">>"
+		isShiftOperator = true
 	case parser.ZserioParserAND:
 		operator = "&"
 	case parser.ZserioParserOR:
@@ -269,9 +272,21 @@ func twoOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
 	case parser.ZserioParserLOGICAL_OR:
 		operator = "||"
 	}
+	operand1Str := ExpressionToGoString(scope, expression.Operand1)
+	if isShiftOperator && expression.Operand1.ResultType == ast.ExpressionTypeInteger && expression.Operand1.FullyResolved {
+		// Resolve issue
+		// https://stackoverflow.com/questions/24865339/invalid-operation-shift-of-type-float64
+		// Shift operations in Go may implicitly cast the first parameter to a float
+		// if there is a cast to a different type.
+		expressionGoType, err := GoType(scope, expression.NativeZserioType)
+		if err != nil {
+			panic(err)
+		}
+		operand1Str = fmt.Sprintf("%s(%s)", expressionGoType, operand1Str)
+	}
 
 	return fmt.Sprintf("%s %s %s",
-		ExpressionToGoString(scope, expression.Operand1),
+		operand1Str,
 		operator,
 		ExpressionToGoString(scope, expression.Operand2))
 }
