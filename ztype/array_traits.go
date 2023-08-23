@@ -816,6 +816,94 @@ func (trait StringArrayTraits) FromUint64(value uint64) string {
 	return "" // not supported for string objects
 }
 
+type BitBufferArrayTraits struct{}
+
+func (trait BitBufferArrayTraits) PackedTraits() IPackedArrayTraits[*ExternType] {
+	return &PackedArrayTraits[*ExternType, BitBufferArrayTraits]{
+		ArrayTraits: trait,
+	}
+}
+
+func (trait BitBufferArrayTraits) BitSizeOfIsConstant() bool {
+	return false
+}
+
+func (trait BitBufferArrayTraits) NeedsBitsizeOfPosition() bool {
+	return false
+}
+
+func (trait BitBufferArrayTraits) NeedsReadIndex() bool {
+	return false
+}
+
+func (trait BitBufferArrayTraits) BitSizeOf(element *ExternType, endBitPosition int) int {
+	return int(element.BitSize)
+}
+
+func (trait BitBufferArrayTraits) InitializeOffsets(bitPosition int, value *ExternType) int {
+	return bitPosition + trait.BitSizeOf(value, 0) // endBitPosition is ignored
+}
+
+func (trait BitBufferArrayTraits) Read(reader zserio.Reader, endBitPosition int) (*ExternType, error) {
+	return ReadExtern(reader)
+}
+
+func (trait BitBufferArrayTraits) Write(writer zserio.Writer, value *ExternType) error {
+	return WriteExtern(writer, value)
+}
+
+func (trait BitBufferArrayTraits) AsUint64(value *ExternType) uint64 {
+	return 0 // not supported for Extern type objects
+}
+
+func (trait BitBufferArrayTraits) FromUint64(value uint64) *ExternType {
+	return nil // not supported for Extern type objects
+}
+
+type BytesArrayTraits struct{}
+
+func (trait BytesArrayTraits) PackedTraits() IPackedArrayTraits[*BytesType] {
+	return &PackedArrayTraits[*BytesType, BytesArrayTraits]{
+		ArrayTraits: trait,
+	}
+}
+
+func (trait BytesArrayTraits) BitSizeOfIsConstant() bool {
+	return false
+}
+
+func (trait BytesArrayTraits) NeedsBitsizeOfPosition() bool {
+	return false
+}
+
+func (trait BytesArrayTraits) NeedsReadIndex() bool {
+	return false
+}
+
+func (trait BytesArrayTraits) BitSizeOf(element *BytesType, endBitPosition int) int {
+	return int(element.ByteSize) * 8
+}
+
+func (trait BytesArrayTraits) InitializeOffsets(bitPosition int, value *BytesType) int {
+	return bitPosition + trait.BitSizeOf(value, 0) // endBitPosition is ignored
+}
+
+func (trait BytesArrayTraits) Read(reader zserio.Reader, endBitPosition int) (*BytesType, error) {
+	return ReadBytes(reader)
+}
+
+func (trait BytesArrayTraits) Write(writer zserio.Writer, value *BytesType) error {
+	return WriteBytes(writer, value)
+}
+
+func (trait BytesArrayTraits) AsUint64(value *BytesType) uint64 {
+	return 0 // not supported for Extern type objects
+}
+
+func (trait BytesArrayTraits) FromUint64(value uint64) *BytesType {
+	return nil // not supported for Extern type objects
+}
+
 // ObjectArrayTraits is an array traits for zserio structs, choice, union or enum types
 type ObjectArrayTraits[T zserio.PackableZserioType] struct {
 	DefaultObject T

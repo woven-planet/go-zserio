@@ -71,8 +71,8 @@ var zserioTypeToArrayTraits = map[string]string{
 	"float32": "ztype.Float32ArrayTraits",
 	"float64": "ztype.Float64ArrayTraits",
 	// other
-	"extern": "ztype.ObjectArrayTraits[*ztype.ExternType]",
-	"bytes":  "ztype.ObjectArrayTraits[*ztype.BytesType]",
+	"extern": "ztype.BitBufferArrayTraits",
+	"bytes":  "ztype.BytesArrayTraits",
 }
 
 // zserioDeltaPackabeTypes are all native types that can be delta-packed
