@@ -31,7 +31,7 @@
 {{- if $field.Array }}
     {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $field_name "field" $field "native" $native }}
     {{- if $native.IsMarshaler }}
-    for index, _ := range {{ $field_name }} {
+    for index := range {{ $field_name }} {
         {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{if $native.RequiresCast }}(*{{ goType $scope $native.Type }})(&{{ $field_name }}[index]){{ else }}&{{ $field_name }}[index]{{ end }})
     }
     {{- else if $native.RequiresCast }}
