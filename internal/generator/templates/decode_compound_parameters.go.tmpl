@@ -1,15 +1,28 @@
 
-{{ $scope := .pkg }}
-{{ $field := .field }}
+{{- $scope := .pkg }}
+{{- $field := .field }}
 {{- $field_name := .field_name }}
-
+{{- $use_index_operator := hasIndexOperators $field.Type }}
 {{- if $field.Type.TypeArguments }}
     {{- if $field.Array }}
-        {{- $field_name = printf "%sArrayProperties.ArrayTraits.DefaultObject" $field.Name }}
+        {{- if $use_index_operator }}
+// This array uses the index operator. The following for loop passes
+// all parameters to individual default objects. Since the @index
+// operator is used, each default object entry may look differently.
+for index, defaultObject := range {{ $field.Name }}ArrayProperties.ArrayTraits.ObjectCreator.DefaultObjects {
+          {{- $field_name = "defaultObject" }}
+        {{- else }}
+          {{- $field_name = printf "%sArrayProperties.ArrayTraits.ObjectCreator.DefaultObject" $field.Name }}
+        {{- end }}
     {{- end }}
     {{- $type_parameter := getTypeParameter $scope $field.Type }}
     {{- range $i, $argument := $field.Type.TypeArguments }}
         {{- $current_type_parameter := index $type_parameter $i }}
         {{ $field_name }}.{{ $current_type_parameter.Name}} = {{ goType $scope $current_type_parameter.Type }}({{ goExpression $scope $argument }})
     {{- end}}
+    {{- if and $field.Array $use_index_operator }}
+        {{- /* Close the for-loop again, if the index operator is used. */}}
+}
+    {{- end }}
+
 {{- end }}

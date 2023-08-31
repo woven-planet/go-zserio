@@ -58,12 +58,12 @@ func (traits *PackedArrayTraits[T, Y]) Write(contextNode *zserio.PackingContextN
 // ObjectPackedArrayTraits is a wrapper around array traits for zserio objects.
 type ObjectPackedArrayTraits[T zserio.PackableZserioType, Y IArrayTraits[T]] struct {
 	ArrayTraits   Y
-	DefaultObject T
+	ObjectCreator ObjectCreator[T]
 }
 
 func (traits *ObjectPackedArrayTraits[T, Y]) CreateContext() (*zserio.PackingContextNode, error) {
 	// Create a packing context without a context set (it will be set by the
-	// compund object fields).
+	// compound object fields).
 	node := &zserio.PackingContextNode{}
 
 	// this is deliberately a null pointer (simulating static methods), as the
@@ -93,7 +93,15 @@ func (traits *ObjectPackedArrayTraits[T, Y]) InitializeOffsets(contextNode *zser
 
 // Read reads an array element of a packed array traits.
 func (traits *ObjectPackedArrayTraits[T, Y]) Read(contextNode *zserio.PackingContextNode, reader zserio.Reader, index int) (T, error) {
-	value := traits.DefaultObject.Clone().(T)
+
+	var value T
+	if traits.ObjectCreator.UsesIndexOperator {
+		// In case the index operator is used, pick the right initial object
+		value = traits.ObjectCreator.DefaultObjects[index].Clone().(T)
+	} else {
+		value = traits.ObjectCreator.DefaultObject.Clone().(T)
+	}
+
 	err := value.UnmarshalZserioPacked(contextNode, reader)
 	return value, err
 }
