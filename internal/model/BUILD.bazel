@@ -13,7 +13,7 @@ go_library(
         "//internal/ast",
         "//internal/parser",
         "//internal/visitor",
-        "@com_github_antlr_antlr4_runtime_go_antlr//:antlr",
+        "@com_github_antlr_antlr4_runtime_go_antlr//v4:antlr",
     ],
 )
 
