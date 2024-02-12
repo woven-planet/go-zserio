@@ -78,6 +78,7 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 load("@rules_antlr//antlr:repositories.bzl", "rules_antlr_dependencies")
 load("//:deps.bzl", "go_dependencies")
+load("@rules_python//python:pip.bzl", "pip_parse")
 
 bazel_skylib_workspace()
 
@@ -90,15 +91,18 @@ rules_antlr_dependencies("4.8")
 
 go_rules_dependencies()
 
-go_register_toolchains(version = "1.18.2")
+go_register_toolchains(version = "1.21.7")
 
 gazelle_dependencies()
 
-load("@rules_python//python:pip.bzl", "pip_install")
-
-pip_install(
-    requirements = "//test/rules:requirements.txt",
+pip_parse(
+    name = "pip",
+    requirements_lock = "//test/rules:requirements.txt",
 )
+
+load("@pip//:requirements.bzl", "install_deps")
+
+install_deps()
 
 RULES_JVM_EXTERNAL_TAG = "4.2"
 
