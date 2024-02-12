@@ -34,9 +34,9 @@ def go_dependencies():
     )
     go_repository(
         name = "com_github_antlr_antlr4_runtime_go_antlr",
-        importpath = "github.com/antlr/antlr4/runtime/Go/antlr",
-        sum = "h1:7qzNO1wqchnLQf8sOapBujDO/mFu8gYW/9jGZl1l96E=",
-        version = "v0.0.0-20211101200231-0802afb9c160",
+        importpath = "github.com/antlr4-go/antlr",
+        sum = "h1:o+W7GDFUwWtVkN28CW/nhh/aCmHn6OJddUs3+8vMMjs=",
+        version = "v0.0.0-20230518091524-98b52378c522",
     )
     go_repository(
         name = "com_github_armon_circbuf",

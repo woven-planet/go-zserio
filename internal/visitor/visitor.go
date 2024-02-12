@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/antlr/antlr4/runtime/Go/antlr"
+	"github.com/antlr4-go/antlr"
 	"github.com/woven-planet/go-zserio/internal/ast"
 	"github.com/woven-planet/go-zserio/internal/parser"
 )
