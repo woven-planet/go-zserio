@@ -1,6 +1,6 @@
 module myproject.home/zserio-example
 
-go 1.18
+go 1.21.1
 
 replace github.com/woven-planet/go-zserio => ../
 
@@ -10,7 +10,6 @@ require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.1.1 // indirect
 	github.com/Masterminds/sprig/v3 v3.2.2 // indirect
-	github.com/antlr/antlr4/runtime/Go/antlr v0.0.0-20211101200231-0802afb9c160 // indirect
 	github.com/google/uuid v1.1.2 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect
