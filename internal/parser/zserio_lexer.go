@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"unicode"
 
-	"github.com/antlr4-go/antl"
+	"github.com/antlr4-go/antlr"
 )
 // Suppress unused import error
 var _ = fmt.Printf
