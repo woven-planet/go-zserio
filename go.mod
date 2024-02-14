@@ -6,7 +6,7 @@ toolchain go1.21.6
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
-	github.com/antlr4-go/antlr/v4 v4.13.0
+	github.com/antlr/antlr4/runtime/Go/antlr/v4 v4.0.0-20230305170008-8188dc5388df
 	github.com/bazelbuild/rules_go v0.46.0
 	github.com/google/go-cmp v0.6.0
 	github.com/iancoleman/strcase v0.3.0
