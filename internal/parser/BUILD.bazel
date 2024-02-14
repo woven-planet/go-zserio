@@ -63,6 +63,7 @@ write_file(
     ],
 )
 
+# TODO: this doesn't work on Windows.
 sh_binary(
     name = "update",
     srcs = ["update.sh"],

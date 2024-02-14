@@ -37,6 +37,7 @@ definitions are stored. Supported file extensions are `.zs` and `.zserio`.
 - The ternary operator only works when used in functions.
 - Offsets and indexed offsets are not implemented yet.
 - Constraints are not implemented yet.
+- The `bazel` build environment does not work on Windows.
 
 ## Links
 
