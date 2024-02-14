@@ -87,7 +87,7 @@ protobuf_deps()
 # gazelle:repository_macro deps.bzl%go_dependencies
 go_dependencies()
 
-rules_antlr_dependencies("4.8")
+rules_antlr_dependencies("4.11.1")
 
 go_rules_dependencies()
 
