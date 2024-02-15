@@ -26,10 +26,11 @@ def _impl(ctx):
         args.add("-setTopLevelPackage", prefix.replace("/", "."))
 
     outs = [ctx.actions.declare_file(paths.join(dir_name, o)) for o in ctx.attr.outs]
+
     # It is not possible to declare the root directory and the generated
     # files within the same action.
     # See https://stackoverflow.com/questions/76284753/declaring-both-directory-and-inner-files-in-a-bazel-rule
-    # As such, we need to deduce the root of the generation directory from the 
+    # As such, we need to deduce the root of the generation directory from the
     # output generator, remove the generated filename sub-path, and go up one more directory,
     # to find the generator directory for zserio.
     first_file = ctx.attr.outs[0]
@@ -74,7 +75,7 @@ py_zserio_compile = rule(
             doc = "The Zserio file to pass to the compiler",
         ),
         "_tool": attr.label(
-            cfg = "host",
+            cfg = "exec",
             default = Label("//test/rules:zserio_compiler"),
             doc = "The zserio compiler tool",
             executable = True,

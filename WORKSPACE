@@ -103,6 +103,7 @@ go_rules_dependencies()
 go_register_toolchains(version = "1.21.7")
 
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
+
 gazelle_dependencies()
 
 load("@rules_python//python:pip.bzl", "pip_parse")

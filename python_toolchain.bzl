@@ -1,6 +1,7 @@
-load("@rules_python//python:repositories.bzl", "python_register_toolchains")
-load("@rules_python//python:pip.bzl", "pip_parse")
+"""The bazel configuration for the Python toolchain.
+"""
 
+load("@rules_python//python:repositories.bzl", "python_register_toolchains")
 
 def initialize_python_toolchain():
     python_register_toolchains(
