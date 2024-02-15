@@ -49,12 +49,11 @@ http_archive(
     urls = ["https://github.com/GorNishanov/rules_antlr/archive/0.5.8.tar.gz"],
 )
 
-# Using 2.25.0 because of https://github.com/bazelbuild/rules_python/issues/1560
 http_archive(
     name = "rules_python",
-    sha256 = "5868e73107a8e85d8f323806e60cad7283f34b32163ea6ff1020cf27abef6036",
-    strip_prefix = "rules_python-0.25.0",
-    url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.25.0.tar.gz",
+    integrity = "sha256-xovcT77CXeW1STuIGc/Id8TqKZwNyxXCRMWgAgjN4xE=",
+    strip_prefix = "rules_python-0.31.0",
+    url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.31.0.tar.gz",
 )
 
 http_archive(
@@ -72,28 +71,41 @@ http_archive(
     ],
 )
 
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
+load("@rules_python//python:repositories.bzl", "py_repositories")
+
+py_repositories()
+
+load("//:python_toolchain.bzl", "initialize_python_toolchain")
+
+initialize_python_toolchain()
+
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
-load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
-load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
-load("@rules_antlr//antlr:repositories.bzl", "rules_antlr_dependencies")
-load("//:deps.bzl", "go_dependencies")
-load("@rules_python//python:pip.bzl", "pip_parse")
 
 bazel_skylib_workspace()
+
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 protobuf_deps()
 
 # gazelle:repository_macro deps.bzl%go_dependencies
+load("//:deps.bzl", "go_dependencies")
+
 go_dependencies()
 
+load("@rules_antlr//antlr:repositories.bzl", "rules_antlr_dependencies")
+
 rules_antlr_dependencies("4.11.1")
+
+load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 
 go_rules_dependencies()
 
 go_register_toolchains(version = "1.21.7")
 
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
 gazelle_dependencies()
+
+load("@rules_python//python:pip.bzl", "pip_parse")
 
 pip_parse(
     name = "pip",
