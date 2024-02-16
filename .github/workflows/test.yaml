@@ -74,6 +74,6 @@ jobs:
       - uses: actions/setup-go@v2
         with:
           stable: false
-          go-version: '1.18.0'
+          go-version: '1.21.6'
 
       - run: ./bin/ensure-unchanged ./example/test.sh

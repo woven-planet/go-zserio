@@ -15,7 +15,7 @@ go_library(
     importpath = "github.com/woven-planet/go-zserio/internal/parser",
     visibility = ["//:__subpackages__"],
     deps = [
-        "@com_github_antlr_antlr4_runtime_go_antlr//:antlr",
+        "@com_github_antlr_antlr4_runtime_go_antlr_v4//:antlr",
     ],
 )
 
@@ -63,6 +63,7 @@ write_file(
     ],
 )
 
+# TODO: this doesn't work on Windows.
 sh_binary(
     name = "update",
     srcs = ["update.sh"],

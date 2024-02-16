@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/antlr/antlr4/runtime/Go/antlr"
+	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
 	"github.com/woven-planet/go-zserio/internal/ast"
 	"github.com/woven-planet/go-zserio/internal/parser"
 	"github.com/woven-planet/go-zserio/internal/visitor"
