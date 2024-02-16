@@ -35,6 +35,7 @@ definitions are stored. Supported file extensions are `.zs` and `.zserio`.
 
 - Implicit length arrays are deprecated, and are not supported.
 - The ternary operator only works when used in functions.
+- Cyclic imports, while not recommended, are supported by zserio, but not supported by go-zserio.
 - Offsets and indexed offsets are not implemented yet.
 - Constraints are not implemented yet.
 - The `bazel run //internal/parser:update` command to rerun the `antlr` parser does not work on Windows. See https://github.com/woven-planet/go-zserio/issues/128 for more details.
@@ -42,4 +43,4 @@ definitions are stored. Supported file extensions are `.zs` and `.zserio`.
 ## Links
 
 - [zserio](https://github.com/ndsev/zserio)
-- [Woven Planet](https://www.woven-planet.global/en)
+- [Woven by Toyota](https://woven.toyota/en/)
