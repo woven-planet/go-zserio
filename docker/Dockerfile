@@ -2,7 +2,7 @@
 
 # Setup initial apt-get infrastructure and CA certificates which are going to
 # be needed in later layers.
-FROM ubuntu:focal AS base
+FROM ubuntu:20.04 AS base
 
 RUN apt-get update && \
     env DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
