@@ -346,7 +346,7 @@ func (expr *Expression) evaluateArrayElement(scope *Package) error {
 		return err
 	}
 	if expr.Operand2.ResultType != ExpressionTypeInteger {
-		return errors.New("array index expression must be an integger")
+		return errors.New("array index expression must be an integer")
 	}
 	if expr.ResultType, expr.NativeZserioType, err = evaluateExpressionType(field.Type, scope); err != nil {
 		return err
