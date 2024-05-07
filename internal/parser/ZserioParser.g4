@@ -97,6 +97,7 @@ structureDeclaration
 structureFieldDefinition
     :   fieldAlignment?
         fieldOffset?
+        EXTEND?
         OPTIONAL?
         fieldTypeId
         fieldInitializer?
@@ -190,7 +191,7 @@ enumDeclaration
     ;
 
 enumItem
-    :   id (ASSIGN expression)?
+    :   (DEPRECATED | REMOVED)? id (ASSIGN expression)?
     ;
 
 
