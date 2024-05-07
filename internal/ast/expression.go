@@ -396,7 +396,8 @@ func (expr *Expression) evaluateDotExpression(scope *Package) error {
 		if bitmask, ok := op1Symbol.Symbol.(*BitmaskType); ok {
 			for _, bitmaskValue := range bitmask.Values {
 				if bitmaskValue.Name == expr.Operand2.Text {
-					copyExpressionResult(bitmaskValue.Expression, expr)
+					expr.ResultIntValue = bitmaskValue.Expression.ResultIntValue
+					expr.ResultType = ExpressionTypeBitmask
 					return nil
 				}
 			}
@@ -407,6 +408,22 @@ func (expr *Expression) evaluateDotExpression(scope *Package) error {
 		return errors.New("dot expression must use a valid symbol")
 	}
 	return errors.New("failed to evaluate dot expression")
+}
+
+// evaluateParenthesizedExpression evaluates if a bit flag is set in a bitmask.
+func (expr *Expression) evaluateIsSetOperator() error {
+	if expr.Operand1 == nil || expr.Operand2 == nil {
+		return errors.New("the isset() operator needs two operands")
+	}
+	if expr.Operand1.ResultType != ExpressionTypeBitmask {
+		return errors.New("the first operand of the isset() operator must be a bitmask")
+	}
+	if expr.Operand2.ResultType != ExpressionTypeBitmask {
+		return errors.New("the second operand of the isset() operator must be a bitmask")
+	}
+	expr.ResultType = ExpressionTypeBool
+	expr.ResultBoolValue = expr.Operand1.ResultIntValue&expr.Operand2.ResultIntValue != 0
+	return nil
 }
 
 // evaluateParenthesizedExpression evaluates an expression inside a parentheses.
@@ -803,6 +820,8 @@ func (expr *Expression) Evaluate(scope *Package) error {
 		err = expr.evaluateArrayElement(scope)
 	case parser.ZserioParserDOT:
 		err = expr.evaluateDotExpression(scope)
+	case parser.ZserioParserISSET:
+		err = expr.evaluateIsSetOperator()
 	case parser.ZserioParserLENGTHOF:
 		err = expr.evaluateLengthOfOperator(scope)
 	case parser.ZserioParserVALUEOF:
