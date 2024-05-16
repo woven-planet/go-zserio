@@ -452,6 +452,15 @@ func (v *Visitor) VisitDotExpression(ctx *parser.DotExpressionContext) any {
 	}
 }
 
+func (v *Visitor) VisitIsSetExpression(ctx *parser.IsSetExpressionContext) any {
+	return &ast.Expression{
+		Operand1: v.Visit(ctx.Expression(0)).(*ast.Expression),
+		Operand2: v.Visit(ctx.Expression(1)).(*ast.Expression),
+		Type:     ctx.GetOperator().GetTokenType(),
+		Text:     ctx.GetOperator().GetText(),
+	}
+}
+
 func (v *Visitor) VisitLengthofExpression(ctx *parser.LengthofExpressionContext) any {
 	return &ast.Expression{
 		Operand1: v.Visit(ctx.Expression()).(*ast.Expression),

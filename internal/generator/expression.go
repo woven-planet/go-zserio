@@ -311,6 +311,10 @@ func ternaryExpressionToGoString(scope ast.Scope, expression *ast.Expression) st
 	)
 }
 
+func isSetOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
+	return fmt.Sprintf("%s & %s != 0", ExpressionToGoString(scope, expression.Operand1), ExpressionToGoString(scope, expression.Operand2))
+}
+
 func lenOperatorToGoString(scope ast.Scope, expression *ast.Expression) string {
 	// zserio internally does not support platform "int" types, so the return value
 	// is casted to an (zserio) int64 types. Note that this value must be aligned
@@ -346,6 +350,8 @@ func ExpressionToGoString(scope ast.Scope, expression *ast.Expression) string {
 		return functionCallExpressionToString(scope, expression)
 	case parser.ZserioParserDOT:
 		return dotOperatorToGoString(scope, expression)
+	case parser.ZserioParserISSET:
+		return isSetOperatorToGoString(scope, expression)
 	case parser.ZserioParserLENGTHOF:
 		return lenOperatorToGoString(scope, expression)
 	case parser.ZserioParserVALUEOF:
