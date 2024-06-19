@@ -61,6 +61,7 @@ maven.install(
     artifacts = [
         "io.github.ndsev:zserio:2.11.0",
     ],
+    lock_file = "//:maven_install.lock.json",
     repositories = [
         "https://repo.maven.apache.org/maven2/",
     ],

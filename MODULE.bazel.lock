@@ -300,9 +300,10 @@
     "@@rules_jvm_external~//:extensions.bzl%maven": {
       "general": {
         "bzlTransitiveDigest": "Pq3YnJEflPAALx/UMykUnN3aA5bve0fNm/cuLvt/zvI=",
-        "usagesDigest": "1rf85CKg+ZzTzSQ0WMyYQbYU2pW4fEMgkuOqyrKqmVc=",
+        "usagesDigest": "4KCQ6S8V+3NFVcXLYhvHlQ4HHAR3xFweKAYXeElFqRI=",
         "recordedFileInputs": {
-          "@@rules_jvm_external~//rules_jvm_external_deps_install.json": "0bfbc915d9155df44d7a3b216e8f3c1fbcd110e358dd07637dc393583a5227e8"
+          "@@rules_jvm_external~//rules_jvm_external_deps_install.json": "0bfbc915d9155df44d7a3b216e8f3c1fbcd110e358dd07637dc393583a5227e8",
+          "@@//maven_install.lock.json": "ed542d582df9820ad8394100e6934d79365ce8d52e6593c35da86e1e0966110c"
         },
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -2057,6 +2058,37 @@
               "downloaded_file_path": "v1/software/amazon/awssdk/s3/2.25.23/s3-2.25.23-sources.jar"
             }
           },
+          "unpinned_go_zserio_maven_deps": {
+            "bzlFile": "@@rules_jvm_external~//:coursier.bzl",
+            "ruleClassName": "coursier_fetch",
+            "attributes": {
+              "user_provided_name": "go_zserio_maven_deps",
+              "repositories": [
+                "{ \"repo_url\": \"https://repo.maven.apache.org/maven2/\" }"
+              ],
+              "artifacts": [
+                "{ \"group\": \"io.github.ndsev\", \"artifact\": \"zserio\", \"version\": \"2.11.0\" }"
+              ],
+              "fail_on_missing_checksum": true,
+              "fetch_sources": false,
+              "fetch_javadoc": false,
+              "excluded_artifacts": [],
+              "generate_compat_repositories": false,
+              "version_conflict_policy": "default",
+              "override_targets": {},
+              "strict_visibility": false,
+              "strict_visibility_value": [
+                "@@//visibility:private"
+              ],
+              "use_credentials_from_home_netrc_file": false,
+              "maven_install_json": "@@//:maven_install.lock.json",
+              "resolve_timeout": 600,
+              "use_starlark_android_rules": false,
+              "aar_import_bzl_label": "@build_bazel_rules_android//android:rules.bzl",
+              "duplicate_version_warning": "warn",
+              "ignore_empty_files": false
+            }
+          },
           "javax_annotation_javax_annotation_api_jar_sources_1_3_2": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_file",
@@ -2321,6 +2353,17 @@
               "downloaded_file_path": "v1/io/grpc/grpc-googleapis/1.62.2/grpc-googleapis-1.62.2.jar"
             }
           },
+          "io_github_ndsev_zserio_2_11_0": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_file",
+            "attributes": {
+              "sha256": "3d9e9c5faf7b4f4e5a8e34dc719f770154d60e051b59dbc2ab5d4c56d1546292",
+              "urls": [
+                "https://repo.maven.apache.org/maven2/io/github/ndsev/zserio/2.11.0/zserio-2.11.0.jar"
+              ],
+              "downloaded_file_path": "v1/io/github/ndsev/zserio/2.11.0/zserio-2.11.0.jar"
+            }
+          },
           "com_google_protobuf_protobuf_java_3_25_2": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_file",
@@ -2466,32 +2509,34 @@
           },
           "go_zserio_maven_deps": {
             "bzlFile": "@@rules_jvm_external~//:coursier.bzl",
-            "ruleClassName": "coursier_fetch",
+            "ruleClassName": "pinned_coursier_fetch",
             "attributes": {
               "user_provided_name": "go_zserio_maven_deps",
               "repositories": [
                 "{ \"repo_url\": \"https://repo.maven.apache.org/maven2/\" }"
               ],
+              "boms": [],
               "artifacts": [
                 "{ \"group\": \"io.github.ndsev\", \"artifact\": \"zserio\", \"version\": \"2.11.0\" }"
               ],
-              "fail_on_missing_checksum": true,
               "fetch_sources": false,
               "fetch_javadoc": false,
-              "excluded_artifacts": [],
+              "resolver": "coursier",
               "generate_compat_repositories": false,
-              "version_conflict_policy": "default",
+              "maven_install_json": "@@//:maven_install.lock.json",
               "override_targets": {},
               "strict_visibility": false,
               "strict_visibility_value": [
                 "@@//visibility:private"
               ],
+              "additional_netrc_lines": [],
               "use_credentials_from_home_netrc_file": false,
-              "resolve_timeout": 600,
+              "fail_if_repin_required": false,
               "use_starlark_android_rules": false,
               "aar_import_bzl_label": "@build_bazel_rules_android//android:rules.bzl",
               "duplicate_version_warning": "warn",
-              "ignore_empty_files": false
+              "excluded_artifacts": [],
+              "repin_instructions": ""
             }
           },
           "org_apache_httpcomponents_httpclient_jar_sources_4_5_14": {
