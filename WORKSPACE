@@ -50,13 +50,6 @@ http_archive(
 )
 
 http_archive(
-    name = "rules_python",
-    integrity = "sha256-xovcT77CXeW1STuIGc/Id8TqKZwNyxXCRMWgAgjN4xE=",
-    strip_prefix = "rules_python-0.31.0",
-    url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.31.0.tar.gz",
-)
-
-http_archive(
     name = "zserio",
     sha256 = "e1b5824836405635fc5a22639394458949d358e6450c4d874f45a56ed5186f3c",
     url = "https://github.com/ndsev/zserio/releases/download/v2.11.0/zserio-2.11.0-bin.zip",
@@ -70,10 +63,6 @@ http_archive(
         "https://github.com/bazelbuild/bazel-skylib/releases/download/1.5.0/bazel-skylib-1.5.0.tar.gz",
     ],
 )
-
-load("@rules_python//python:repositories.bzl", "py_repositories")
-
-py_repositories()
 
 load("//:python_toolchain.bzl", "initialize_python_toolchain")
 
@@ -105,17 +94,6 @@ go_register_toolchains(version = "1.21.7")
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
 
 gazelle_dependencies()
-
-load("@rules_python//python:pip.bzl", "pip_parse")
-
-pip_parse(
-    name = "pip",
-    requirements_lock = "//test/rules:requirements.txt",
-)
-
-load("@pip//:requirements.bzl", "install_deps")
-
-install_deps()
 
 RULES_JVM_EXTERNAL_TAG = "4.2"
 

@@ -12,5 +12,4 @@ build --incompatible_strict_action_env
 # from typing a lot in their terminal. See ../docs/bazel.md for more info.
 try-import %workspace%/user.bazelrc
 
-# Disable bazel modules.
-common --noenable_bzlmod
+common:ci --lockfile_mode=error

@@ -1,0 +1,25 @@
+module(
+    name = "go-zserio",
+    version = "0.0.0",
+    compatibility_level = 1,
+)
+
+bazel_dep(name = "bazel_env.bzl", version = "0.1.0", dev_dependency = True)
+bazel_dep(name = "rules_python", version = "0.33.1", dev_dependency = True)
+bazel_dep(
+    name = "buildifier_prebuilt",
+    version = "6.4.0",
+    dev_dependency = True,
+)
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(python_version = "3.12")
+
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    hub_name = "pip",
+    python_version = "3.12",
+    experimental_index_url = "https://pypi.org/simple",
+    requirements_lock = "//test/rules:requirements.txt",
+)
+use_repo(pip, "pip")

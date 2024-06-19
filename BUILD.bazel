@@ -1,6 +1,16 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
 load("@com_github_bazelbuild_buildtools//buildifier:def.bzl", "buildifier")
 load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@bazel_env.bzl", "bazel_env")
+
+bazel_env(
+    name = "bazel_env",
+    tools = {
+        # Tools can be specified as labels.
+        "buildifier": "@buildifier_prebuilt//:buildifier",
+        "buildozer": "@buildifier_prebuilt//:buildozer",
+    },
+)
 
 # gazelle:prefix github.com/woven-planet/go-zserio
 # gazelle:exclude example/**

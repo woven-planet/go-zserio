@@ -24,3 +24,9 @@ repos:
       entry: bazel run -- //:buildifier --mode=fix --lint=warn --warnings=all
       types: [file]
       files: /(BUILD.bazel|WORKSPACE|.*\.bzl)$
+    - id: module-bazel-lock
+      name: Ensure that the MODULE.bazel.lock is up-to-date
+      entry: bazel mod deps --lockfile_mode=update
+      language: system
+      files: '^(MODULE.bazel|.bazelversion)$'
+      pass_filenames: false
