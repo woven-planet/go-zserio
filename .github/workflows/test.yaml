@@ -36,8 +36,7 @@ jobs:
 
       - name: Gazelle
         run: |
-          ./bin/ensure-unchanged ./bin/gazelle
-          ./bin/ensure-unchanged ./bin/gazelle-update-repos
+          ./bin/ensure-unchanged bazel run //:gazelle
 
   test:
     strategy:
