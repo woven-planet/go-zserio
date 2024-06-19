@@ -1,5 +1,5 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
-load("@com_github_bazelbuild_buildtools//buildifier:def.bzl", "buildifier")
+load("@buildifier_prebuilt//:rules.bzl", "buildifier")
 load("@io_bazel_rules_go//go:def.bzl", "go_library")
 load("@bazel_env.bzl", "bazel_env")
 
@@ -34,6 +34,9 @@ gazelle(
 
 buildifier(
     name = "buildifier",
+    exclude_patterns = [
+        "./.git/*",
+    ],
     lint_mode = "warn",
     lint_warnings = ["all"],
 )

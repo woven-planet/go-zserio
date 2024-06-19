@@ -17,9 +17,9 @@ python.toolchain(python_version = "3.12")
 
 pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
 pip.parse(
+    experimental_index_url = "https://pypi.org/simple",
     hub_name = "pip",
     python_version = "3.12",
-    experimental_index_url = "https://pypi.org/simple",
     requirements_lock = "//test/rules:requirements.txt",
 )
 use_repo(pip, "pip")
