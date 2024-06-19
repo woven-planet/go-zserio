@@ -7,8 +7,8 @@
     "https://bcr.bazel.build/modules/abseil-cpp/20211102.0/source.json": "7e3a9adf473e9af076ae485ed649d5641ad50ec5c11718103f34de03170d94ad",
     "https://bcr.bazel.build/modules/apple_support/1.5.0/MODULE.bazel": "50341a62efbc483e8a2a6aec30994a58749bd7b885e18dd96aa8c33031e558ef",
     "https://bcr.bazel.build/modules/apple_support/1.5.0/source.json": "eb98a7627c0bc486b57f598ad8da50f6625d974c8f723e9ea71bd39f709c9862",
-    "https://bcr.bazel.build/modules/bazel_env.bzl/0.1.0/MODULE.bazel": "3d51ca10642c47f20940b1d8760eb5f0f9e7dd9ead6fac281a3c173de494761a",
-    "https://bcr.bazel.build/modules/bazel_env.bzl/0.1.0/source.json": "015f2c916a208a0c17c83adb08549482d62455266899618f534d51af5a7517ff",
+    "https://bcr.bazel.build/modules/bazel_env.bzl/0.1.1/MODULE.bazel": "3a7ed5896da0b379ac2d707afad050b523e16f46964441b146991928f8b8260d",
+    "https://bcr.bazel.build/modules/bazel_env.bzl/0.1.1/source.json": "2c6edb84b8797f9291d7f83d6253c1b7fc79892e99f333d6b00109c0e99abb2e",
     "https://bcr.bazel.build/modules/bazel_features/1.1.0/MODULE.bazel": "cfd42ff3b815a5f39554d97182657f8c4b9719568eb7fded2b9135f084bf760b",
     "https://bcr.bazel.build/modules/bazel_features/1.1.1/MODULE.bazel": "27b8c79ef57efe08efccbd9dd6ef70d61b4798320b8d3c134fd571f78963dbcd",
     "https://bcr.bazel.build/modules/bazel_features/1.11.0/MODULE.bazel": "f9382337dd5a474c3b7d334c2f83e50b6eaedc284253334cf823044a26de03e8",
@@ -300,7 +300,7 @@
     "@@rules_jvm_external~//:extensions.bzl%maven": {
       "general": {
         "bzlTransitiveDigest": "Pq3YnJEflPAALx/UMykUnN3aA5bve0fNm/cuLvt/zvI=",
-        "usagesDigest": "4KCQ6S8V+3NFVcXLYhvHlQ4HHAR3xFweKAYXeElFqRI=",
+        "usagesDigest": "xcpuL8vLDYwPkat443qzBaAeetwzKiGcufjyBzQJePM=",
         "recordedFileInputs": {
           "@@rules_jvm_external~//rules_jvm_external_deps_install.json": "0bfbc915d9155df44d7a3b216e8f3c1fbcd110e358dd07637dc393583a5227e8",
           "@@//maven_install.lock.json": "ed542d582df9820ad8394100e6934d79365ce8d52e6593c35da86e1e0966110c"
@@ -3820,7 +3820,7 @@
     "@@rules_python~//python/extensions:pip.bzl%pip": {
       "general": {
         "bzlTransitiveDigest": "pSFUckgDXO3R47IX4XJl+XDO9WA8wbxu4VLeR/pj2vQ=",
-        "usagesDigest": "4zwm51aHS4MCE9lQKhe7Y8THV/ks6Yt08ZusJiH9u0s=",
+        "usagesDigest": "MHEP3SPB2qlUwh1Zo2nCc83SNeCfopl1nCtxoAyJMlg=",
         "recordedFileInputs": {
           "@@//test/rules/requirements.txt": "a4d004aae04726c2e551ab52618f1cec9f43daebcf4afbf1f4d0688da0b860f5"
         },
