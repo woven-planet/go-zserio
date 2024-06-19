@@ -11,5 +11,3 @@ build --incompatible_strict_action_env
 # A user specific configuration that have local settings to save the user
 # from typing a lot in their terminal. See ../docs/bazel.md for more info.
 try-import %workspace%/user.bazelrc
-
-common:ci --lockfile_mode=error

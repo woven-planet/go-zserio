@@ -58,7 +58,7 @@ jobs:
           path: "~/.cache/bazel"
           key: bazel
 
-      - run: bazel test --config=ci //...
+      - run: bazel test //...
 
   integration_test:
     strategy:
