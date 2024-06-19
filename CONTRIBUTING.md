@@ -31,12 +31,6 @@ To run the go-zserio command:
 bazel run //cmd/go-zserio
 ```
 
-To update the go dependencies for bazel using `go.mod`:
-
-```shell
-gazelle-update-repos
-```
-
 ## pre-commit
 
 It is strongly recommended to run tests locally before you commit or a push a
