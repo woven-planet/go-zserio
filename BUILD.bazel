@@ -52,5 +52,8 @@ bazel_env(
         # Tools can be specified as labels.
         "buildifier": "@buildifier_prebuilt//:buildifier",
         "buildozer": "@buildifier_prebuilt//:buildozer",
+        "gazelle": "//:gazelle",
+        "go": "@rules_go//:go",
+        "gopackagesdriver.sh": "@rules_go//go/tools/gopackagesdriver",
     },
 )
