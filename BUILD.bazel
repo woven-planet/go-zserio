@@ -1,6 +1,6 @@
-load("@bazel_gazelle//:def.bzl", "gazelle")
 load("@buildifier_prebuilt//:rules.bzl", "buildifier")
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@gazelle//:def.bzl", "gazelle")
+load("@rules_go//go:def.bzl", "go_library")
 load("@bazel_env.bzl", "bazel_env")
 
 # gazelle:prefix github.com/woven-planet/go-zserio

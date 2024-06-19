@@ -1,6 +1,6 @@
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
 load("@rules_antlr//antlr:antlr4.bzl", "antlr")
+load("@rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "parser",
