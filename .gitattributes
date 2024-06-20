@@ -1,3 +1,7 @@
 deps.bzl                    linguist-generated=true
 go.mod                      linguist-generated=true
 internal/parser/zserio*.go  linguist-generated=true
+
+# A custom merge driver for the Bazel lockfile.
+# https://bazel.build/external/lockfile#automatic-resolution
+MODULE.bazel.lock merge=bazel-lockfile-merge linguist-generated=true

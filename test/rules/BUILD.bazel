@@ -10,6 +10,6 @@ java_binary(
     main_class = "zserio.tools.ZserioToolPython",
     visibility = ["//visibility:public"],
     runtime_deps = [
-        "@maven//:io_github_ndsev_zserio",
+        "@go_zserio_maven_deps//:io_github_ndsev_zserio",
     ],
 )

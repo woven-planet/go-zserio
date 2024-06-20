@@ -1,7 +1,7 @@
 """A simple bazel rule to build a single go_library from a set of zserio schema files.
 """
 
-load("@io_bazel_rules_go//go:def.bzl", _go_library = "go_library")
+load("@rules_go//go:def.bzl", _go_library = "go_library")
 
 def go_zserio_srcs(name, srcs, rootpackage, pkg = None, format = True, sql = False):
     """Generate Go source code for the given zserio files.

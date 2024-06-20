@@ -31,12 +31,6 @@ To run the go-zserio command:
 bazel run //cmd/go-zserio
 ```
 
-To update the go dependencies for bazel using `go.mod`:
-
-```shell
-gazelle-update-repos
-```
-
 ## pre-commit
 
 It is strongly recommended to run tests locally before you commit or a push a
@@ -69,7 +63,7 @@ that use the following for `.vscode/settings.json`, replacing
 {
   "go.goroot": "/Users/wichert/Code/go-zserio/bazel-go-zserio/external/go_sdk",
   "go.toolsEnvVars": {
-    "GOPACKAGESDRIVER": "/Users/wichert/Code/go-zserio/bin/gopackagesdriver.sh"
+    "GOPACKAGESDRIVER": "/Users/wichert/Code/go-zserio/bazel-out/bazel_env-opt/bin/bazel_env/bin/gopackagesdriver.sh"
   },
   "go.enableCodeLens": {
     "references": false,

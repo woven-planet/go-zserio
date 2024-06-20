@@ -16,11 +16,16 @@ repos:
     exclude: "internal/parser/(.*.(tokens|inter)|zserio.*.go)"
   #- id: trailing-whitespace
   #- id: requirements-txt-fixer
-- repo: local
+- repo: https://github.com/keith/pre-commit-buildifier
+  rev: 6.4.0.1
   hooks:
     - id: buildifier
-      name: buildifier
+    - id: buildifier-lint
+- repo: local
+  hooks:
+    - id: module-bazel-lock
+      name: Ensure that the MODULE.bazel.lock is up-to-date
+      entry: bazel mod deps --lockfile_mode=update
       language: system
-      entry: bazel run -- //:buildifier --mode=fix --lint=warn --warnings=all
-      types: [file]
-      files: /(BUILD.bazel|WORKSPACE|.*\.bzl)$
+      files: '^(MODULE.bazel|.bazelversion)$'
+      pass_filenames: false

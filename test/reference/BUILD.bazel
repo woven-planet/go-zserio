@@ -1,10 +1,5 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_test")
+load("@rules_go//go:def.bzl", "go_test")
 load("//test/rules:rules.bzl", "zs_payload")
-
-filegroup(
-    name = "specs",
-    srcs = glob(["*.feature"]),
-)
 
 zs_payload(
     name = "testdata",
@@ -17,7 +12,6 @@ go_test(
     name = "reference_test",
     srcs = ["reference_test.go"],
     data = [
-        ":specs",
         ":testdata",
     ],
     env = {
@@ -31,6 +25,6 @@ go_test(
         "//ztype",
         "@com_github_stretchr_testify//assert",
         "@com_github_stretchr_testify//require",
-        "@io_bazel_rules_go//go/tools/bazel:go_default_library",
+        "@rules_go//go/tools/bazel:go_default_library",
     ],
 )

@@ -1,6 +1,7 @@
-load("@bazel_gazelle//:def.bzl", "gazelle")
-load("@com_github_bazelbuild_buildtools//buildifier:def.bzl", "buildifier")
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@buildifier_prebuilt//:rules.bzl", "buildifier")
+load("@gazelle//:def.bzl", "gazelle")
+load("@rules_go//go:def.bzl", "go_library")
+load("@bazel_env.bzl", "bazel_env")
 
 # gazelle:prefix github.com/woven-planet/go-zserio
 # gazelle:exclude example/**
@@ -24,6 +25,9 @@ gazelle(
 
 buildifier(
     name = "buildifier",
+    exclude_patterns = [
+        "./.git/*",
+    ],
     lint_mode = "warn",
     lint_warnings = ["all"],
 )
@@ -39,4 +43,25 @@ go_library(
     importpath = "github.com/woven-planet/go-zserio",
     visibility = ["//visibility:public"],
     deps = ["//zstream"],
+)
+
+# This is to ensure that common CLI tools are added to the PATH when using direnv.
+bazel_env(
+    name = "bazel_env",
+    toolchains = {
+        "jdk": "@rules_java//toolchains:current_host_java_runtime",
+        "python": "@rules_python//python:current_py_toolchain",
+    },
+    tools = {
+        # Tools can be provided either as labels or via special make vars that
+        # are provided by the toolchains.
+        "buildifier": "@buildifier_prebuilt//:buildifier",
+        "buildozer": "@buildifier_prebuilt//:buildozer",
+        "gazelle": "//:gazelle",
+        "go": "@rules_go//go",
+        "gopackagesdriver.sh": "@rules_go//go/tools/gopackagesdriver",
+        "jar": "$(JAVABASE)/bin/jar",
+        "java": "$(JAVA)",
+        "python": "$(PYTHON3)",
+    },
 )
