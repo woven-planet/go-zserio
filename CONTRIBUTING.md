@@ -61,9 +61,9 @@ that use the following for `.vscode/settings.json`, replacing
 
 ```json
 {
-  "go.goroot": "/Users/wichert/Code/go-zserio/bazel-go-zserio/external/go_sdk",
+  "go.goroot": "{workspaceFolder}/bazel-out/bazel_env-opt/bin/bazel_env/bin/go.runfiles/rules_go~~go_sdk~go-zserio-go-sdk",
   "go.toolsEnvVars": {
-    "GOPACKAGESDRIVER": "/Users/wichert/Code/go-zserio/bazel-out/bazel_env-opt/bin/bazel_env/bin/gopackagesdriver.sh"
+    "GOPACKAGESDRIVER": "{workspaceFolder}/bazel-out/bazel_env-opt/bin/bazel_env/bin/gopackagesdriver.sh"
   },
   "go.enableCodeLens": {
     "references": false,
