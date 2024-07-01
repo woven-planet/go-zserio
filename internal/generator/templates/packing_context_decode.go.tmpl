@@ -65,6 +65,7 @@
         {{- if $native.IsMarshaler }}
             {{- $element = "*elem" }}
         {{- end }}
+        {{ $assign_str_lvalue }} = make([]{{ $field.Type }}, 0, len({{ $field.Name }}ArrayProperties.RawArray))
         for _, elem := range {{ $field.Name }}ArrayProperties.RawArray {
             {{ $assign_str_lvalue }} = append({{ $assign_str_lvalue }}, {{ if $native.RequiresCast }}{{ goType $scope $field.Type }}({{ $element }}){{ else }}{{ $element }}{{ end }})
         }

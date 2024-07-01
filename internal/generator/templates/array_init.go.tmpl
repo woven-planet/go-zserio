@@ -20,7 +20,7 @@
     {{ $field.Name }}ArrayProperties.ArrayTraits.ObjectCreator = ztype.ObjectCreator[*{{ goType $scope $native.Type }}] {
     {{- if $requireIndexedInit }}
         UsesIndexOperator: true,
-        DefaultObjects: []*{{ goType $scope $native.Type }}{},
+        DefaultObjects: make([]*{{ goType $scope $native.Type }}, 0, {{ $field.Name }}ArrayProperties.FixedSize),
     {{- else }}
         DefaultObject: new({{ goType $scope $native.Type }}),
     {{- end }}
