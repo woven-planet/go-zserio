@@ -54,16 +54,21 @@ pre-commit installed at .git/hooks/pre-commit
 
 ## Visual Studio Code
 
+In order to setup the tools called by the editor, run:
+
+```console
+bazel run //:bazel_env
+```
+
 In order for [VS Code](https://code.visualstudio.com) you will need to configure
 it to use a bazel-aware _gopackagesdriver_ with the gopls language server. To do
-that use the following for `.vscode/settings.json`, replacing
-`/Users/wichert/Code/go-zserio` with the correct location on your machine.
+that use the following for `.vscode/settings.json`:
 
 ```json
 {
-  "go.goroot": "/Users/wichert/Code/go-zserio/bazel-go-zserio/external/go_sdk",
+  "go.goroot": "{workspaceFolder}/bazel-out/bazel_env-opt/bin/bazel_env/bin/go.runfiles/rules_go~~go_sdk~go-zserio-go-sdk",
   "go.toolsEnvVars": {
-    "GOPACKAGESDRIVER": "/Users/wichert/Code/go-zserio/bazel-out/bazel_env-opt/bin/bazel_env/bin/gopackagesdriver.sh"
+    "GOPACKAGESDRIVER": "{workspaceFolder}/bazel-out/bazel_env-opt/bin/bazel_env/bin/gopackagesdriver.sh"
   },
   "go.enableCodeLens": {
     "references": false,
