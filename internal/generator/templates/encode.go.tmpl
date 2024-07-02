@@ -44,10 +44,12 @@
         }
     {{- end }}
     {{- if $native.IsMarshaler }}
+        {{ $field.Name }}ArrayProperties.RawArray = make({{ goType $scope $native.Type }}, 0, {{ $field.Name }}ArrayProperties.FixedSize)
         for index := range {{ $field_name }} {
             {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{if $native.RequiresCast }}(*{{ goType $scope $native.Type }})(&{{ $field_name }}[index]){{ else }}&{{ $field_name }}[index]{{ end }})
         }
     {{- else if $native.RequiresCast }}
+        {{ $field.Name }}ArrayProperties.RawArray = make({{ goType $scope $native.Type }}, 0, {{ $field.Name }}ArrayProperties.FixedSize)
         for _, element := range {{ $field_name }} {
             {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{ goType $scope $native.Type }}(element))
         }
