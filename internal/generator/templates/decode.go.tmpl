@@ -69,7 +69,7 @@
             {{- if $native.IsMarshaler }}
                 {{- $element = "*elem" }}
             {{- end }}
-            {{ $assign_str_lvalue }} = make([]{{ if $native.RequiresCast }}{{ goType $scope $field.Type }}{{ else }}{{ goType $scope $native.Type }}{{ end }}, 0, len({{ $field.Name }}ArrayProperties.RawArray))
+            {{ $assign_str_lvalue }} = make([]{{ goType $scope $field.Type }}, 0, len({{ $field.Name }}ArrayProperties.RawArray))
             for _, elem := range {{ $field.Name }}ArrayProperties.RawArray {
                 {{ $assign_str_lvalue }} = append({{ $assign_str_lvalue }}, {{ if $native.RequiresCast }}{{ goType $scope $field.Type }}({{ $element }}){{ else }}{{ $element }}{{ end }})
             }
