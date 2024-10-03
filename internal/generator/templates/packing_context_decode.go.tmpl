@@ -43,7 +43,9 @@
 {{- end }}
 
 {{- if not (eq $field.Alignment 0) }}
-    r.Align({{ $field.Alignment }})
+    if _, err = r.Align({{ $field.Alignment }}); err != nil {
+        return err
+    }
 {{- end }}
 
 {{- if $field.Array }}
