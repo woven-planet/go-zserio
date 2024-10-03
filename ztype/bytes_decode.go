@@ -2,6 +2,7 @@ package ztype
 
 import (
 	"errors"
+	"io"
 
 	zserio "github.com/woven-planet/go-zserio"
 )
@@ -16,7 +17,7 @@ func ReadBytes(r zserio.Reader) (*BytesType, error) {
 	}
 
 	b.Buffer = make([]byte, b.ByteSize)
-	n, err := r.Read(b.Buffer)
+	n, err := io.ReadFull(r, b.Buffer)
 	if err != nil {
 		return nil, err
 	}
