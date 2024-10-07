@@ -2,6 +2,7 @@ package ztype
 
 import (
 	"errors"
+	"io"
 
 	zserio "github.com/woven-planet/go-zserio"
 )
@@ -17,8 +18,8 @@ func ReadExtern(r zserio.Reader) (*ExternType, error) {
 	numOfFullBytes := int(e.BitSize / 8)
 	remainingBits := uint8(e.BitSize % 8)
 
-	e.Buffer = make([]byte, numOfFullBytes)
-	n, err := r.Read(e.Buffer)
+	e.Buffer = make([]byte, numOfFullBytes, numOfFullBytes+1)
+	n, err := io.ReadFull(r, e.Buffer)
 	if err != nil {
 		return nil, err
 	}

@@ -23,6 +23,7 @@ go_test(
     deps = [
         "//:go-zserio",
         "//testdata/reference_modules:go_core_types",
+        "//zstream",
         "@com_github_stretchr_testify//assert",
         "@com_github_stretchr_testify//require",
     ],

@@ -1,12 +1,15 @@
 package reference
 
 import (
+	"bufio"
+	"bytes"
 	"gen/github.com/woven-planet/go-zserio/testdata/reference_modules/core/types"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
 	zserio "github.com/woven-planet/go-zserio"
+	"github.com/woven-planet/go-zserio/zstream"
 )
 
 func TestOptionalField(t *testing.T) {
@@ -44,4 +47,29 @@ func TestGoIntegerTypeCasts(t *testing.T) {
 		I32ValueArray: []int32{-1, -2, -3, -4, -5},
 	}
 	require.Equal(t, (float32)(11320.0), value.TestTypeCasts())
+}
+
+func TestShortRead(t *testing.T) {
+	input := types.ValueWrapper{
+		Value:         1,
+		Description:   "this is a string that is larger than the buffer size",
+		Vari16Value:   16,
+		Vari32Value:   32,
+		Vari64Value:   64,
+		VariValue:     -33,
+		Varu16Value:   1,
+		Varu32Value:   0,
+		Varu64Value:   353,
+		VaruValue:     6457,
+		VarSizeValue:  4425,
+		I32ValueArray: []int32{-1, -2, -3, -4, -5},
+	}
+	data, err := zserio.Marshal(&input)
+	require.Nil(t, err, "zserio marshalling failed")
+	buf := bytes.NewBuffer(data)
+	reader := zstream.NewReader(bufio.NewReaderSize(buf, 16))
+	var got types.ValueWrapper
+	got.UnmarshalZserio(reader)
+	require.Nil(t, err, "zserio unmarshalling failed")
+	require.Equal(t, input, got)
 }
