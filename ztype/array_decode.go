@@ -16,16 +16,22 @@ func (array *Array[T, Y]) UnmarshalZserio(reader zserio.Reader) error {
 		arraySize = int(u64ReadSize)
 	}
 
-	array.RawArray = make([]T, arraySize)
+	array.RawArray = make([]T, 0, arraySize)
+
 	if arraySize > 0 {
+		var err error
+		var element T
+		var packedTraits IPackedArrayTraits[T] = nil
+
 		if array.IsPacked {
-			var err error
+			packedTraits = array.ArrayTraits.PackedTraits()
 			// A descriptor is only written for packed arrays.
-			array.PackedContext, err = array.ArrayTraits.PackedTraits().CreateContext()
+			array.PackedContext, err = packedTraits.CreateContext()
 			if err != nil {
 				return err
 			}
 		}
+
 		for index := 0; index < arraySize; index++ {
 			if array.checkOffsetMethod != nil {
 				count, err := reader.Align(8)
@@ -34,17 +40,16 @@ func (array *Array[T, Y]) UnmarshalZserio(reader zserio.Reader) error {
 				}
 				array.checkOffsetMethod(index, count)
 			}
-			var err error
-			var element T
+
 			if array.IsPacked {
-				element, err = array.ArrayTraits.PackedTraits().Read(array.PackedContext, reader, index)
+				element, err = packedTraits.Read(array.PackedContext, reader, index)
 			} else {
 				element, err = array.ArrayTraits.Read(reader, index)
 			}
 			if err != nil {
 				return err
 			}
-			array.RawArray[index] = element
+			array.RawArray = append(array.RawArray, element)
 		}
 	}
 	return nil
