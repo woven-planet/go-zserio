@@ -14,20 +14,19 @@ const (
 // DeltaContext is a packing context used when writing data using delta
 // packing, i.e. instead of storing all values, only stores the deltas.
 type DeltaContext[T any] struct {
-
-	// specifies if delta packing is actually used (it may be skipped if normal
-	// packing is more efficient)
-	isPacked bool
+	// previousElement is the value of the previously stored element
+	previousElement *uint64
 
 	// maxBitNumber specifies the number of bits needed per delta element
-	maxBitNumber int
-
-	// previousElement is the value of the previously stored element
-	previousElement     *uint64
-	processingStarted   bool
+	maxBitNumber        int
 	unpackedBitSize     int
 	firstElementBitSize int
 	numElements         int
+
+	// specifies if delta packing is actually used (it may be skipped if normal
+	// packing is more efficient)
+	isPacked          bool
+	processingStarted bool
 }
 
 // arrayTraitsBitsizeOf returns the bit size of an array element.
@@ -48,8 +47,7 @@ func (context *DeltaContext[T]) Init(arrayTraits IArrayTraits[T], element T) {
 	context.unpackedBitSize += bitsizeOfUnpacked(arrayTraits, element)
 
 	if context.previousElement == nil {
-		elementAsUint64 := arrayTraits.AsUint64(element)
-		context.previousElement = &elementAsUint64
+		context.previousElement = new(uint64)
 		context.firstElementBitSize = context.unpackedBitSize
 	} else if context.maxBitNumber <= maxBitNumberLimit {
 		context.isPacked = true
@@ -65,8 +63,8 @@ func (context *DeltaContext[T]) Init(arrayTraits IArrayTraits[T], element T) {
 				context.isPacked = false
 			}
 		}
-		*context.previousElement = arrayTraits.AsUint64(element)
 	}
+	*context.previousElement = arrayTraits.AsUint64(element)
 }
 
 // BitSizeOf returns the size of the delta context array in bits.
@@ -182,8 +180,12 @@ func (context *DeltaContext[T]) readUnpacked(arrayTraits IArrayTraits[T], reader
 	if err != nil {
 		return arrayTraits.FromUint64(0), err
 	}
-	elementAsUint64 := arrayTraits.AsUint64(element)
-	context.previousElement = &elementAsUint64
+
+	if context.previousElement == nil {
+		context.previousElement = new(uint64)
+	}
+	*context.previousElement = arrayTraits.AsUint64(element)
+
 	return element, nil
 }
 
@@ -200,8 +202,11 @@ func (context *DeltaContext[T]) WriteDescriptor(writer zserio.Writer) error {
 
 // writeUnpacked writes an unpacked array element to a writer.
 func (context *DeltaContext[T]) writeUnpacked(arrayTraits IArrayTraits[T], writer zserio.Writer, element T) error {
-	elementAsUint64 := arrayTraits.AsUint64(element)
-	context.previousElement = &elementAsUint64
+	if context.previousElement == nil {
+		context.previousElement = new(uint64)
+	}
+	*context.previousElement = arrayTraits.AsUint64(element)
+
 	return arrayTraits.Write(writer, element)
 }
 
