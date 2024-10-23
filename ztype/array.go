@@ -12,24 +12,24 @@ type Array[T any, Y IArrayTraits[T]] struct {
 	// ArrayTraits are the array traits used.
 	ArrayTraits Y
 
-	// RawArray is a reference to the raw array.
-	RawArray []T
-
-	// IsAuto specifies if the array size is automatically calculated.
-	IsAuto bool
-
-	// IsPacked specifies if the array is packed.
-	IsPacked bool
-
-	// FixedSize is the size of the array, if the array is of fixed size
-	FixedSize int
-
 	// The node used by this array for packing
 	PackedContext *zserio.PackingContextNode
 
 	// SetOffsetMethod is an optional function to set the offset to the buffer.
 	setOffsetMethod   OffsetMethod
 	checkOffsetMethod OffsetMethod
+
+	// RawArray is a reference to the raw array.
+	RawArray []T
+
+	// FixedSize is the size of the array, if the array is of fixed size
+	FixedSize int
+
+	// IsAuto specifies if the array size is automatically calculated.
+	IsAuto bool
+
+	// IsPacked specifies if the array is packed.
+	IsPacked bool
 }
 
 // Size returns the number of elements in an array.
