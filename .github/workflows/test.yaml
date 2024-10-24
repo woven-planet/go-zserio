@@ -9,15 +9,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Mount bazel cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: "~/.cache/bazel"
           key: bazel
 
-      - uses: actions/setup-python@v2
-      - uses: pre-commit/action@v2.0.3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: pre-commit/action@v3.0.1
 
       - name: bazel mod tidy
         run: |
@@ -51,11 +54,13 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
       - name: Mount bazel cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: "~/.cache/bazel"
           key: bazel
@@ -72,10 +77,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
-          stable: false
           go-version: '1.21.6'
 
       - run: ./bin/ensure-unchanged ./example/test.sh
