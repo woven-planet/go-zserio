@@ -28,7 +28,7 @@ use_repo(pip, "pip")
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk")
 go_sdk.download(
     name = "go-zserio-go-sdk",
-    version = "1.21.7",
+    version = "1.23.2",
 )
 
 go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps")

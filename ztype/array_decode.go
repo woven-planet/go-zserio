@@ -1,8 +1,69 @@
 package ztype
 
 import (
+	"iter"
+
 	zserio "github.com/woven-planet/go-zserio"
 )
+
+// UnmarshalZserio reads an array from a bit reader, in either packed or unpacked configuration.
+func (array *Array[T, Y]) UnmarshalZserioIter(reader zserio.Reader) iter.Seq2[T, error] {
+	return func(yield func(T, error) bool) {
+		arraySize := array.FixedSize
+		if array.IsAuto {
+			// The array size is passed as a varsize inside the byte stream
+			u64ReadSize, err := ReadVarsize(reader)
+			if err != nil {
+				yield(*new(T), err)
+				return
+			}
+			arraySize = int(u64ReadSize)
+		}
+
+		if arraySize <= 0 {
+			return
+		}
+
+		var err error
+		var element T
+		var packedTraits IPackedArrayTraits[T] = nil
+
+		if array.IsPacked {
+			packedTraits = array.ArrayTraits.PackedTraits()
+			// A descriptor is only written for packed arrays.
+			array.PackedContext, err = packedTraits.CreateContext()
+			if err != nil {
+				yield(*new(T), err)
+				return
+			}
+		}
+
+		for index := 0; index < arraySize; index++ {
+			if array.checkOffsetMethod != nil {
+				count, err := reader.Align(8)
+				if err != nil {
+					yield(*new(T), err)
+					return
+				}
+				array.checkOffsetMethod(index, count)
+			}
+
+			if array.IsPacked {
+				element, err = packedTraits.Read(array.PackedContext, reader, index)
+			} else {
+				element, err = array.ArrayTraits.Read(reader, index)
+			}
+			if err != nil {
+				yield(*new(T), err)
+				return
+			}
+
+			yield(element, nil)
+		}
+
+		return
+	}
+}
 
 // UnmarshalZserio reads an array from a bit reader, in either packed or unpacked configuration.
 func (array *Array[T, Y]) UnmarshalZserio(reader zserio.Reader) error {
