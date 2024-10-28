@@ -93,13 +93,12 @@ func (traits *ObjectPackedArrayTraits[T, Y]) InitializeOffsets(contextNode *zser
 
 // Read reads an array element of a packed array traits.
 func (traits *ObjectPackedArrayTraits[T, Y]) Read(contextNode *zserio.PackingContextNode, reader zserio.Reader, index int) (T, error) {
-
 	var value T
 	if traits.ObjectCreator.UsesIndexOperator {
 		// In case the index operator is used, pick the right initial object
-		value = traits.ObjectCreator.DefaultObjects[index].Clone().(T)
+		value = traits.ObjectCreator.DefaultObjects[index]
 	} else {
-		value = traits.ObjectCreator.DefaultObject.Clone().(T)
+		value = traits.ObjectCreator.DefaultObject
 	}
 
 	err := value.UnmarshalZserioPacked(contextNode, reader)

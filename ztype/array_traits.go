@@ -186,8 +186,7 @@ func (trait Float64ArrayTraits) FromUint64(value uint64) float64 {
 }
 
 // VarIntArrayTraits is an array traits implementation for VarInt.
-type VarIntArrayTraits struct {
-}
+type VarIntArrayTraits struct{}
 
 func (trait VarIntArrayTraits) PackedTraits() IPackedArrayTraits[int64] {
 	return &PackedArrayTraits[int64, VarIntArrayTraits]{
@@ -237,8 +236,7 @@ func (trait VarIntArrayTraits) FromUint64(value uint64) int64 {
 }
 
 // VarInt16ArrayTraits is the implementation of an array traits for a VarInt16.
-type VarInt16ArrayTraits struct {
-}
+type VarInt16ArrayTraits struct{}
 
 func (trait VarInt16ArrayTraits) PackedTraits() IPackedArrayTraits[int16] {
 	return &PackedArrayTraits[int16, VarInt16ArrayTraits]{
@@ -284,8 +282,7 @@ func (trait VarInt16ArrayTraits) FromUint64(value uint64) int16 {
 }
 
 // VarInt32ArrayTraits is the implementation of an array traits for a VarInt32.
-type VarInt32ArrayTraits struct {
-}
+type VarInt32ArrayTraits struct{}
 
 func (trait VarInt32ArrayTraits) PackedTraits() IPackedArrayTraits[int32] {
 	return &PackedArrayTraits[int32, VarInt32ArrayTraits]{
@@ -331,8 +328,7 @@ func (trait VarInt32ArrayTraits) FromUint64(value uint64) int32 {
 }
 
 // VarInt64ArrayTraits is the implementation of an array traits for a VarInt64.
-type VarInt64ArrayTraits struct {
-}
+type VarInt64ArrayTraits struct{}
 
 func (trait VarInt64ArrayTraits) PackedTraits() IPackedArrayTraits[int64] {
 	return &PackedArrayTraits[int64, VarInt64ArrayTraits]{
@@ -378,8 +374,7 @@ func (trait VarInt64ArrayTraits) FromUint64(value uint64) int64 {
 }
 
 // VarUInt16ArrayTraits is the implementation of an array traits for a VarUint16.
-type VarUInt16ArrayTraits struct {
-}
+type VarUInt16ArrayTraits struct{}
 
 func (trait VarUInt16ArrayTraits) PackedTraits() IPackedArrayTraits[uint16] {
 	return &PackedArrayTraits[uint16, VarUInt16ArrayTraits]{
@@ -424,8 +419,7 @@ func (trait VarUInt16ArrayTraits) FromUint64(value uint64) uint16 {
 	return uint16(value)
 }
 
-type VarUInt32ArrayTraits struct {
-}
+type VarUInt32ArrayTraits struct{}
 
 func (trait VarUInt32ArrayTraits) PackedTraits() IPackedArrayTraits[uint32] {
 	return &PackedArrayTraits[uint32, VarUInt32ArrayTraits]{
@@ -470,8 +464,7 @@ func (trait VarUInt32ArrayTraits) FromUint64(value uint64) uint32 {
 	return uint32(value)
 }
 
-type VarUInt64ArrayTraits struct {
-}
+type VarUInt64ArrayTraits struct{}
 
 func (trait VarUInt64ArrayTraits) PackedTraits() IPackedArrayTraits[uint64] {
 	return &PackedArrayTraits[uint64, VarUInt64ArrayTraits]{
@@ -955,7 +948,7 @@ func (trait ObjectArrayTraits[T]) Read(reader zserio.Reader, index int) (T, erro
 	if trait.ObjectCreator.UsesIndexOperator {
 		value = trait.ObjectCreator.DefaultObjects[index]
 	} else {
-		value = trait.ObjectCreator.DefaultObject.Clone().(T)
+		value = trait.ObjectCreator.DefaultObject
 	}
 	err := value.UnmarshalZserio(reader)
 	return value, err

@@ -59,19 +59,24 @@
         // This array is implicitly packed, because its parent object is packed
         {{ $field.Name }}ArrayProperties.IsPacked = true
     {{- end }}
-    if err = {{ $field.Name }}ArrayProperties.UnmarshalZserio(r); err != nil {
-        return err
-    }
     {{- if or $native.IsMarshaler $native.RequiresCast }}
         {{- $element := "elem" }}
         {{- if $native.IsMarshaler }}
             {{- $element = "*elem" }}
         {{- end }}
-        {{ $assign_str_lvalue }} = make([]{{ goType $scope $field.Type }}, 0, len({{ $field.Name }}ArrayProperties.RawArray))
-        for _, elem := range {{ $field.Name }}ArrayProperties.RawArray {
+        {{- if $field.Array.Length }}
+        {{ $assign_str_lvalue }} = make([]{{ goType $scope $field.Type }}, 0, int({{ goExpression $scope $field.Array.Length }}))
+        {{- end }}
+        for elem, err := range {{ $field.Name }}ArrayProperties.UnmarshalZserioIter(r) {
+            if err != nil {
+                return err
+            }
             {{ $assign_str_lvalue }} = append({{ $assign_str_lvalue }}, {{ if $native.RequiresCast }}{{ goType $scope $field.Type }}({{ $element }}){{ else }}{{ $element }}{{ end }})
-        }
+	    }
     {{- else }}
+        if err = {{ $field.Name }}ArrayProperties.UnmarshalZserio(r); err != nil {
+            return err
+        }
         {{ $assign_str_lvalue }} = {{ $field.Name }}ArrayProperties.RawArray
     {{- end }}
 
