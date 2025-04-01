@@ -15,7 +15,7 @@ func (array *ObjectArray[T, PT]) UnmarshalZserio(reader zserio.Reader) ([]T, err
 	}
 
 	result := make([]T, arraySize)
-	array.ArrayTraits = ObjectArrayTraits[T, PT]{}
+	arrayTraits := ObjectArrayTraits[T, PT]{}
 
 	if arraySize > 0 {
 		var err error
@@ -23,7 +23,7 @@ func (array *ObjectArray[T, PT]) UnmarshalZserio(reader zserio.Reader) ([]T, err
 		var packedTraits IPackedObjectArrayTraits[T, PT]
 
 		if array.IsPacked {
-			packedTraits = array.ArrayTraits.PackedTraits()
+			packedTraits = arrayTraits.PackedTraits()
 			// A descriptor is only written for packed arrays.
 			array.PackedContext, err = packedTraits.CreateContext()
 			if err != nil {
@@ -48,7 +48,7 @@ func (array *ObjectArray[T, PT]) UnmarshalZserio(reader zserio.Reader) ([]T, err
 			if array.IsPacked {
 				err = packedTraits.Read(array.PackedContext, reader, element)
 			} else {
-				err = array.ArrayTraits.Read(reader, element)
+				err = arrayTraits.Read(reader, element)
 			}
 			if err != nil {
 				return nil, err

@@ -13,13 +13,14 @@ func (array *ObjectArray[T, PT]) MarshalZserio(elements []T, writer zserio.Write
 	}
 
 	if size > 0 {
+		arrayTraits := ObjectArrayTraits[T, PT]{}
 		var packedTraits IPackedObjectArrayTraits[T, PT]
 		var element PT
 
 		if array.IsPacked {
 			// descriptors are only needed if the array is packed
 			var err error
-			packedTraits = array.ArrayTraits.PackedTraits()
+			packedTraits = arrayTraits.PackedTraits()
 			array.PackedContext, err = packedTraits.CreateContext()
 			if err != nil {
 				return err
@@ -43,7 +44,7 @@ func (array *ObjectArray[T, PT]) MarshalZserio(elements []T, writer zserio.Write
 			if array.IsPacked {
 				packedTraits.Write(array.PackedContext, writer, element)
 			} else {
-				array.ArrayTraits.Write(writer, element)
+				arrayTraits.Write(writer, element)
 			}
 		}
 	}

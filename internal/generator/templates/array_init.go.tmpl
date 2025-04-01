@@ -7,7 +7,6 @@
 
 {{- if eq $traits "ztype.ObjectArrayTraits" }}
     {{ $field.Name }}ArrayProperties := ztype.ObjectArray[{{ goType $scope $native.Type }}, *{{ goType $scope $native.Type }}]{}
-    {{ $field.Name }}ArrayProperties.ArrayTraits = {{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
 {{- else }}
     {{ $field.Name }}ArrayProperties := ztype.Array[{{if $native.IsMarshaler }}*{{ end }}{{ goType $scope $native.Type }}, {{ template "array_traits_type.go.tmpl" dict "pkg" $scope "type" $native.Type }}]{}
     {{ $field.Name }}ArrayProperties.ArrayTraits = {{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}

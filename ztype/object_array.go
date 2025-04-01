@@ -4,8 +4,6 @@ import zserio "github.com/woven-planet/go-zserio"
 
 // ObjectArray allows representing arrays of structs and serialize them to the zserio format.
 type ObjectArray[T any, PT zserio.PackableZserioType[T]] struct {
-	ArrayTraits ObjectArrayTraits[T, PT]
-
 	// The node used by this array for packing
 	PackedContext *zserio.PackingContextNode
 
@@ -37,9 +35,12 @@ func (array *ObjectArray[T, PT]) ZserioBitSize(elements []T, bitPosition int) (i
 		}
 		endBitPosition += delta
 	}
-	if array.ArrayTraits.BitSizeOfIsConstant() && size > 0 {
+
+	arrayTraits := ObjectArrayTraits[T, PT]{}
+
+	if arrayTraits.BitSizeOfIsConstant() && size > 0 {
 		var dummy PT
-		elementSize := array.ArrayTraits.BitSizeOf(dummy, 0)
+		elementSize := arrayTraits.BitSizeOf(dummy, 0)
 		if array.setOffsetMethod != nil {
 			endBitPosition += size * elementSize
 		} else {
@@ -52,7 +53,7 @@ func (array *ObjectArray[T, PT]) ZserioBitSize(elements []T, bitPosition int) (i
 			if array.setOffsetMethod != nil {
 				endBitPosition = alignTo(8, endBitPosition)
 			}
-			endBitPosition += array.ArrayTraits.BitSizeOf(&elements[i], endBitPosition)
+			endBitPosition += arrayTraits.BitSizeOf(&elements[i], endBitPosition)
 		}
 	}
 	return endBitPosition - bitPosition, nil
@@ -70,7 +71,8 @@ func (array *ObjectArray[T, PT]) ZserioBitSizePacked(elements []T, bitPosition i
 		endBitPosition += delta
 	}
 	if size > 0 {
-		packedTraits := array.ArrayTraits.PackedTraits()
+		arrayTraits := ObjectArrayTraits[T, PT]{}
+		packedTraits := arrayTraits.PackedTraits()
 
 		for i := 0; i < size; i++ {
 			if array.setOffsetMethod != nil {
