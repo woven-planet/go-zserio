@@ -61,23 +61,34 @@
         {{- $assign_str_rvalue = printf "%sArrayProperties" $field.Name }}
         {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $assign_str_lvalue "field" $field "native" $native }}
     {{- end }}
-    {{- template "decode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field "field_name" $assign_str_lvalue }}
+    {{- template "decode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field "field_name" $assign_str_lvalue "native" $native }}
+     {{- if $field.Array }}
+        {{- $traits := goArrayTraits $scope $native.Type }}
+        {{- if eq $traits "ztype.ObjectArrayTraits" }}
+        if {{ $assign_str_lvalue }}, err = {{ $assign_str_rvalue }}.UnmarshalZserio(r); err != nil {
+            return err
+        }
+        {{- else }}
+        if err = {{ $assign_str_rvalue }}.UnmarshalZserio(r); err != nil {
+            return err
+        }
+            {{- if or $native.IsMarshaler $native.RequiresCast }}
+                {{- $element := "elem" }}
+                {{- if $native.IsMarshaler }}
+                    {{- $element = "*elem" }}
+                {{- end }}
+                {{ $assign_str_lvalue }} = make([]{{ goType $scope $field.Type }}, 0, len({{ $field.Name }}ArrayProperties.RawArray))
+                for _, elem := range {{ $field.Name }}ArrayProperties.RawArray {
+                    {{ $assign_str_lvalue }} = append({{ $assign_str_lvalue }}, {{ if $native.RequiresCast }}{{ goType $scope $field.Type }}({{ $element }}){{ else }}{{ $element }}{{ end }})
+                }
+            {{- else }}
+                {{ $assign_str_lvalue }} = {{ $field.Name }}ArrayProperties.RawArray
+            {{- end }}
+        {{- end -}}
+    {{- else }}
     if err = {{ $assign_str_rvalue }}.UnmarshalZserio(r); err != nil {
         return err
     }
-    {{- if $field.Array }}
-        {{- if or $native.IsMarshaler $native.RequiresCast }}
-            {{- $element := "elem" }}
-            {{- if $native.IsMarshaler }}
-                {{- $element = "*elem" }}
-            {{- end }}
-            {{ $assign_str_lvalue }} = make([]{{ goType $scope $field.Type }}, 0, len({{ $field.Name }}ArrayProperties.RawArray))
-            for _, elem := range {{ $field.Name }}ArrayProperties.RawArray {
-                {{ $assign_str_lvalue }} = append({{ $assign_str_lvalue }}, {{ if $native.RequiresCast }}{{ goType $scope $field.Type }}({{ $element }}){{ else }}{{ $element }}{{ end }})
-            }
-        {{- else }}
-            {{ $assign_str_lvalue }} = {{ $field.Name }}ArrayProperties.RawArray
-        {{- end }}
     {{- end }}
 {{- end}}
 

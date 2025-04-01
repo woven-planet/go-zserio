@@ -49,7 +49,6 @@ type Marshaler interface {
 type ZserioType interface {
 	Marshaler
 	Unmarshaler
-	Clone() ZserioType
 }
 
 type PackableUnmarshaler interface {
@@ -64,8 +63,9 @@ type PackableMarshaler interface {
 	ZserioBitSizePacked(contextNode *PackingContextNode, bitPosition int) (int, error)
 }
 
-type PackableZserioType interface {
+type PackableZserioType[B any] interface {
 	ZserioType
 	PackableMarshaler
 	PackableUnmarshaler
+	*B
 }

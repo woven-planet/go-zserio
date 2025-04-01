@@ -1,28 +1,29 @@
 
 {{- $scope := .pkg }}
 {{- $field := .field }}
+{{- $native := .native }}
 {{- $field_name := .field_name }}
 {{- $use_index_operator := hasIndexOperators $field.Type }}
 {{- if $field.Type.TypeArguments }}
     {{- if $field.Array }}
-        {{- if $use_index_operator }}
-// This array uses the index operator. The following for loop passes
-// all parameters to individual default objects. Since the @index
-// operator is used, each default object entry may look differently.
-for index, defaultObject := range {{ $field.Name }}ArrayProperties.ArrayTraits.ObjectCreator.DefaultObjects {
-          {{- $field_name = "defaultObject" }}
-        {{- else }}
-          {{- $field_name = printf "%sArrayProperties.ArrayTraits.ObjectCreator.DefaultObject" $field.Name }}
-        {{- end }}
+        {{ $field.Name }}ArrayProperties.SetCompoundParameterFn = func(index int, elem *{{ goType $scope $native.Type }}) {
+     {{- end}}
+    {{- if $use_index_operator }}
+    // This array uses the index operator. The following for loop passes
+    // all parameters to individual default objects. Since the @index
+    // operator is used, each default object entry may look differently.
     {{- end }}
     {{- $type_parameter := getTypeParameter $scope $field.Type }}
     {{- range $i, $argument := $field.Type.TypeArguments }}
         {{- $current_type_parameter := index $type_parameter $i }}
-        {{ $field_name }}.{{ $current_type_parameter.Name}} = {{ goType $scope $current_type_parameter.Type }}({{ goExpression $scope $argument }})
+        {{- if $field.Array }}
+            elem.{{ $current_type_parameter.Name}} = {{ goType $scope $current_type_parameter.Type }}({{ goExpression $scope $argument }})
+        {{- else }}
+            {{ $field_name }}.{{ $current_type_parameter.Name}} = {{ goType $scope $current_type_parameter.Type }}({{ goExpression $scope $argument }})
+        {{- end }}
     {{- end}}
-    {{- if and $field.Array $use_index_operator }}
-        {{- /* Close the for-loop again, if the index operator is used. */}}
-}
+    
+    {{- if $field.Array }}
+        }
     {{- end }}
-
 {{- end }}

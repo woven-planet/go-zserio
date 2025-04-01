@@ -1,16 +1,10 @@
 package ztype
 
-import (
-	zserio "github.com/woven-planet/go-zserio"
-)
+import zserio "github.com/woven-planet/go-zserio"
 
-// OffsetMethod is a function used to set/check bit offsets in the buffer.
-type OffsetMethod func(int, int64)
-
-// Array allows representing arrays of any type and serialize them to the zserio format.
-type Array[T any, Y IArrayTraits[T]] struct {
-	// ArrayTraits are the array traits used.
-	ArrayTraits Y
+// ObjectArray allows representing arrays of structs and serialize them to the zserio format.
+type ObjectArray[T any, PT zserio.PackableZserioType[T]] struct {
+	ArrayTraits ObjectArrayTraits[T, PT]
 
 	// The node used by this array for packing
 	PackedContext *zserio.PackingContextNode
@@ -19,8 +13,8 @@ type Array[T any, Y IArrayTraits[T]] struct {
 	setOffsetMethod   OffsetMethod
 	checkOffsetMethod OffsetMethod
 
-	// RawArray is a reference to the raw array.
-	RawArray []T
+	// SetCompoundParameterFn is an optional function to set the compound parameters
+	SetCompoundParameterFn func(index int, item PT)
 
 	// FixedSize is the size of the array, if the array is of fixed size
 	FixedSize int
@@ -32,15 +26,10 @@ type Array[T any, Y IArrayTraits[T]] struct {
 	IsPacked bool
 }
 
-// Size returns the number of elements in an array.
-func (array *Array[T, Y]) Size() int {
-	return len(array.RawArray)
-}
-
-// ZserioBitSize returns the total size of the unpacked array in bits.
-func (array *Array[T, Y]) ZserioBitSize(bitPosition int) (int, error) {
+// ZserioBitSize returns the total size of the unpacked object array in bits.
+func (array *ObjectArray[T, PT]) ZserioBitSize(elements []T, bitPosition int) (int, error) {
 	endBitPosition := bitPosition
-	size := array.Size()
+	size := len(elements)
 	if array.IsAuto {
 		delta, err := SignedBitSize(int64(size), 4)
 		if err != nil {
@@ -49,7 +38,7 @@ func (array *Array[T, Y]) ZserioBitSize(bitPosition int) (int, error) {
 		endBitPosition += delta
 	}
 	if array.ArrayTraits.BitSizeOfIsConstant() && size > 0 {
-		var dummy T
+		var dummy PT
 		elementSize := array.ArrayTraits.BitSizeOf(dummy, 0)
 		if array.setOffsetMethod != nil {
 			endBitPosition += size * elementSize
@@ -59,20 +48,20 @@ func (array *Array[T, Y]) ZserioBitSize(bitPosition int) (int, error) {
 			endBitPosition += elementSize + (size-1)*alignTo(8, elementSize)
 		}
 	} else {
-		for _, element := range array.RawArray {
+		for i := 0; i < size; i++ {
 			if array.setOffsetMethod != nil {
 				endBitPosition = alignTo(8, endBitPosition)
 			}
-			endBitPosition += array.ArrayTraits.BitSizeOf(element, endBitPosition)
+			endBitPosition += array.ArrayTraits.BitSizeOf(&elements[i], endBitPosition)
 		}
 	}
 	return endBitPosition - bitPosition, nil
 }
 
-// BitSizeOfPacked returns the total size of the packed array in bits.
-func (array *Array[T, Y]) ZserioBitSizePacked(bitPosition int) (int, error) {
+// ZserioBitSizePacked returns the total size of the packed object array in bits.
+func (array *ObjectArray[T, PT]) ZserioBitSizePacked(elements []T, bitPosition int) (int, error) {
 	endBitPosition := bitPosition
-	size := array.Size()
+	size := len(elements)
 	if array.IsAuto {
 		delta, err := SignedBitSize(int64(size), 4)
 		if err != nil {
@@ -83,11 +72,11 @@ func (array *Array[T, Y]) ZserioBitSizePacked(bitPosition int) (int, error) {
 	if size > 0 {
 		packedTraits := array.ArrayTraits.PackedTraits()
 
-		for _, element := range array.RawArray {
+		for i := 0; i < size; i++ {
 			if array.setOffsetMethod != nil {
 				endBitPosition = alignTo(8, endBitPosition)
 			}
-			delta, err := packedTraits.BitSizeOf(array.PackedContext, endBitPosition, element)
+			delta, err := packedTraits.BitSizeOf(array.PackedContext, endBitPosition, &elements[i])
 			if err != nil {
 				return 0, err
 			}
@@ -95,19 +84,4 @@ func (array *Array[T, Y]) ZserioBitSizePacked(bitPosition int) (int, error) {
 		}
 	}
 	return endBitPosition - bitPosition, nil
-}
-
-// Clone does a deep copy of the array.
-func (array *Array[T, Y]) Clone() zserio.ZserioType {
-	clone := Array[T, Y]{
-		ArrayTraits:       array.ArrayTraits,
-		RawArray:          array.RawArray,
-		IsAuto:            array.IsAuto,
-		IsPacked:          array.IsPacked,
-		FixedSize:         array.FixedSize,
-		PackedContext:     array.PackedContext,
-		setOffsetMethod:   array.setOffsetMethod,
-		checkOffsetMethod: array.checkOffsetMethod,
-	}
-	return &clone
 }

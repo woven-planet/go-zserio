@@ -30,16 +30,23 @@
 {{- template "encode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field "field_name" $field_name }}
 {{- if $field.Array }}
     {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $field_name "field" $field "native" $native }}
-    {{- if $native.IsMarshaler }}
-    for index := range {{ $field_name }} {
-        {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{if $native.RequiresCast }}(*{{ goType $scope $native.Type }})(&{{ $field_name }}[index]){{ else }}&{{ $field_name }}[index]{{ end }})
-    }
-    {{- else if $native.RequiresCast }}
-    for _, element := range {{ $field_name }} {
-        {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{ goType $scope $native.Type }}(element))
-    }
+    
+    {{- $traits := goArrayTraits $scope $native.Type }}
+    {{- if eq $traits "ztype.ObjectArrayTraits" }}
+        if delta, err := {{ $field.Name }}ArrayProperties.ZserioBitSizePacked({{if $field.IsOptional}}*{{ end }}v.{{ $field.Name }}, endBitPosition); err != nil {
+    {{- else }}
+        {{- if $native.IsMarshaler }}
+        for index := range {{ $field_name }} {
+            {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{if $native.RequiresCast }}(*{{ goType $scope $native.Type }})(&{{ $field_name }}[index]){{ else }}&{{ $field_name }}[index]{{ end }})
+        }
+        {{- else if $native.RequiresCast }}
+        for _, element := range {{ $field_name }} {
+            {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{ goType $scope $native.Type }}(element))
+        }
+        {{- end }}
+
+        if delta, err := {{ $field.Name }}ArrayProperties.ZserioBitSizePacked(endBitPosition); err != nil {
     {{- end }}
-    if delta, err := {{ $field.Name }}ArrayProperties.ZserioBitSizePacked(endBitPosition); err != nil {
         return 0, err
     } else {
     endBitPosition += delta
@@ -66,7 +73,7 @@
 
 {{- else }}
     {{/* These fields use the standard packing */}}
-    {{- template "builtin_bitsizeof.go.tmpl" dict "pkg" $scope "name" $field_name "native" $native "isarray" $field.Array }}
+    {{- template "builtin_bitsizeof.go.tmpl" dict "pkg" $scope "name" $field_name "native" $native "isarray" $field.Array "isoptional" $field.IsOptional }}
 
 {{- end }}
 {{- if $field.IsOptional}}
