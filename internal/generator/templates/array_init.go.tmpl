@@ -5,8 +5,11 @@
 {{- $native := .native }}
 {{- $traits := goArrayTraits $scope $native.Type }}
 {{ $field.Name }}ArrayProperties := ztype.Array[{{if $native.IsMarshaler }}*{{ end }}{{ goType $scope $native.Type }}, {{ template "array_traits_type.go.tmpl" dict "pkg" $scope "type" $native.Type }}]{}
-{{ $field.Name }}ArrayProperties.ArrayTraits = {{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
-
+{{ if or (eq $traits "ztype.ObjectArrayTraits") -}}
+    {{ $field.Name }}ArrayProperties.ArrayTraits = {{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
+{{- else }}
+    {{ $field.Name }}ArrayProperties.ArrayTraits = *{{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
+{{- end }}
 {{- if $field.Array.IsPacked }}
     {{ $field.Name }}ArrayProperties.IsPacked = true
 {{- end }}

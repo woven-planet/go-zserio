@@ -48,6 +48,85 @@ type IArrayTraits[T any] interface {
 	FromUint64(value uint64) T
 }
 
+var ArrayTraits = staticArrayTraits{
+	VarInt:    &VarIntArrayTraits{},
+	VarInt16:  &VarInt16ArrayTraits{},
+	VarInt32:  &VarInt32ArrayTraits{},
+	VarInt64:  &VarInt64ArrayTraits{},
+	VarUInt:   &VarUIntArrayTraits{},
+	VarUInt16: &VarUInt16ArrayTraits{},
+	VarUInt32: &VarUInt32ArrayTraits{},
+	VarUInt64: &VarUInt64ArrayTraits{},
+	VarSize:   &VarSizeArrayTraits{},
+	Bool:      &BooleanArrayTraits{},
+	String:    &StringArrayTraits{},
+	Float16:   &Float16ArrayTraits{},
+	Float32:   &Float32ArrayTraits{},
+	Float64:   &Float64ArrayTraits{},
+	Bytes:     &BytesArrayTraits{},
+	Extern:    &BitBufferArrayTraits{},
+	UInt8:     &BitFieldArrayTraits[uint8]{NumBits: 8},
+	UInt16:    &BitFieldArrayTraits[uint16]{NumBits: 16},
+	UInt32:    &BitFieldArrayTraits[uint32]{NumBits: 32},
+	UInt64:    &BitFieldArrayTraits[uint64]{NumBits: 64},
+	Int8:      &SignedBitFieldArrayTraits[int8]{NumBits: 8},
+	Int16:     &SignedBitFieldArrayTraits[int16]{NumBits: 16},
+	Int32:     &SignedBitFieldArrayTraits[int32]{NumBits: 32},
+	Int64:     &SignedBitFieldArrayTraits[int64]{NumBits: 64},
+}
+
+type staticArrayTraits struct {
+	VarInt    *VarIntArrayTraits
+	VarInt16  *VarInt16ArrayTraits
+	VarInt32  *VarInt32ArrayTraits
+	VarInt64  *VarInt64ArrayTraits
+	VarUInt   *VarUIntArrayTraits
+	VarUInt16 *VarUInt16ArrayTraits
+	VarUInt32 *VarUInt32ArrayTraits
+	VarUInt64 *VarUInt64ArrayTraits
+	VarSize   *VarSizeArrayTraits
+	Bool      *BooleanArrayTraits
+	String    *StringArrayTraits
+	Float16   *Float16ArrayTraits
+	Float32   *Float32ArrayTraits
+	Float64   *Float64ArrayTraits
+	Bytes     *BytesArrayTraits
+	Extern    *BitBufferArrayTraits
+	UInt8     *BitFieldArrayTraits[uint8]
+	UInt16    *BitFieldArrayTraits[uint16]
+	UInt32    *BitFieldArrayTraits[uint32]
+	UInt64    *BitFieldArrayTraits[uint64]
+	Int8      *SignedBitFieldArrayTraits[int8]
+	Int16     *SignedBitFieldArrayTraits[int16]
+	Int32     *SignedBitFieldArrayTraits[int32]
+	Int64     *SignedBitFieldArrayTraits[int64]
+}
+
+var (
+	mapSignedBitFieldArrayTraits []any = make([]any, 64)
+	mapBitFieldArrayTraits       []any = make([]any, 64)
+)
+
+func GetSignedBitFieldArrayTraits[T constraints.Signed](numBits uint8) *SignedBitFieldArrayTraits[T] {
+	traits := mapSignedBitFieldArrayTraits[numBits]
+	if traits == nil {
+		traits = &SignedBitFieldArrayTraits[T]{NumBits: uint8(numBits)}
+		mapSignedBitFieldArrayTraits[numBits] = traits
+	}
+
+	return traits.(*SignedBitFieldArrayTraits[T])
+}
+
+func GetBitFieldArrayTraits[T constraints.Unsigned](numBits uint8) *BitFieldArrayTraits[T] {
+	traits := mapBitFieldArrayTraits[numBits]
+	if traits == nil {
+		traits = &BitFieldArrayTraits[T]{NumBits: uint8(numBits)}
+		mapBitFieldArrayTraits[numBits] = traits
+	}
+
+	return traits.(*BitFieldArrayTraits[T])
+}
+
 // Float16ArrayTraits is an array trait implementation for float16 arrays.
 type Float16ArrayTraits struct{}
 
@@ -186,8 +265,7 @@ func (trait Float64ArrayTraits) FromUint64(value uint64) float64 {
 }
 
 // VarIntArrayTraits is an array traits implementation for VarInt.
-type VarIntArrayTraits struct {
-}
+type VarIntArrayTraits struct{}
 
 func (trait VarIntArrayTraits) PackedTraits() IPackedArrayTraits[int64] {
 	return &PackedArrayTraits[int64, VarIntArrayTraits]{
@@ -237,8 +315,7 @@ func (trait VarIntArrayTraits) FromUint64(value uint64) int64 {
 }
 
 // VarInt16ArrayTraits is the implementation of an array traits for a VarInt16.
-type VarInt16ArrayTraits struct {
-}
+type VarInt16ArrayTraits struct{}
 
 func (trait VarInt16ArrayTraits) PackedTraits() IPackedArrayTraits[int16] {
 	return &PackedArrayTraits[int16, VarInt16ArrayTraits]{
@@ -284,8 +361,7 @@ func (trait VarInt16ArrayTraits) FromUint64(value uint64) int16 {
 }
 
 // VarInt32ArrayTraits is the implementation of an array traits for a VarInt32.
-type VarInt32ArrayTraits struct {
-}
+type VarInt32ArrayTraits struct{}
 
 func (trait VarInt32ArrayTraits) PackedTraits() IPackedArrayTraits[int32] {
 	return &PackedArrayTraits[int32, VarInt32ArrayTraits]{
@@ -331,8 +407,7 @@ func (trait VarInt32ArrayTraits) FromUint64(value uint64) int32 {
 }
 
 // VarInt64ArrayTraits is the implementation of an array traits for a VarInt64.
-type VarInt64ArrayTraits struct {
-}
+type VarInt64ArrayTraits struct{}
 
 func (trait VarInt64ArrayTraits) PackedTraits() IPackedArrayTraits[int64] {
 	return &PackedArrayTraits[int64, VarInt64ArrayTraits]{
@@ -378,8 +453,7 @@ func (trait VarInt64ArrayTraits) FromUint64(value uint64) int64 {
 }
 
 // VarUInt16ArrayTraits is the implementation of an array traits for a VarUint16.
-type VarUInt16ArrayTraits struct {
-}
+type VarUInt16ArrayTraits struct{}
 
 func (trait VarUInt16ArrayTraits) PackedTraits() IPackedArrayTraits[uint16] {
 	return &PackedArrayTraits[uint16, VarUInt16ArrayTraits]{
@@ -424,8 +498,7 @@ func (trait VarUInt16ArrayTraits) FromUint64(value uint64) uint16 {
 	return uint16(value)
 }
 
-type VarUInt32ArrayTraits struct {
-}
+type VarUInt32ArrayTraits struct{}
 
 func (trait VarUInt32ArrayTraits) PackedTraits() IPackedArrayTraits[uint32] {
 	return &PackedArrayTraits[uint32, VarUInt32ArrayTraits]{
@@ -470,8 +543,7 @@ func (trait VarUInt32ArrayTraits) FromUint64(value uint64) uint32 {
 	return uint32(value)
 }
 
-type VarUInt64ArrayTraits struct {
-}
+type VarUInt64ArrayTraits struct{}
 
 func (trait VarUInt64ArrayTraits) PackedTraits() IPackedArrayTraits[uint64] {
 	return &PackedArrayTraits[uint64, VarUInt64ArrayTraits]{

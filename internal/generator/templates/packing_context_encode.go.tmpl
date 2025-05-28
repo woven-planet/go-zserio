@@ -78,7 +78,7 @@
     if field{{ $field.Name }}Context, ok := childrenNodes[{{ $index }}].Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}]); !ok {
         return errors.New("unknown context type")
     } else {
-        if err := field{{ $field.Name }}Context.Write(&{{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}, w, {{ goType $scope $native.Type }}({{ $field_name }})); err != nil {
+        if err := field{{ $field.Name }}Context.Write({{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}, w, {{ goType $scope $native.Type }}({{ $field_name }})); err != nil {
             return err
         }
     }

@@ -85,7 +85,7 @@
         return errors.New("unknown context type")
     } else {
         traits := {{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
-        if tempValue, err := field{{ $field.Name }}Context.Read(&traits, r); err == nil {
+        if tempValue, err := field{{ $field.Name }}Context.Read(traits, r); err == nil {
             {{ $assign_str_lvalue }} = ({{ goType $scope $field.Type }})(tempValue)
         } else {
             return err

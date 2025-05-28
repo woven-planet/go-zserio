@@ -176,7 +176,7 @@ func (v *{{ $enum.Name}}) ZserioInitPackingContext(contextNode *zserio.PackingCo
   }
 
   traits := {{- template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
-  context.Init(&traits, {{ goType $scope $native.Type }}(*v))
+  context.Init(traits, {{ goType $scope $native.Type }}(*v))
   return nil
 }
 
@@ -188,7 +188,7 @@ func (v *{{ $enum.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingConte
   }
 
   traits := {{- template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
-  if tempValue, err := context.Read(&traits, r); err != nil {
+  if tempValue, err := context.Read(traits, r); err != nil {
     return err
   } else {
     (*v) = {{ $enum.Name }}(tempValue)
@@ -203,7 +203,7 @@ func (v *{{ $enum.Name}}) MarshalZserioPacked(contextNode *zserio.PackingContext
   }
 
   traits := {{- template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
-  return context.Write(&traits, w, {{ goType $scope $native.Type }}(*v))
+  return context.Write(traits, w, {{ goType $scope $native.Type }}(*v))
 }
 
 func (v *{{ $enum.Name}}) ZserioInitializeOffsetsPacked(contextNode *zserio.PackingContextNode, bitPosition int) int {
@@ -215,7 +215,7 @@ func (v *{{ $enum.Name}}) ZserioBitSizePacked(contextNode *zserio.PackingContext
   if !ok {
       return 0, errors.New("invalid packing context")
   }
-  delta, err := context.BitSizeOf(&{{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}, bitPosition, {{ goType $scope $native.Type }}(*v))
+  delta, err := context.BitSizeOf({{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}, bitPosition, {{ goType $scope $native.Type }}(*v))
   if err != nil {
       return 0, err
   }

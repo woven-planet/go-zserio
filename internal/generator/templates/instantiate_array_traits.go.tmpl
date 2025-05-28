@@ -1,22 +1,41 @@
 {{- $scope := .pkg }}
 {{- $type := .type }}
 {{- $traits := goArrayTraits $scope $type }}
-{{- template "array_traits_type.go.tmpl" dict "pkg" $scope "type" $type }} {
 {{- if or (eq $traits "ztype.BitFieldArrayTraits") (eq $traits "ztype.SignedBitFieldArrayTraits") -}}
-    NumBits: uint8(
-    {{- if gt $type.Bits 0 }}
-        {{- $type.Bits }}
-    {{- else if $type.LengthExpression }}
-        {{- goExpression $scope $type.LengthExpression }}
-    {{- else if eq $type.Name "uint8" }}8
-    {{- else if eq $type.Name "uint16" }}16
-    {{- else if eq $type.Name "uint32" }}32
-    {{- else if eq $type.Name "uint64" }}64
-    {{- else if eq $type.Name "int8" }}8
-    {{- else if eq $type.Name "int16" }}16
-    {{- else if eq $type.Name "int32" }}32
-    {{- else if eq $type.Name "int64" }}64
+    {{- if gt $type.Bits 0 -}}
+        ztype.Get{{if eq $traits "ztype.SignedBitFieldArrayTraits" }}Signed{{ end }}BitFieldArrayTraits[{{ goType $scope $type }}](uint8({{- $type.Bits }}))
+    {{- else if $type.LengthExpression -}}
+        ztype.Get{{if eq $traits "ztype.SignedBitFieldArrayTraits" }}Signed{{ end }}BitFieldArrayTraits[{{ goType $scope $type }}](uint8({{- goExpression $scope $type.LengthExpression }}))
+    {{- else if eq $type.Name "uint8" }}ztype.ArrayTraits.UInt8
+    {{- else if eq $type.Name "uint16" }}ztype.ArrayTraits.UInt16
+    {{- else if eq $type.Name "uint32" }}ztype.ArrayTraits.UInt32
+    {{- else if eq $type.Name "uint64" }}ztype.ArrayTraits.UInt64
+    {{- else if eq $type.Name "int8" }}ztype.ArrayTraits.Int8
+    {{- else if eq $type.Name "int16" }}ztype.ArrayTraits.Int16
+    {{- else if eq $type.Name "int32" }}ztype.ArrayTraits.Int32
+    {{- else if eq $type.Name "int64" }}ztype.ArrayTraits.Int64
     {{- else }}UNSUPPORTED
-    {{- end }})
+    {{- end }}
+{{- else if eq $traits "ztype.ObjectArrayTraits" }}
+    {{- $traits }}[*{{ goType $scope $type }}]{}
+{{- else }}
+    {{- if eq $type.Name "varint" }}ztype.ArrayTraits.VarInt
+    {{- else if eq $type.Name "varint16" }}ztype.ArrayTraits.VarInt16
+    {{- else if eq $type.Name "varint32" }}ztype.ArrayTraits.VarInt32
+    {{- else if eq $type.Name "varint64" }}ztype.ArrayTraits.VarInt64
+    {{- else if eq $type.Name "varuint" }}ztype.ArrayTraits.VarUInt
+    {{- else if eq $type.Name "varuint16" }}ztype.ArrayTraits.VarUInt16
+    {{- else if eq $type.Name "varuint32" }}ztype.ArrayTraits.VarUInt32
+    {{- else if eq $type.Name "varuint64" }}ztype.ArrayTraits.VarUInt64
+    {{- else if eq $type.Name "varsize" }}ztype.ArrayTraits.VarSize
+    {{- else if eq $type.Name "bool" }}ztype.ArrayTraits.Bool
+    {{- else if eq $type.Name "string" }}ztype.ArrayTraits.String
+    {{- else if eq $type.Name "float16" }}ztype.ArrayTraits.Float16
+    {{- else if eq $type.Name "float32" }}ztype.ArrayTraits.Float32
+    {{- else if eq $type.Name "float64" }}ztype.ArrayTraits.Float64
+    {{- else if eq $type.Name "bytes" }}ztype.ArrayTraits.Bytes
+    {{- else if eq $type.Name "extern" }}ztype.ArrayTraits.Extern
+    {{- else }}UNSUPPORTED
+    {{- end }}
 {{- end -}}
-}{{/* remove trailing newlines */ -}}
+{{/* remove trailing newlines */ -}}
