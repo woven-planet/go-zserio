@@ -46,6 +46,7 @@ jobs:
 
   test:
     strategy:
+      fail-fast: false
       matrix:
         os: ["ubuntu-latest", "windows-latest"]
 
@@ -69,6 +70,7 @@ jobs:
 
   integration_test:
     strategy:
+      fail-fast: false
       matrix:
         os: ["ubuntu-latest", "windows-latest"]
 
