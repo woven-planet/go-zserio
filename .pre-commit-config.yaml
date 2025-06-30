@@ -1,23 +1,24 @@
 # See https://pre-commit.com/#usage
 repos:
 - repo: https://github.com/executablebooks/mdformat
-  rev: 0.7.7
+  rev: 0.7.17
   hooks:
   - id: mdformat
     additional_dependencies:
     - mdformat-gfm
     - mdformat-black
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v2.3.0
+  rev: v4.6.0
   hooks:
   - id: check-yaml
     args: [--allow-multiple-documents]
   - id: end-of-file-fixer
     exclude: "internal/parser/(.*.(tokens|inter)|zserio.*.go)"
+  - id: check-merge-conflict
   #- id: trailing-whitespace
   #- id: requirements-txt-fixer
 - repo: https://github.com/keith/pre-commit-buildifier
-  rev: 6.4.0.1
+  rev: 8.2.0
   hooks:
     - id: buildifier
     - id: buildifier-lint
