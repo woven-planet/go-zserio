@@ -13,12 +13,6 @@ http_archive(
     urls = ["https://github.com/GorNishanov/rules_antlr/archive/0.5.8.tar.gz"],
 )
 
-http_archive(
-    name = "zserio",
-    sha256 = "e1b5824836405635fc5a22639394458949d358e6450c4d874f45a56ed5186f3c",
-    url = "https://github.com/ndsev/zserio/releases/download/v2.11.0/zserio-2.11.0-bin.zip",
-)
-
 load("@rules_antlr//antlr:repositories.bzl", "rules_antlr_dependencies")
 
 rules_antlr_dependencies("4.11.1")

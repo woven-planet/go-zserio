@@ -8,9 +8,9 @@ bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "rules_go", version = "0.55.1")
 bazel_dep(name = "gazelle", version = "0.44.0")
 
-bazel_dep(name = "bazel_env.bzl", version = "0.1.1", dev_dependency = True)
-bazel_dep(name = "rules_python", version = "0.33.1", dev_dependency = True)
-bazel_dep(name = "rules_jvm_external", version = "6.1", dev_dependency = True)
+bazel_dep(name = "bazel_env.bzl", version = "0.4.0", dev_dependency = True)
+bazel_dep(name = "rules_python", version = "1.4.1", dev_dependency = True)
+bazel_dep(name = "rules_jvm_external", version = "6.7", dev_dependency = True)
 bazel_dep(name = "buildifier_prebuilt", version = "8.2.0.2", dev_dependency = True)
 bazel_dep(name = "rules_shell", version = "0.5.0", dev_dependency = True)
 
@@ -68,4 +68,12 @@ maven.install(
 use_repo(
     maven,
     "go_zserio_maven_deps",
+)
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "zserio",
+    sha256 = "e1b5824836405635fc5a22639394458949d358e6450c4d874f45a56ed5186f3c",
+    url = "https://github.com/ndsev/zserio/releases/download/v2.11.0/zserio-2.11.0-bin.zip",
 )

@@ -1,5 +1,8 @@
-common --tool_java_runtime_version=remotejdk_17
+common --java_runtime_version=remotejdk_11
 common --test_output=errors
+
+# rules_antlr is still a WORKSPACE-only thing
+common --enable_workspace
 
 # Extra flags to improve the reproducibility
 common --incompatible_disallow_empty_glob
