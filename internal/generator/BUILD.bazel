@@ -64,6 +64,6 @@ go_test(
         "//internal/model",
         "@com_github_stretchr_testify//assert",
         "@com_github_stretchr_testify//require",
-        "@rules_go//go/tools/bazel:go_default_library",
+        "@rules_go//go/tools/bazel",
     ],
 )

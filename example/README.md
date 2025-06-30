@@ -56,7 +56,7 @@ $ go mod tidy -v
 Now let's generate the code:
 
 ```bash
-$ go generate . -v
+$ go generate .
 ```
 
 Then run again in order to ensure that we have all of the right dependencies for the generated code:
