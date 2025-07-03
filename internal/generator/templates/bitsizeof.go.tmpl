@@ -31,18 +31,21 @@
 {{- template "encode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field "field_name" $name }}
 {{- if $field.Array }}
     {{- template "array_init.go.tmpl" dict "pkg" $scope "field_name" $name "field" $field "native" $native }}
-    {{- if $native.IsMarshaler }}
-    for index := range {{ $name }} {
-        {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{if $native.RequiresCast }}(*{{ goType $scope $native.Type }})(&{{ $name }}[index]){{ else }}&{{ $name }}[index]{{ end }})
-    }
-    {{- else if $native.RequiresCast }}
-    for _, element := range {{ $name }} {
-        {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{ goType $scope $native.Type }}(element))
-    }
+    {{- $traits := goArrayTraits $scope $native.Type }}
+    {{- if not (eq $traits "ztype.ObjectArrayTraits") }}
+        {{- if $native.IsMarshaler }}
+        for index := range {{ $name }} {
+            {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{if $native.RequiresCast }}(*{{ goType $scope $native.Type }})(&{{ $name }}[index]){{ else }}&{{ $name }}[index]{{ end }})
+        }
+        {{- else if $native.RequiresCast }}
+        for _, element := range {{ $name }} {
+            {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{ goType $scope $native.Type }}(element))
+        }
+        {{- end }}
     {{- end }}
-    {{- $name = printf "%sArrayProperties" $field.Name }}
+    {{- $name = $field.Name }}
 {{- end }}
-{{ template "builtin_bitsizeof.go.tmpl" dict "pkg" $scope "name" $name "native" $native "isarray" $field.Array }}
+{{ template "builtin_bitsizeof.go.tmpl" dict "pkg" $scope "name" $name "native" $native "isarray" $field.Array "isoptional" $field.IsOptional }}
 
 {{- if $field.IsOptional}}
     }

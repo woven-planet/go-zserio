@@ -53,20 +53,27 @@
         // This array is implicitly packed, because its parent object is packed
         {{ $field.Name }}ArrayProperties.IsPacked = true
     {{- end }}
-    {{- if $native.IsMarshaler }}
-        for index := range {{ $field_name }} {
-            {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{if $native.RequiresCast }}(*{{ goType $scope $native.Type }})(&{{ $field_name }}[index]){{ else }}&{{ $field_name }}[index]{{ end }})
-        }
-    {{- else if $native.RequiresCast }}
-        for _, element := range {{ $field_name }} {
-            {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{ goType $scope $native.Type }}(element))
+    {{- $traits := goArrayTraits $scope $native.Type }}
+    {{- if eq $traits "ztype.ObjectArrayTraits" }}
+        if err = {{ $field.Name }}ArrayProperties.MarshalZserio({{ if $field.IsOptional }}*{{ end }}v.{{ $field.Name }}, w); err != nil {
+            return err
         }
     {{- else }}
-        {{ $field.Name }}ArrayProperties.RawArray = {{ $field_name }}
-    {{- end }}
-    if err = {{ $field.Name }}ArrayProperties.MarshalZserio(w); err != nil {
-        return err
-    }
+        {{- if $native.IsMarshaler }}
+            for index := range {{ $field_name }} {
+                {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{if $native.RequiresCast }}(*{{ goType $scope $native.Type }})(&{{ $field_name }}[index]){{ else }}&{{ $field_name }}[index]{{ end }})
+            }
+        {{- else if $native.RequiresCast }}
+            for _, element := range {{ $field_name }} {
+                {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{ goType $scope $native.Type }}(element))
+            }
+        {{- else }}
+            {{ $field.Name }}ArrayProperties.RawArray = {{ $field_name }}
+        {{- end }}
+        if err = {{ $field.Name }}ArrayProperties.MarshalZserio(w); err != nil {
+            return err
+        }
+     {{- end }}
 
 {{- else if $native.IsMarshaler }}
     if err := {{ $field_name }}.MarshalZserioPacked(childrenNodes[{{ $index }}], w); err != nil {

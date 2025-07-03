@@ -2,6 +2,8 @@
 {{- $name := .name }}
 {{- $native := .native }}
 {{- $isarray := .isarray }}
+{{- $isoptional := .isoptional }}
+
 {{- if and (not $native.IsMarshaler) (not $isarray)}}
     {{- if gt $native.Type.Bits 0 }}
         endBitPosition += {{- $native.Type.Bits }}
@@ -42,9 +44,14 @@
         {{- end}}
     {{- end }}
 {{- else }}
-    if delta, err := {{ $name }}.ZserioBitSize(endBitPosition); err != nil {
-        return 0, err
-    } else {
-        endBitPosition += delta
-    }
+    {{- $traits := goArrayTraits $scope $native.Type }}
+    {{- if and ( $isarray ) ( eq $traits "ztype.ObjectArrayTraits" )}}
+        if delta, err := {{ $name }}ArrayProperties.ZserioBitSize({{ if $isoptional }}*{{ end }}v.{{ $name }}, endBitPosition); err != nil {
+    {{- else }}
+        if delta, err := {{ $name }}{{- if $isarray }}ArrayProperties{{- end }}.ZserioBitSize(endBitPosition); err != nil {
+    {{- end }}
+            return 0, err
+        } else {
+            endBitPosition += delta
+        }
 {{- end }}

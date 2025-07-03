@@ -11,12 +11,6 @@ type {{ $struct.Name }} struct {
 {{- end }}
 }
 
-func (v *{{ $struct.Name}}) Clone() zserio.ZserioType {
-  clone := &{{ $struct.Name }}{}
-  *clone = *v
-  return clone
-}
-
 func (v *{{ $struct.Name}}) LoadDefaultValues() error {
 {{- range $field := $struct.Fields }}
 {{template "default_values.go.tmpl" dict "pkg" $scope "field" $field }}

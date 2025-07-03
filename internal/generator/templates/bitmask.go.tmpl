@@ -16,11 +16,6 @@ const (
 {{- end }}
 )
 
-func (v *{{ $bitmask.Name}}) Clone() zserio.ZserioType {
-  clone := *v
-  return &clone
-}
-
 func (v *{{ $bitmask.Name}}) LoadDefaultValues() error {
   return nil
 }
@@ -66,7 +61,7 @@ func (v *{{ $bitmask.Name}}) ZserioBitSize(bitPosition int) (int, error) {
 {{- if not $native.Type.IsBuiltin }}
       panic("only builtin types supported")
 {{- else }}
-  {{ template "builtin_bitsizeof.go.tmpl" dict "pkg" $scope "name" $obj_with_cast "native" $native }}
+  {{ template "builtin_bitsizeof.go.tmpl" dict "pkg" $scope "name" $obj_with_cast "native" $native "isoptional" false }}
 {{- end }}
   return endBitPosition - bitPosition, nil
 }

@@ -24,12 +24,6 @@ UnionChoice {{ $union.Name }}UnionChoiceType
 {{- end }}
 }
 
-func (v *{{ $union.Name}}) Clone() zserio.ZserioType {
-  clone := &{{ $union.Name }}{}
-  *clone = *v
-  return clone
-}
-
 func (v *{{ $union.Name}}) LoadDefaultValues() error {
 {{- range $field := $union.Fields }}
   {{template "default_values.go.tmpl" dict "pkg" $scope "field" $field }}

@@ -19,12 +19,6 @@ type {{ $choice.Name }} struct {
 {{- end }}
 }
 
-func (v *{{ $choice.Name}}) Clone() zserio.ZserioType {
-  clone := &{{ $choice.Name }}{}
-  *clone = *v
-  return clone
-}
-
 func (v *{{ $choice.Name}}) LoadDefaultValues() error {
 {{- range $case := $choice.Cases }}
   {{- if .Field }}

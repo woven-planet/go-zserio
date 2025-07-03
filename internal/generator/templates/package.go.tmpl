@@ -8,5 +8,5 @@ const (
 )
 
 {{- range $subtype := .pkg.Subtypes }}
-type {{ $subtype.Name }} {{ goType $scope .Type }}
+type {{ $subtype.Name }} = {{ goType $scope .Type }}
 {{- end }}
