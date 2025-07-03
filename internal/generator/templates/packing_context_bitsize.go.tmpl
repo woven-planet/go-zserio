@@ -63,7 +63,7 @@
     if field{{ $field.Name }}Context, ok := childrenNodes[{{ $index }}].Context.(*ztype.DeltaContext[{{ goType $scope $native.Type }}]); !ok {
         return 0, errors.New("invalid packing context")
     } else {
-        if delta, err := field{{ $field.Name }}Context.BitSizeOf(&{{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}, endBitPosition, {{ goType $scope $native.Type }}({{ $field_name }})); err != nil {
+        if delta, err := field{{ $field.Name }}Context.BitSizeOf({{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}, endBitPosition, {{ goType $scope $native.Type }}({{ $field_name }})); err != nil {
             return 0, err
         } else {
             endBitPosition += delta

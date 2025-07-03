@@ -82,7 +82,7 @@ func (v *{{ $bitmask.Name}}) ZserioInitPackingContext(contextNode *zserio.Packin
   }
 
   traits := {{- template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
-  context.Init(&traits, {{ goType $scope $native.Type }}(*v))
+  context.Init(traits, {{ goType $scope $native.Type }}(*v))
   return nil
 }
 
@@ -93,7 +93,7 @@ func (v *{{ $bitmask.Name}}) UnmarshalZserioPacked(contextNode *zserio.PackingCo
   }
 
   traits := {{- template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
-  if tempValue, err := context.Read(&traits, r); err != nil {
+  if tempValue, err := context.Read(traits, r); err != nil {
     return err
   } else {
     (*v) = {{ $bitmask.Name }}(tempValue)
@@ -108,7 +108,7 @@ func (v *{{ $bitmask.Name}}) MarshalZserioPacked(contextNode *zserio.PackingCont
   }
 
   traits := {{- template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
-  return context.Write(&traits, w, {{ goType $scope $native.Type }}(*v))
+  return context.Write(traits, w, {{ goType $scope $native.Type }}(*v))
 }
 
 func (v *{{ $bitmask.Name}}) ZserioInitializeOffsetsPacked(contextNode *zserio.PackingContextNode, bitPosition int) int {
@@ -120,7 +120,7 @@ func (v *{{ $bitmask.Name}}) ZserioBitSizePacked(contextNode *zserio.PackingCont
   if !ok {
       return 0, errors.New("invalid packing context")
   }
-  delta, err := context.BitSizeOf(&{{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}, bitPosition, {{ goType $scope $native.Type }}(*v))
+  delta, err := context.BitSizeOf({{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}, bitPosition, {{ goType $scope $native.Type }}(*v))
   if err != nil {
       return 0, err
   }
