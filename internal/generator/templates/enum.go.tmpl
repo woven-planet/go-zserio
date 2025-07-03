@@ -106,11 +106,6 @@ func (i *{{ $enum.Name}}) Scan(src interface{}) error {
 }
 {{ end }}
 
-func (v *{{ $enum.Name}}) Clone() zserio.ZserioType {
-  clone := *v
-  return &clone
-}
-
 func (v *{{ $enum.Name}}) LoadDefaultValues() error {
   return nil
 }
@@ -156,7 +151,7 @@ func (v *{{ $enum.Name}}) ZserioBitSize(bitPosition int) (int, error) {
 {{- if not $native.Type.IsBuiltin }}
       panic("only builtin types supported")
 {{- else }}
-  {{ template "builtin_bitsizeof.go.tmpl" dict "pkg" $scope "name" "*v" "native" $native "isarray" false }}
+  {{ template "builtin_bitsizeof.go.tmpl" dict "pkg" $scope "name" "*v" "native" $native "isarray" false "isoptional" false }}
 {{- end }}
   return endBitPosition - bitPosition, nil
 }

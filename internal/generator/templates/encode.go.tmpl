@@ -43,18 +43,21 @@
             return fmt.Errorf("{{ $field.Name }} array must have a size of %d", int({{ goExpression $scope $field.Array.Length }}))
         }
     {{- end }}
-    {{- if $native.IsMarshaler }}
-        {{ $field.Name }}ArrayProperties.RawArray = make([]*{{ goType $scope $native.Type }}, 0, {{ $field.Name }}ArrayProperties.FixedSize)
-        for index := range {{ $field_name }} {
-            {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{if $native.RequiresCast }}(*{{ goType $scope $native.Type }})(&{{ $field_name }}[index]){{ else }}&{{ $field_name }}[index]{{ end }})
-        }
-    {{- else if $native.RequiresCast }}
-        {{ $field.Name }}ArrayProperties.RawArray = make([]{{ goType $scope $native.Type }}, 0, {{ $field.Name }}ArrayProperties.FixedSize)
-        for _, element := range {{ $field_name }} {
-            {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{ goType $scope $native.Type }}(element))
-        }
-    {{- else }}
-        {{ $field.Name }}ArrayProperties.RawArray = {{ $field_name }}
+    {{- $traits := goArrayTraits $scope $native.Type }}
+    {{- if not ( eq $traits "ztype.ObjectArrayTraits" ) }}
+        {{- if $native.IsMarshaler }}
+            {{ $field.Name }}ArrayProperties.RawArray = make([]*{{ goType $scope $native.Type }}, 0, {{ $field.Name }}ArrayProperties.FixedSize)
+            for index := range {{ $field_name }} {
+                {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{if $native.RequiresCast }}(*{{ goType $scope $native.Type }})(&{{ $field_name }}[index]){{ else }}&{{ $field_name }}[index]{{ end }})
+            }
+        {{- else if $native.RequiresCast }}
+            {{ $field.Name }}ArrayProperties.RawArray = make([]{{ goType $scope $native.Type }}, 0, {{ $field.Name }}ArrayProperties.FixedSize)
+            for _, element := range {{ $field_name }} {
+                {{ $field.Name }}ArrayProperties.RawArray = append({{ $field.Name }}ArrayProperties.RawArray, {{ goType $scope $native.Type }}(element))
+            }
+        {{- else }}
+            {{ $field.Name }}ArrayProperties.RawArray = {{ $field_name }}
+        {{- end }}
     {{- end }}
     {{- $field_name = printf "%sArrayProperties" $field.Name }}
 {{- end }}
@@ -71,7 +74,18 @@
     {{- end }}
         return err
     }
-{{- else}}
+{{- else if $field.Array}}
+    {{- $traits := goArrayTraits $scope $native.Type }}
+    {{- if eq $traits "ztype.ObjectArrayTraits" }}
+        if err = {{ $field_name }}.MarshalZserio({{ if $field.IsOptional }}*{{ end }}v.{{ $field.Name }},w); err != nil {
+            return err
+        }
+    {{- else }}
+        if err = {{ $field_name }}.MarshalZserio(w); err != nil {
+            return err
+        }
+    {{- end}}
+{{- else }}
     if err = {{ $field_name }}.MarshalZserio(w); err != nil {
         return err
     }

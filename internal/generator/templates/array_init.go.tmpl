@@ -4,8 +4,13 @@
 {{- $field := .field }}
 {{- $native := .native }}
 {{- $traits := goArrayTraits $scope $native.Type }}
-{{ $field.Name }}ArrayProperties := ztype.Array[{{if $native.IsMarshaler }}*{{ end }}{{ goType $scope $native.Type }}, {{ template "array_traits_type.go.tmpl" dict "pkg" $scope "type" $native.Type }}]{}
-{{ $field.Name }}ArrayProperties.ArrayTraits = {{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
+
+{{- if eq $traits "ztype.ObjectArrayTraits" }}
+    {{ $field.Name }}ArrayProperties := ztype.ObjectArray[{{ goType $scope $native.Type }}, *{{ goType $scope $native.Type }}]{}
+{{- else }}
+    {{ $field.Name }}ArrayProperties := ztype.Array[{{if $native.IsMarshaler }}*{{ end }}{{ goType $scope $native.Type }}, {{ template "array_traits_type.go.tmpl" dict "pkg" $scope "type" $native.Type }}]{}
+    {{ $field.Name }}ArrayProperties.ArrayTraits = {{ template "instantiate_array_traits.go.tmpl" dict "pkg" $scope "type" $native.Type }}
+{{- end }}
 
 {{- if $field.Array.IsPacked }}
     {{ $field.Name }}ArrayProperties.IsPacked = true
@@ -14,20 +19,4 @@
     {{ $field.Name }}ArrayProperties.FixedSize = int({{ goExpression $scope $field.Array.Length }})
 {{- else }}
     {{ $field.Name }}ArrayProperties.IsAuto = true
-{{- end }}
-{{- if eq $traits "ztype.ObjectArrayTraits" }}
-    {{- $requireIndexedInit := hasIndexOperators $field.Type }}
-    {{ $field.Name }}ArrayProperties.ArrayTraits.ObjectCreator = ztype.ObjectCreator[*{{ goType $scope $native.Type }}] {
-    {{- if $requireIndexedInit }}
-        UsesIndexOperator: true,
-        DefaultObjects: make([]*{{ goType $scope $native.Type }}, 0, {{ $field.Name }}ArrayProperties.FixedSize),
-    {{- else }}
-        DefaultObject: new({{ goType $scope $native.Type }}),
-    {{- end }}
-    }
-    {{- if $requireIndexedInit }}
-    for index := 0; index < {{ $field.Name }}ArrayProperties.FixedSize; index++ {
-        {{ $field.Name }}ArrayProperties.ArrayTraits.ObjectCreator.DefaultObjects = append({{ $field.Name }}ArrayProperties.ArrayTraits.ObjectCreator.DefaultObjects, new({{ goType $scope $native.Type }}))
-    }
-    {{- end }}
 {{- end }}

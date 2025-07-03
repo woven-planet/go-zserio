@@ -1,6 +1,6 @@
 module github.com/woven-planet/go-zserio
 
-go 1.21.6
+go 1.23.7
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3

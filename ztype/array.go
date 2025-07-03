@@ -81,11 +81,13 @@ func (array *Array[T, Y]) ZserioBitSizePacked(bitPosition int) (int, error) {
 		endBitPosition += delta
 	}
 	if size > 0 {
+		packedTraits := array.ArrayTraits.PackedTraits()
+
 		for _, element := range array.RawArray {
 			if array.setOffsetMethod != nil {
 				endBitPosition = alignTo(8, endBitPosition)
 			}
-			delta, err := array.ArrayTraits.PackedTraits().BitSizeOf(array.PackedContext, endBitPosition, element)
+			delta, err := packedTraits.BitSizeOf(array.PackedContext, endBitPosition, element)
 			if err != nil {
 				return 0, err
 			}

@@ -26,7 +26,7 @@
         if v.{{ $field.Name }} != nil {
     {{- end }}
 
-    {{- template "decode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field "field_name" $field_name }}
+    {{- template "decode_compound_parameters.go.tmpl" dict "pkg" $scope "field" $field "field_name" $field_name "native" $native }}
     {{- if $native.IsMarshaler }}
         if err := {{ $field_name }}.ZserioInitPackingContext(childrenNodes[{{ $index }}]); err != nil {
             return err
